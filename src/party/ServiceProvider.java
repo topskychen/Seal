@@ -3,10 +3,11 @@
  */
 package party;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 
 import index.Entry;
-import index.Index;
+import index.SearchIndex;
 
 /**
  * @author chenqian
@@ -14,8 +15,12 @@ import index.Index;
  */
 public class ServiceProvider {
 
-	Index index = null;
+	SearchIndex index = null;
 	
+	/**
+	 * Collect the data once, and build the index.
+	 * @param dataOwners
+	 */
 	public void collectDataOnce(ArrayList<DataOwner> dataOwners) {
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
@@ -23,8 +28,6 @@ public class ServiceProvider {
 		}
 		index.buildIndex(entries);
 	}
-	
-	
 	
 	/**
 	 * 
@@ -38,7 +41,7 @@ public class ServiceProvider {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+//		System.out.println(MOD.toString(2));
 	}
 
 }

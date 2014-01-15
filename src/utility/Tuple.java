@@ -3,13 +3,15 @@
  */
 package utility;
 
+import index.Point;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
-import IO.DataIO;
-import IO.RW;
+import io.IO;
+import io.RW;
 
 /**
  * @author chenqian
@@ -17,8 +19,38 @@ import IO.RW;
  */
 public class Tuple implements RW{
 
-	private int[] point = null;
-	private int t;
+	private Point[] point = null;
+	private int[] tiStp;
+	
+	/**
+	 * Construct a tuple based on two tuples.
+	 * The points tracks the bounds of two tuples.
+	 * And the timeStp also are the bounds.
+	 * @param t1
+	 * @param t2
+	 */
+	public Tuple(Tuple t1, Tuple t2) {
+		this.point = new Point[2];
+		this.tiStp = new int[2];
+		this.point[0] = t1.getLowPoint();
+		this.point[1] = t2.getHiPoint();
+		this.tiStp[0] = t1.getLowTiStp();
+		this.tiStp[1] = t2.getHiTiStp();
+	}
+	
+	/**
+	 * Construct a tuple.
+	 * @param v
+	 * @param t
+	 */
+	public Tuple(int v, int t) {
+		this.point = new Point[2];
+		this.tiStp = new int[2];
+		this.point[0] = new Point(v);
+		this.point[1] = this.point[0];
+		this.tiStp[0] = t;
+		this.tiStp[1] = t;
+	}
 	
 	/**
 	 * 
@@ -27,6 +59,26 @@ public class Tuple implements RW{
 		// TODO Auto-generated constructor stub
 	}
 
+	public Point getLowPoint() {
+		return point[0];
+	}
+	
+	public int getLowTiStp() {
+		return tiStp[0];
+	}
+	
+	public Point getHiPoint() {
+		return point[1];
+	}
+	
+	public int getHiTiStp() {
+		return tiStp[1];
+	}
+	
+	public int getDim() {
+		return point[0].getDim();
+	}
+	
 	/**
 	 * @param args
 	 */
@@ -38,31 +90,24 @@ public class Tuple implements RW{
 	@Override
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
-		point = DataIO.readIntArrays(ds);
-		t = DataIO.readInt(ds);
+		int num = IO.readInt(ds);
+		point = new Point[num];
+		for (int i = 0; i < num; i ++) {
+			point[i] = new Point(); 
+			point[i].read(ds);
+		}
+		tiStp = new int[num];
+		tiStp = IO.readIntArrays(ds);
 	}
 
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
-		DataIO.writeIntArrays(ds, point);
-		DataIO.writeInt(ds, t);
-	}
-
-	@Override
-	public void loadBytes(byte[] data) {
-		// TODO Auto-generated method stub
-		DataInputStream ds = new DataInputStream(new ByteArrayInputStream(data));
-		read(ds);
-	}
-
-	@Override
-	public byte[] toBytes() {
-		// TODO Auto-generated method stub
-		ByteArrayOutputStream bs = new ByteArrayOutputStream();
-		DataOutputStream ds = new DataOutputStream(bs);
-		write(ds);
-		return bs.toByteArray();
+		IO.writeInt(ds, point.length);
+		for (int i = 0; i < point.length; i ++) {
+			point[i].write(ds);			
+		}
+		IO.writeIntArrays(ds, tiStp);
 	}
 
 }
