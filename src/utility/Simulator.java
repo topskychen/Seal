@@ -17,13 +17,13 @@ import party.TrustedRegister;
  */
 public abstract class Simulator {
 
-	TrustedRegister trustedRegister = null;
-	ArrayList<DataOwner> dataOwners = null;
-	ServiceProvider serviceProvider = null;
-	Client client = null;
-	double 			preparationTime 		= -1;
-	double 			verificationTime 		= -1;
-	long 			voSize					= -1;
+	TrustedRegister 		trustedRegister 		= null;
+	ArrayList<DataOwner> 	dataOwners 				= null;
+	ServiceProvider 		serviceProvider 		= null;
+	Client 					client 					= null;
+	double 					preparationTime 		= -1;
+	double 					verificationTime 		= -1;
+	long 					voSize					= -1;
 	
 	
 	/**

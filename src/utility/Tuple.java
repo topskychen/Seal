@@ -19,8 +19,9 @@ import io.RW;
  */
 public class Tuple implements RW{
 
-	private Point[] point = null;
-	private int[] tiStp;
+	
+	private Point[] point 	= null;
+	private int[] 	tiStp	= null;
 	
 	/**
 	 * Construct a tuple based on two tuples.

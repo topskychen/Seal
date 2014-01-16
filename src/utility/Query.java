@@ -29,6 +29,7 @@ public class Query {
 		return true;
 	}
 	
+	
 	/**
 	 * Get the lower bound.
 	 * @return
@@ -43,6 +44,11 @@ public class Query {
 	 */
 	public Point getHB() {
 		return high;
+	}
+	
+	public Query(int low, int high) {
+		this.low = new Point(low);
+		this.high = new Point(high);
 	}
 	
 	/**

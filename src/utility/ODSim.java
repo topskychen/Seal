@@ -39,36 +39,17 @@ public class ODSim extends Simulator {
 	public void init() {
 		// TODO Auto-generated method stub
 		// Data owners prepare data 
-		this.dataOwners = new ArrayList<>();
-		ArrayList<Integer> values = loadValuesFromFile("");
-		for (int i = 0; i < values.size(); i ++) {
-			dataOwners.get(i).addValue(values.get(i));
-			dataOwners.get(i).prepareSeals();
-		}
+		DataOwner.initOneDim(dataOwners, "");
 		
 		// Service Provider collects data.
-		this.serviceProvider = new ServiceProvider();
+		// Currently, the index will not be stored to file.
 		serviceProvider.collectDataOnce(dataOwners);
 		
 		// Client Make queries
-		this.client = new Client();
+//		client
+		client.rangeQuery(serviceProvider, "");
 	}
 	
-	public ArrayList<Integer> loadValuesFromFile(String file) {
-		try {
-			ArrayList<Integer> data = new ArrayList<>();
-			Scanner in = new Scanner(new File(file));
-			while(in.hasNext()) {
-				data.add(Integer.parseInt(in.nextLine()));
-			}
-			in.close();
-			return data;
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
 	
 
 	/* (non-Javadoc)

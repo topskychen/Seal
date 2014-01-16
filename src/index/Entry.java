@@ -6,6 +6,7 @@ package index;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+import io.IO;
 import io.RW;
 import utility.Seal;
 import utility.Tuple;
@@ -16,8 +17,9 @@ import utility.Tuple;
  */
 public class Entry implements RW{
 
-	private Tuple tuple = null;
-	private Seal seal = null;
+	private int		id 		= -1;
+	private Tuple 	tuple 	= null;
+	private Seal 	seal 	= null;
 
 	/**
 	 * Construct an entry based on two children.
@@ -34,9 +36,14 @@ public class Entry implements RW{
 	 * @param tuple
 	 * @param seal
 	 */
-	public Entry(Tuple tuple, Seal seal) {
-		this.tuple = tuple;
-		this.seal = seal;
+	public Entry(int id, Tuple tuple, Seal seal) {
+		this.id 	= id;
+		this.tuple 	= tuple;
+		this.seal 	= seal;
+	}
+	
+	public int getId() {
+		return id;
 	}
 	
 	/**
@@ -82,7 +89,8 @@ public class Entry implements RW{
 	/**
 	 * 
 	 */
-	public Entry() {
+	public Entry(int id) {
+		this.id = id;
 		// TODO Auto-generated constructor stub
 	}
 
@@ -99,6 +107,7 @@ public class Entry implements RW{
 	@Override
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
+		id = IO.readInt(ds);
 		tuple = new Tuple();
 		tuple.read(ds);
 		seal = new Seal();
@@ -110,6 +119,7 @@ public class Entry implements RW{
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
+		IO.writeInt(ds, id);
 		tuple.write(ds);
 		seal.write(ds);
 	}

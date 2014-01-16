@@ -6,6 +6,8 @@ package party;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import utility.Query;
+import utility.VO;
 import index.Entry;
 import index.SearchIndex;
 
@@ -29,6 +31,9 @@ public class ServiceProvider {
 		index.buildIndex(entries);
 	}
 	
+	public VO rangeQuery(Query query) {
+		return null;
+	}
 	/**
 	 * 
 	 */

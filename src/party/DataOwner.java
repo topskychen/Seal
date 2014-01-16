@@ -4,9 +4,21 @@
 package party;
 
 import index.Entry;
+import io.IO;
+import io.RW;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Scanner;
 
 import utility.Tuple;
 
@@ -14,11 +26,12 @@ import utility.Tuple;
  * @author chenqian
  *
  */
-public class DataOwner {
+public class DataOwner implements RW{
 
-	private ArrayList<Entry> entries = null;
-	private Iterator<Entry> iter = null;
-	private byte[] secretShare = null;
+	private int					id				= -1;
+	private ArrayList<Entry> 	entries 		= null;
+	private Iterator<Entry> 	iter 			= null;
+	private byte[] 				secretShare 	= null;
 	
 	/**
 	 * Prepare Seals.
@@ -64,20 +77,20 @@ public class DataOwner {
 	 * @param p
 	 */
 	public void addValue(int v) {
-		entries.add(new Entry(new Tuple(v, 0), null));
+		entries.add(new Entry(id, new Tuple(v, 0), null));
 	}
 	
 	public void clear() {
 		entries.clear();
 		iter = null;
 	}
-	/**
-	 * 
-	 */
-	public DataOwner(byte[] secretShare) {
-		// TODO Auto-generated constructor stub
-		this.entries = new ArrayList<Entry>();
+	
+	public void setSecretShare(byte[] secretShare) {
 		this.secretShare = secretShare;
+	}
+	
+	public DataOwner(int id) {
+		this.id = id;
 	}
 
 	/**
@@ -87,5 +100,94 @@ public class DataOwner {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public static void initOneDim(ArrayList<DataOwner> dataOwners, String fileName) {
+		File doFile = new File(fileName + ".do");
+		TrustedRegister.secretShares.clear();
+		if (doFile.exists()) {
+			try {
+				DataInputStream ds = new DataInputStream(new BufferedInputStream(new FileInputStream(doFile)));
+				int size = IO.readInt(ds);
+				for (int i = 0; i < size; i ++) {
+					DataOwner dataOwner = new DataOwner(i); dataOwner.read(ds);
+					dataOwners.add(dataOwner);
+					TrustedRegister.addSecretShare(i, dataOwner.secretShare);
+				}
+				ds.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				DataOutputStream ds = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(doFile)));
+				ArrayList<Integer> values = loadValuesFromFile(fileName + ".pl");
+				IO.writeInt(ds, dataOwners.size());
+				for (int i = 0; i < values.size(); i ++) {
+					DataOwner dataOwner = new DataOwner(i);
+					dataOwner.addValue(values.get(i));
+					dataOwner.setSecretShare(TrustedRegister.genSecretShare(i, dataOwner.getFirstEntry().getTuple()));
+					dataOwner.prepareSeals();
+					dataOwner.write(ds);
+				}
+				ds.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static ArrayList<Integer> loadValuesFromFile(String file) {
+		try {
+			ArrayList<Integer> data = new ArrayList<>();
+			Scanner in = new Scanner(new File(file));
+			while(in.hasNext()) {
+				data.add(Integer.parseInt(in.nextLine()));
+			}
+			in.close();
+			return data;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
+	public void read(DataInputStream ds) {
+		// TODO Auto-generated method stub
+		id = IO.readInt(ds);
+		int size = IO.readInt(ds);
+		if (size != 0) {
+			entries = new ArrayList<Entry>();
+			for (int i = 0; i < size; i ++) {
+				Entry e = new Entry(-1); e.read(ds);
+				entries.add(e);
+			}
+		}
+		secretShare = IO.readBytes(ds);
+	}
+
+	@Override
+	public void write(DataOutputStream ds) {
+		// TODO Auto-generated method stub
+		IO.writeInt(ds, id);
+		if (entries == null) IO.writeInt(ds, 0);
+		else {
+			IO.writeInt(ds, entries.size());
+			for (int i = 0; i < entries.size(); i ++) {
+				entries.get(i).write(ds);
+			}
+		}
+		IO.writeBytes(ds, secretShare);
+	}
+	
 
 }
