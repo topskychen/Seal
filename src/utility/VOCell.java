@@ -8,7 +8,11 @@ import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import crypto.Constants;
+import crypto.Hasher;
+import party.TrustedRegister;
 import index.Entry;
+import io.IO;
 import io.RW;
 
 /**
@@ -18,22 +22,46 @@ import io.RW;
 public class VOCell implements RW{
 
 	ArrayList<Integer> 	ids 		= null;
+	ArrayList<Tuple>	tuples 		= null;
 	Entry 				entry		= null;
 	
 	public boolean verify(Query query) {
 		//TODO
-		
-		return false;
+		BigInteger random = Constants.PRIME_Q.multiply(
+				new BigInteger(new Integer(entry.getNO()).toString())
+			);
+		if (query.inRange(entry.getLB(), entry.getHB())) {
+			BigInteger ps = BigInteger.ZERO;
+			for (int i = 0; i < ids.size(); i ++) {
+				BigInteger secretShare = TrustedRegister.genSecretShare(ids.get(i), tuples.get(i));
+				ps = ps.add(secretShare).mod(TrustedRegister.mod);
+			}
+			BigInteger rs = entry.getSeal().getSecretShare(random).mod(TrustedRegister.mod);
+			if (!ps.equals(rs)) return false;
+		}
+		int[] comPre = Utility.comPre(entry.getLowVal(), entry.getHiVal(), 4);
+		Utility.pi22(comPre[0]);
+		BigInteger cnt = entry.getSeal().getCnt(random);
+		BigInteger dig = entry.getSeal().getDig(random, comPre[1]);
+		if (!Utility.getBI(Hasher.hashBytes(new Integer(comPre[0]).toString().getBytes())).multiply(cnt).equals(dig)) {
+			return false;
+		}
+		return true;
 	}
 	/**
 	 * 
 	 */
-	public VOCell(ArrayList<Integer> ids, Entry entry) {
+	public VOCell(ArrayList<Integer> ids, ArrayList<Tuple> tuples, Entry entry) {
 		// TODO Auto-generated constructor stub
-//		for ()
+		this.ids 	= ids;
+		this.entry 	= entry;
+		this.tuples = tuples;
 	}
 	
-	public VOCell() {}
+	
+	public VOCell() {
+		
+	}
 
 	/**
 	 * @param args
@@ -46,11 +74,36 @@ public class VOCell implements RW{
 	@Override
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
+		int size = IO.readInt(ds);
+		ids = new ArrayList<>(size);
+		for (int i = 0; i < size; i ++) {
+			ids.add(IO.readInt(ds));
+		}
+		tuples = new ArrayList<>(size);
+		for (int i = 0; i < size; i ++) {
+			Tuple tuple = new Tuple();
+			tuple.read(ds);
+			tuples.add(tuple);
+		}
+		entry = new Entry(-1);
+		entry.read(ds);
 	}
 
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
+		if (ids == null) {
+			IO.writeInt(ds, 0);
+		} else {
+			IO.writeInt(ds, ids.size());
+			for (int i = 0; i < ids.size(); i ++) {
+				IO.writeInt(ds, ids.get(i));
+			}
+			for (Tuple tuple : tuples) {
+				tuple.write(ds);
+			}
+		}
+		entry.write(ds);
 	}
 
 }

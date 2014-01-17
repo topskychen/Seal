@@ -5,6 +5,7 @@ package index;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.math.BigInteger;
 
 import io.IO;
 import io.RW;
@@ -20,7 +21,15 @@ public class Entry implements RW{
 	private int		id 		= -1;
 	private Tuple 	tuple 	= null;
 	private Seal 	seal 	= null;
+	private int 	no		= 0;
 
+	public Entry (Entry e) {
+		this.id 	= e.id;
+		this.tuple 	= new Tuple(e.getTuple());
+		this.seal 	= new Seal(e.getSeal());
+		this.no		= e.no;
+	}
+	
 	/**
 	 * Construct an entry based on two children.
 	 * @param a
@@ -29,6 +38,7 @@ public class Entry implements RW{
 	public Entry(Entry a, Entry b) {
 		tuple = new Tuple(a.tuple, b.tuple);
 		seal = new Seal(a.seal, b.seal);
+		no = a.no + b.no;
 	}
 	
 	/**
@@ -40,6 +50,15 @@ public class Entry implements RW{
 		this.id 	= id;
 		this.tuple 	= tuple;
 		this.seal 	= seal;
+		this.no 	= 1;
+	}
+	
+	/**
+	 * Return the number of points in this entry.
+	 * @return
+	 */
+	public int getNO() {
+		return no;
 	}
 	
 	public int getId() {
@@ -82,7 +101,7 @@ public class Entry implements RW{
 	 * Prepare a seal based on the tuple and the secretShare.
 	 * @param secretShare
 	 */
-	public void prepareSeal(byte[] secretShare) {
+	public void prepareSeal(BigInteger secretShare) {
 		seal = new Seal(tuple, secretShare);
 	}
 
@@ -112,6 +131,7 @@ public class Entry implements RW{
 		tuple.read(ds);
 		seal = new Seal();
 		seal.read(ds);
+		no = IO.readInt(ds);
 	}
 
 
@@ -122,6 +142,15 @@ public class Entry implements RW{
 		IO.writeInt(ds, id);
 		tuple.write(ds);
 		seal.write(ds);
+		IO.writeInt(ds, no);
+	}
+	
+	public Point getLB() {
+		return tuple.getLowPoint();
+	}
+	
+	public Point getHB() {
+		return tuple.getHiPoint();
 	}
 	
 	/**

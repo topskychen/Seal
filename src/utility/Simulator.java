@@ -28,19 +28,9 @@ public abstract class Simulator {
 	
 	/**
 	 * 
-	 * @param trustedRegister
-	 * @param dataOwners
-	 * @param serviceProvider
-	 * @param client
 	 */
-	public Simulator(TrustedRegister trustedRegister,
-			ArrayList<DataOwner> dataOwners, ServiceProvider serviceProvider,
-			Client client) {
+	public Simulator() {
 		super();
-		this.trustedRegister = trustedRegister;
-		this.dataOwners = dataOwners;
-		this.serviceProvider = serviceProvider;
-		this.client = client;
 	}
 	
 

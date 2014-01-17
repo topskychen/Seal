@@ -16,6 +16,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import utility.Query;
+import utility.VO;
+import utility.VOCell;
 import memoryindex.BinaryTree;
 import memoryindex.IQueryStrategy;
 import multithread.MultiThread;
@@ -47,11 +49,11 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	 * @see index.SearchIndex#rangeQuery(index.Query)
 	 */
 	@Override
-	public ArrayList<Entry> rangeQuery(Query query) {
+	public ArrayList<VOCell> rangeQuery(Query query) {
 		// TODO Auto-generated method stub
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query.getLB().getCoord(0), query.getHB().getCoord(0));
 		queryStrategy(rangeQueryStrategy);
-		return rangeQueryStrategy.getResults();
+		return rangeQueryStrategy.getVOCells();
 	}
 
 	/* (non-Javadoc)
@@ -62,11 +64,11 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		// TODO Auto-generated method stub
 		
 		BinaryTree[] nodes = new BinaryTree[entries.size()]; int size = 0;
-		for (int i = 1; i <= entries.size(); i ++) {
+		for (int i = 0; i < entries.size(); i ++) {
 			nodes[size ++] = new BinaryTree<Integer, Entry>(i, entries.get(i), getClassValue());
 		}
 		buildIndex(nodes, size);
-		flush();
+//		flush();
 	}
 	
 	/**
@@ -87,7 +89,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	class RangeQueryStrategy implements IQueryStrategy {
 
 		private ArrayList<BinaryTree> toVisit = new ArrayList<BinaryTree>();
-		private ArrayList<Entry> results = new ArrayList<Entry>();
+		private ArrayList<BinaryTree> trees = new ArrayList<BinaryTree>();
 		private int lBound, rBound;
 		
 		
@@ -97,8 +99,14 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 			this.rBound = rBound;
 		}
 
-		public ArrayList<Entry> getResults() {
-			return results;
+		public ArrayList<VOCell> getVOCells() {
+			ArrayList<VOCell> voCells = new ArrayList<>();
+			for (BinaryTree tree : trees) {
+				RetrieveStrategy qs = new RetrieveStrategy();
+				queryStrategy(tree, qs);
+				voCells.add(new VOCell(qs.getIds(), qs.getTuples(), (Entry)tree.getValue()));
+			}
+			return voCells;
 		}
 
 		@Override
@@ -106,14 +114,12 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 				boolean[] hasNext) {
 			// TODO Auto-generated method stub
 			if (!n.isLeftChildEmpty()) {
-				Entry data = (Entry)n.getLeftChild().getValue();
-				if (visitData(data)) {
+				if (visitData(n.getLeftChild())) {
 					toVisit.add(n.getLeftChild());
 				}
 			}
 			if (!n.isRightChildEmpty()) {
-				Entry data = (Entry) n.getRightChild().getValue();
-				if (visitData(data)) {
+				if (visitData(n.getRightChild())) {
 					toVisit.add(n.getRightChild());
 				}
 			}
@@ -125,17 +131,28 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 			}
 		}
 		
-		boolean visitData(Entry data) {
+		boolean visitData(BinaryTree tree) {
+			Entry data = (Entry) tree.getValue(); 
 			if (data.getLowVal() >= lBound && data.getHiVal() <= rBound) {
-				results.add(data);
+				trees.add(tree);
 				return false;
 			} else if (data.getLowVal() > rBound || data.getHiVal() < lBound) {
-				results.add(data);
+				trees.add(tree);
 				return false;
 			}
 			return true;
 		}
 		
+	}
+	
+	public void queryStrategy(BinaryTree tree, final IQueryStrategy qs) {
+		BinaryTree[] next = new BinaryTree[]{tree};
+		while (true) {
+			BinaryTree n = next[0];
+			boolean[] hasNext = new boolean[] {false};
+			qs.getNextEntry(n, next, hasNext);
+			if (hasNext[0] == false) break;
+		}
 	}
 
 	

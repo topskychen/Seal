@@ -47,9 +47,9 @@ public class TestEncFun {
 		BigInteger b1 = new BigInteger("491511231");
 		BigInteger b2 = new BigInteger("491511233");
 		BigInteger c1 = encFunO.encrypt(b1, Constants.PRIME_P);
-		BigInteger c2 = encFunO.encrypt(b2, Constants.PRIME_Q);
+		BigInteger c2 = encFunO.encrypt(b2, Constants.PRIME_P);
 		BigInteger c3 = c1.add(c2).mod(mod);
-		BigInteger m3 = encFunO.decrypt(c3, Constants.PRIME_P.add(Constants.PRIME_Q));
+		BigInteger m3 = encFunO.decrypt(c3, Constants.PRIME_P.add(Constants.PRIME_P));
 		assertEquals(b1.add(b2).mod(mod), m3);
 	}
 

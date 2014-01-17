@@ -7,8 +7,11 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 
+import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
+
 import party.TrustedRegister;
 import utility.EncFun.ENC_TYPE;
+import crypto.Constants;
 import crypto.Hasher;
 import io.IO;
 import io.RW;
@@ -19,7 +22,12 @@ import io.RW;
  */
 public class Seal implements RW{
 
-	BigInteger content = null;
+	BigInteger content 	= null;
+	BigInteger cipher 	= null;
+	
+	public Seal(Seal seal) {
+		cipher = seal.cipher;
+	}
 	
 	/**
 	 * Construction based on two children
@@ -27,7 +35,7 @@ public class Seal implements RW{
 	 * @param b
 	 */
 	public Seal(Seal a, Seal b) {
-		content = fold(a.content, b.content);
+		cipher = fold(a.cipher, b.cipher);
 	}
 	
 	/**
@@ -51,8 +59,8 @@ public class Seal implements RW{
 	 * @param tuple
 	 * @param secretShare
 	 */
-	public Seal(Tuple tuple, byte[] secretShare) {
-		content = getBI(secretShare);
+	public Seal(Tuple tuple, BigInteger secretShare) {
+		content = secretShare;
 		content = content.shiftLeft(24);
 		content = content.add(BigInteger.ONE);
 		if (tuple.getDim() == 1) {
@@ -62,11 +70,12 @@ public class Seal implements RW{
 			int value = tuple.getLowPoint().getCoord(0);
 			for (int i = 0; i < 8; i ++) {
 				content = content.shiftLeft(24 + 160);
-				int v = (int) (value & ((1L << (i * 4 + 4)) - 1));
+				int v = (value >> (4 * i));
 				byte[] hash = Hasher.hashBytes(new Integer(v).toString().getBytes());
-				content = content.xor(getBI(hash));
+				content = content.xor(Utility.getBI(hash));
 			}
 			// Encrypt with Paillier or one-time pad
+			cipher = TrustedRegister.encFun.encrypt(content, Constants.PRIME_P);
 			
 		} else if (tuple.getDim() == 2) {
 			
@@ -75,13 +84,22 @@ public class Seal implements RW{
 		}
 	}
 	
-	/**
-	 * Get the corresponding bigInteger based on the byte[].
-	 * @param bytes
-	 * @return
-	 */
-	private BigInteger getBI(byte[] bytes) {
-		return new BigInteger(IO.toHexFromBytes(bytes), 16);
+	public BigInteger getSecretShare(BigInteger random) {
+		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
+		BigInteger ss = content.shiftRight((160 + 24) * 8 + 24).mod(TrustedRegister.mod);
+		return ss;
+	}
+	
+	public BigInteger getCnt(BigInteger random) {
+		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
+		BigInteger cnt = content.shiftRight((160 + 24) * 8).and(Utility.getBits1(24));
+		return cnt;
+	}
+	
+	public BigInteger getDig(BigInteger random, int p) {
+		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
+		BigInteger dig = content.shiftRight((160 + 24) * p).and(Utility.getBits1(160 + 24));
+		return dig;
 	}
 	
 	/**
@@ -100,20 +118,20 @@ public class Seal implements RW{
 //		int v = (int) (value & ((1L << (31 * 4 + 4)) - 1));
 //		System.out.println(Integer.toBinaryString(value));
 		Tuple tuple = new Tuple(1, 1);
-		Seal seal = new Seal(tuple, new byte[]{'a'});
-		System.out.println(seal.content.toString(2));
+		Seal seal = new Seal(tuple, null);
+		System.out.println(seal.cipher.toString(2));
 	}
 
 	@Override
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
-		content = IO.readBigInteger(ds);
+		cipher = IO.readBigInteger(ds);
 	}
 
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
-		IO.writeBigInteger(ds, content);
+		IO.writeBigInteger(ds, cipher);
 	}
 
 }

@@ -3,15 +3,19 @@
  */
 package utility;
 
+import index.SearchIndex.INDEX_TYPE;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import crypto.AES;
 import party.Client;
 import party.DataOwner;
 import party.ServiceProvider;
 import party.TrustedRegister;
+import utility.EncFun.ENC_TYPE;
 
 /**
  * @author chenqian
@@ -25,10 +29,8 @@ public class ODSim extends Simulator {
 	 * @param serviceProvider
 	 * @param client
 	 */
-	public ODSim(TrustedRegister trustedRegister,
-			ArrayList<DataOwner> dataOwners, ServiceProvider serviceProvider,
-			Client client) {
-		super(trustedRegister, dataOwners, serviceProvider, client);
+	public ODSim() {
+		super();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -38,16 +40,13 @@ public class ODSim extends Simulator {
 	@Override
 	public void init() {
 		// TODO Auto-generated method stub
-		// Data owners prepare data 
-		DataOwner.initOneDim(dataOwners, "");
-		
-		// Service Provider collects data.
-		// Currently, the index will not be stored to file.
-		serviceProvider.collectDataOnce(dataOwners);
-		
-		// Client Make queries
-//		client
-		client.rangeQuery(serviceProvider, "");
+		dataOwners 			= new ArrayList<>();
+		serviceProvider 	= new ServiceProvider();
+		client 				= new Client();
+		TrustedRegister.sk 	= AES.getSampleKey();
+		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier);
+		serviceProvider.specifyIndex(INDEX_TYPE.BTree);
+
 	}
 	
 	
@@ -58,7 +57,15 @@ public class ODSim extends Simulator {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
+		// Data owners prepare data 
+		DataOwner.initOneDim(dataOwners, "./data/test");
 		
+		// Service Provider collects data.
+		// Currently, the index will not be stored to file.
+		serviceProvider.collectDataOnce(dataOwners);		
+		// Client Make queries
+//		client
+		client.rangeQuery(serviceProvider, "./data/test");
 	}
 
 	/**
@@ -66,7 +73,9 @@ public class ODSim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
+		ODSim odSim = new ODSim();
+		odSim.init();
+		odSim.run();
 	}
 
 }

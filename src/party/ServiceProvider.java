@@ -6,10 +6,16 @@ package party;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import memoryindex.BinaryTree;
+import memoryindex.IQueryStrategy;
 import utility.Query;
 import utility.VO;
+import utility.VOCell;
+import index.BinarySearchTree;
 import index.Entry;
+import index.RetrieveStrategy;
 import index.SearchIndex;
+import index.SearchIndex.INDEX_TYPE;
 
 /**
  * @author chenqian
@@ -32,8 +38,17 @@ public class ServiceProvider {
 	}
 	
 	public VO rangeQuery(Query query) {
-		return null;
+		VO vo = new VO();
+		vo.prepare(index, query);
+		return vo;
 	}
+	
+	public void specifyIndex(INDEX_TYPE type) {
+		if (type == INDEX_TYPE.BTree) {
+			index = new BinarySearchTree(Entry.class);
+		}
+	}
+	
 	/**
 	 * 
 	 */

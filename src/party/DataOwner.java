@@ -16,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -31,7 +32,7 @@ public class DataOwner implements RW{
 	private int					id				= -1;
 	private ArrayList<Entry> 	entries 		= null;
 	private Iterator<Entry> 	iter 			= null;
-	private byte[] 				secretShare 	= null;
+	private BigInteger			secretShare 	= null;
 	
 	/**
 	 * Prepare Seals.
@@ -85,12 +86,13 @@ public class DataOwner implements RW{
 		iter = null;
 	}
 	
-	public void setSecretShare(byte[] secretShare) {
+	public void setSecretShare(BigInteger secretShare) {
 		this.secretShare = secretShare;
 	}
 	
 	public DataOwner(int id) {
 		this.id = id;
+		this.entries = new ArrayList<Entry>();
 	}
 
 	/**
@@ -111,6 +113,7 @@ public class DataOwner implements RW{
 				for (int i = 0; i < size; i ++) {
 					DataOwner dataOwner = new DataOwner(i); dataOwner.read(ds);
 					dataOwners.add(dataOwner);
+					System.out.println(dataOwner.entries.get(0).getSeal().getCnt(null));
 					TrustedRegister.addSecretShare(i, dataOwner.secretShare);
 				}
 				ds.close();
@@ -125,13 +128,15 @@ public class DataOwner implements RW{
 			try {
 				DataOutputStream ds = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(doFile)));
 				ArrayList<Integer> values = loadValuesFromFile(fileName + ".pl");
-				IO.writeInt(ds, dataOwners.size());
+				IO.writeInt(ds, values.size());
 				for (int i = 0; i < values.size(); i ++) {
 					DataOwner dataOwner = new DataOwner(i);
 					dataOwner.addValue(values.get(i));
 					dataOwner.setSecretShare(TrustedRegister.genSecretShare(i, dataOwner.getFirstEntry().getTuple()));
 					dataOwner.prepareSeals();
 					dataOwner.write(ds);
+					dataOwners.add(dataOwner);
+					System.out.println(dataOwner.entries.get(0).getSeal().getCnt(null));
 				}
 				ds.close();
 			} catch (FileNotFoundException e) {
@@ -172,7 +177,7 @@ public class DataOwner implements RW{
 				entries.add(e);
 			}
 		}
-		secretShare = IO.readBytes(ds);
+		secretShare = IO.readBigInteger(ds);
 	}
 
 	@Override
@@ -186,7 +191,7 @@ public class DataOwner implements RW{
 				entries.get(i).write(ds);
 			}
 		}
-		IO.writeBytes(ds, secretShare);
+		IO.writeBigInteger(ds, secretShare);
 	}
 	
 

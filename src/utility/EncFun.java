@@ -36,7 +36,7 @@ public class EncFun {
 		if (type == ENC_TYPE.Paillier) {
 			cipher = paillier.Encrypt(content, random);
 		} else {
-			cipher = (Constants.PRIME_P.multiply(content)).add(random).mod(mod);
+			cipher = (Constants.PRIME_Q.multiply(content)).add(random).mod(mod);
 		}
 		return cipher;
 	}
@@ -76,7 +76,7 @@ public class EncFun {
 				paillier = new Paillier(mod.bitLength() + 1, 100);
 			}
 		} else {
-			kInv = Constants.PRIME_P.modInverse(mod);
+			kInv = Constants.PRIME_Q.modInverse(mod);
 		}
 		
 	}

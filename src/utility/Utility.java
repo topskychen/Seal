@@ -3,6 +3,10 @@
  */
 package utility;
 
+import io.IO;
+
+import java.math.BigInteger;
+
 /**
  * @author chenqian
  *
@@ -32,23 +36,35 @@ public class Utility {
 	 * @param d
 	 * @return
 	 */
-	public static int comPre(int x, int y, int d) {
-		long lx = x, ly = y, lz = 0; 
+	public static int[] comPre(int x, int y, int d) { 
 //		pi22(x);
 //		pi22(y);
-		for (int i = 0; i < 32 / d; i ++) {
-			long mask = ((1L << (32 - d * i)) - 1) ^ ((1L << (32 - d - d * i)) - 1);
+		int i, z = 0;
+		for (i = 0; i < 32 / d; i ++) {
 //			System.out.println(Long.toBinaryString(mask));
-			if ((lx & mask) != (ly & mask)) {
+			int shift = (32 / d - i - 1);
+			if ((x >> (shift * d)) != (y >> (shift * d))) {
 				break;
 			} else {
 //				System.out.println(Long.toBinaryString(lx & mask));
-				lz = lz | (lx & mask);
+				z = x >> (i * d);
 			}
 		}
-		return (int) lz;
+		return new int[]{z, i - 1};
 	}
 	
+	/**
+	 * Get the corresponding bigInteger based on the byte[].
+	 * @param bytes
+	 * @return
+	 */
+	public static BigInteger getBI(byte[] bytes) {
+		return new BigInteger(IO.toHexFromBytes(bytes), 16);
+	}
+	
+	public static BigInteger getBits1(int d) {
+		return BigInteger.ONE.shiftLeft(d).subtract(BigInteger.ONE);
+	}
 	/**
 	 * 
 	 */
@@ -61,8 +77,7 @@ public class Utility {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int z = comPre(61731, 61795, 4);
-		System.out.println(Integer.toBinaryString(z));
+		System.out.println(getBits1(24).toString(2));
 	}
 
 }

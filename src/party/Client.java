@@ -27,7 +27,7 @@ public class Client {
 	public void rangeQuery(ServiceProvider serviceProvider, String fileName) {
 		Scanner in;
 		try {
-			in = new Scanner(new File(fileName));
+			in = new Scanner(new File(fileName + ".qr"));
 			while(in.hasNext()) {
 				String[] tks = in.nextLine().split(" ");
 				if (tks.length != 2) {
@@ -35,7 +35,12 @@ public class Client {
 				} else {
 					Query query = new Query(Integer.parseInt(tks[0]), Integer.parseInt(tks[1]));
 					VO vo = serviceProvider.rangeQuery(query);
-					
+					if (!vo.verify(query)) {
+						System.out.println("Fail verify!");
+					} else {
+						System.out.println("Pass verify!");
+					}
+					System.out.println(vo.toString());
 				}
 			}
 			in.close();

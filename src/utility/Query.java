@@ -20,9 +20,9 @@ public class Query {
 	 * @param point
 	 * @return
 	 */
-	boolean inRange(Point point) {
-		for (int i = 0; i < point.getDim(); i ++) {
-			if (point.getCoord(i) > high.getCoord(i) || point.getCoord(i) < low.getCoord(i)) {
+	boolean inRange(Point L, Point H) {
+		for (int i = 0; i < L.getDim(); i ++) {
+			if (L.getCoord(i) > high.getCoord(i) || H.getCoord(i) < low.getCoord(i)) {
 				return false;
 			}
 		}
@@ -45,6 +45,23 @@ public class Query {
 	public Point getHB() {
 		return high;
 	}
+	
+	/**
+	 * Get the lower value, applied only to one d.
+	 * @return
+	 */
+	public int getLowVal() {
+		return low.getCoord(0);
+	}
+	
+	/**
+	 * Get the higher value, applied only to the one d.
+	 * @return
+	 */
+	public int getHiVal() {
+		return high.getCoord(0);
+	}
+	
 	
 	public Query(int low, int high) {
 		this.low = new Point(low);

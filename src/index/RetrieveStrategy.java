@@ -5,6 +5,7 @@ package index;
 
 import java.util.ArrayList;
 
+import utility.Tuple;
 import memoryindex.BinaryTree;
 import memoryindex.IQueryStrategy;
 
@@ -12,17 +13,27 @@ import memoryindex.IQueryStrategy;
  * @author chenqian
  *
  */
-public class RetrieveIdsStrategy implements IQueryStrategy {
+public class RetrieveStrategy implements IQueryStrategy {
 
 	private ArrayList<BinaryTree> toVisit = new ArrayList<BinaryTree>();
-	ArrayList<Integer> ids = null;
+	ArrayList<Integer> 	ids 	= null;
+	ArrayList<Tuple> 	tuples	= null;
+	
+	public ArrayList<Integer> getIds() {
+		return ids;
+	}
+	
+	public ArrayList<Tuple> getTuples() {
+		return tuples;
+	}
 	
 	/**
 	 * 
 	 */
-	public RetrieveIdsStrategy() {
+	public RetrieveStrategy() {
 		// TODO Auto-generated constructor stub
 		ids = new ArrayList<>();
+		tuples = new ArrayList<>();
 	}
 
 	/* (non-Javadoc)
@@ -38,8 +49,9 @@ public class RetrieveIdsStrategy implements IQueryStrategy {
 			toVisit.add(n.getRightChild());
 		}
 		if (n.isLeaf()) {
-			Entry data = (Entry) n.getLeftChild().getValue();
+			Entry data = (Entry) n.getValue();
 			ids.add(data.getId());
+			tuples.add(data.getTuple());
 		}
 		if (!toVisit.isEmpty()) {
 			next[0] = toVisit.remove(0);

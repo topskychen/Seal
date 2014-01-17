@@ -23,6 +23,11 @@ public class Tuple implements RW{
 	private Point[] point 	= null;
 	private int[] 	tiStp	= null;
 	
+	public Tuple(Tuple tuple) {
+		point = tuple.point;
+		tiStp = tuple.tiStp;
+	}
+	
 	/**
 	 * Construct a tuple based on two tuples.
 	 * The points tracks the bounds of two tuples.

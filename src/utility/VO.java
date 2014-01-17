@@ -3,7 +3,6 @@
  */
 package utility;
 
-import index.Entry;
 import index.SearchIndex;
 import io.IO;
 import io.RW;
@@ -22,7 +21,7 @@ public class VO implements RW{
 
 	private Timer 		timer 			= null;
 	private double 		prepareTime 	= -1;
-	private double 		verifiyTime 	= -1;
+	private double 		verifyTime 	= -1;
 	private int 		voSize 			= -1;
 	ArrayList<VOCell> 	voCells 		= null;
 	Query				query 			= null;
@@ -40,10 +39,7 @@ public class VO implements RW{
 	 */
 	public void prepare(SearchIndex index, Query query) {
 		timer.reset();
-		ArrayList<Entry> entries = index.rangeQuery(query);
-		for (Entry entry: entries) {
-			//TODO
-		}
+		voCells = index.rangeQuery(query);
 		timer.stop();
 		prepareTime = timer.timeElapseinMs();
 	}
@@ -58,7 +54,7 @@ public class VO implements RW{
 			}
 		}
 		timer.stop();
-		verifiyTime = timer.timeElapseinMs();
+		verifyTime = timer.timeElapseinMs();
 		voSize = IO.toBytes(this).length;
 		return isVerify;
 	}
@@ -97,6 +93,17 @@ public class VO implements RW{
 		}
 	}
 	
-	
+	public String toString() {
+		StringBuffer sb = new StringBuffer("");
+		sb.append("PrepareTime: " + prepareTime + "ms\n");
+		sb.append("VerifyTime: " + verifyTime + "ms\n");
+		sb.append("VOSize: " + voSize + "bytes, " + voSize / 1024.0 + " KB\n");
+//		if(!precise){
+//			for (int i = 0; i < voCells.size(); i ++) {
+//				sb.append((i + 1)  + " [ " + voCells.get(i).toString() + " ] : " + Data.TYPE_NAMES[voCells.get(i).voType] + "\n");
+//			}
+//		}
+		return sb.toString();
+	}
 
 }
