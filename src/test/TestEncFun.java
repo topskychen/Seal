@@ -8,6 +8,7 @@ import static org.junit.Assert.*;
 import java.math.BigInteger;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import crypto.Constants;
@@ -24,7 +25,7 @@ public class TestEncFun {
 	EncFun encFunP;
 	EncFun encFunO;
 	BigInteger mod;
-	@Before
+	@BeforeClass
 	public void init() {
 		mod = new BigInteger("65536");
 		encFunP = new EncFun(ENC_TYPE.Paillier, mod);

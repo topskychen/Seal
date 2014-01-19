@@ -102,7 +102,6 @@ public class Tuple implements RW{
 			point[i] = new Point(); 
 			point[i].read(ds);
 		}
-		tiStp = new int[num];
 		tiStp = IO.readIntArrays(ds);
 	}
 
@@ -114,6 +113,15 @@ public class Tuple implements RW{
 			point[i].write(ds);			
 		}
 		IO.writeIntArrays(ds, tiStp);
+	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < point.length; i ++) {
+			if (i != 0) sb.append(", ");
+			sb.append(point[i].toString());
+		}
+		return sb.toString();
 	}
 
 }

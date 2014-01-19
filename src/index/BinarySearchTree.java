@@ -172,11 +172,18 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 					BinaryTree<Integer, Entry> leftNode = nodes[i];
 					BinaryTree<Integer, Entry> rightNode = nodes[i + 1];
 					nodes[newSize ++] = new BinaryTree(null,
-							new Entry(leftNode.getValue(), rightNode.getValue()),
+							new Entry((Entry)leftNode.getValue(), (Entry)rightNode.getValue()),
 							leftNode,
 							rightNode,
 							getClassValue()
 							);
+//					System.out.println(nodes[newSize - 1].getValue());
+//					System.out.println("[" + cnt(leftNode) + "+" + cnt(rightNode) + "] = " + cnt(nodes[newSize - 1]));
+//					if (cnt(leftNode).add(cnt(rightNode)).equals(cnt(nodes[newSize - 1])) == false) {
+//						System.out.println("What the fuck!");
+//					}
+//					System.out.println("cnt o: " + ((Entry) nodes[newSize - 1].getValue()).getNO());
+//					System.out.println("cnt r: " + ((Entry) nodes[newSize - 1].getValue()).getSeal().getCnt(null));
 				}
 			}
 			size = newSize;
@@ -184,5 +191,12 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		this.value = nodes[0].getValue();
 		this.setLeftChild(nodes[0].getLeftChild());
 		this.setRightChild(nodes[0].getRightChild());
+	}
+	
+	public int no(BinaryTree node) {
+		return ((Entry) node.getValue()).getNO();
+	}
+	public BigInteger cnt(BinaryTree node) {
+		return ((Entry) node.getValue()).getSeal().getCnt(null);
 	}
 }

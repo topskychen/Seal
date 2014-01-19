@@ -7,8 +7,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-
 import party.TrustedRegister;
 import utility.EncFun.ENC_TYPE;
 import crypto.Constants;
@@ -44,12 +42,12 @@ public class Seal implements RW{
 	 * @param content2
 	 * @return
 	 */
-	public BigInteger fold(BigInteger content1, BigInteger content2) {
+	public BigInteger fold(BigInteger cipher1, BigInteger cipher2) {
 		BigInteger ans = null;
 		if (TrustedRegister.type == ENC_TYPE.Paillier) {
-			ans = content1.multiply(content2).mod(EncFun.paillier.nsquare);
+			ans = cipher1.multiply(cipher2).mod(EncFun.paillier.nsquare);
 		} else {
-			ans = content1.add(content2).mod(TrustedRegister.mod);
+			ans = cipher1.add(cipher2).mod(TrustedRegister.mod);
 		}
 		return ans;
 	}
@@ -86,7 +84,7 @@ public class Seal implements RW{
 	
 	public BigInteger getSecretShare(BigInteger random) {
 		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
-		BigInteger ss = content.shiftRight((160 + 24) * 8 + 24).mod(TrustedRegister.mod);
+		BigInteger ss = content.shiftRight((160 + 24) * 8 + 24).and(Utility.getBits1(128 + 24));
 		return ss;
 	}
 	
@@ -132,6 +130,12 @@ public class Seal implements RW{
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
 		IO.writeBigInteger(ds, cipher);
+	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("[" + getSecretShare(null) + ", " + getCnt(null)  + "]");
+		return sb.toString();
 	}
 
 }

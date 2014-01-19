@@ -9,8 +9,10 @@ import io.RW;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.math.BigInteger;
 import java.util.ArrayList;
 
+import party.TrustedRegister;
 import timer.Timer;
 
 /**
@@ -21,7 +23,7 @@ public class VO implements RW{
 
 	private Timer 		timer 			= null;
 	private double 		prepareTime 	= -1;
-	private double 		verifyTime 	= -1;
+	private double 		verifyTime 		= -1;
 	private int 		voSize 			= -1;
 	ArrayList<VOCell> 	voCells 		= null;
 	Query				query 			= null;
@@ -50,13 +52,28 @@ public class VO implements RW{
 		for (VOCell voCell : voCells) {
 			if (!voCell.verify(query)) {
 				isVerify = false;
+				System.out.print("x");
+				System.out.println(voCell);
 				break;
+			} else {
+				System.out.print(".");
 			}
+		}
+		if (!verifyComplete()) {
+			isVerify = false;
 		}
 		timer.stop();
 		verifyTime = timer.timeElapseinMs();
 		voSize = IO.toBytes(this).length;
 		return isVerify;
+	}
+	
+	public boolean verifyComplete() {
+		BigInteger ss = BigInteger.ZERO;
+		for (VOCell voCell : voCells) {
+			ss = ss.add(voCell.getPartialSS());
+		}
+		return ss.equals(TrustedRegister.totalSS);
 	}
 
 	/**

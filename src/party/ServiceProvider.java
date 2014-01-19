@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import memoryindex.BinaryTree;
 import memoryindex.IQueryStrategy;
 import utility.Query;
+import utility.Seal;
 import utility.VO;
 import utility.VOCell;
 import index.BinarySearchTree;
@@ -33,7 +34,9 @@ public class ServiceProvider {
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
 			entries.add(dataOwners.get(i).getFirstEntry());
+//			System.out.println(entries.get(i));
 		}
+		
 		index.buildIndex(entries);
 	}
 	

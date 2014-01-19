@@ -9,8 +9,10 @@ import java.math.BigInteger;
 
 import io.IO;
 import io.RW;
+import utility.Constants;
 import utility.Seal;
 import utility.Tuple;
+import utility.Utility;
 
 /**
  * @author chenqian
@@ -22,12 +24,18 @@ public class Entry implements RW{
 	private Tuple 	tuple 	= null;
 	private Seal 	seal 	= null;
 	private int 	no		= 0;
+	private int[] 	comPre	= null;
 
 	public Entry (Entry e) {
 		this.id 	= e.id;
 		this.tuple 	= new Tuple(e.getTuple());
 		this.seal 	= new Seal(e.getSeal());
 		this.no		= e.no;
+		this.comPre	= e.getComPre();
+	}
+	
+	public int[] getComPre() {
+		return comPre;
 	}
 	
 	/**
@@ -39,6 +47,7 @@ public class Entry implements RW{
 		tuple = new Tuple(a.tuple, b.tuple);
 		seal = new Seal(a.seal, b.seal);
 		no = a.no + b.no;
+		comPre = Utility.comPre(a.comPre, b.comPre, Constants.D);
 	}
 	
 	/**
@@ -51,6 +60,7 @@ public class Entry implements RW{
 		this.tuple 	= tuple;
 		this.seal 	= seal;
 		this.no 	= 1;
+		this.comPre	= new int[]{tuple.getLowPoint().getCoord(0), Constants.L};
 	}
 	
 	/**
@@ -118,7 +128,6 @@ public class Entry implements RW{
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
 	}
 
 
@@ -132,6 +141,7 @@ public class Entry implements RW{
 		seal = new Seal();
 		seal.read(ds);
 		no = IO.readInt(ds);
+		comPre = IO.readIntArrays(ds);
 	}
 
 
@@ -143,6 +153,7 @@ public class Entry implements RW{
 		tuple.write(ds);
 		seal.write(ds);
 		IO.writeInt(ds, no);
+		IO.writeIntArrays(ds, comPre);
 	}
 	
 	public Point getLB() {
@@ -169,5 +180,15 @@ public class Entry implements RW{
 	 */
 	public int getHiVal() {
 		return tuple.getHiPoint().getCoord(0);
+	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("id : " + id + "\n");
+		sb.append("tuple : " + tuple + "\n");
+		sb.append("seal : " + seal + "\n");
+		sb.append("no : " + no + "\n");
+		sb.append("comPre : " + comPre[0] + ", " + comPre[1] + "\n");
+		return sb.toString();
 	}
 }

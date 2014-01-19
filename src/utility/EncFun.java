@@ -3,6 +3,16 @@
  */
 package utility;
 
+import io.IO;
+import io.RW;
+
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 
 import crypto.Constants;
@@ -13,7 +23,7 @@ import party.ServiceProvider;
  * @author chenqian
  *
  */
-public class EncFun {
+public class EncFun implements RW{
 
 	public static enum ENC_TYPE {Paillier, OTPad};
 	
@@ -52,7 +62,7 @@ public class EncFun {
 	public BigInteger decrypt(BigInteger cipher, BigInteger random) {
 		BigInteger content = null;
 		if (type == ENC_TYPE.Paillier) {
-			content = paillier.Decrypt(cipher).mod(paillier.n).mod(mod);
+			content = paillier.Decrypt(cipher);
 		} else {
 			content = cipher.subtract(random);
 			if (content.signum() < 0 ){
@@ -81,12 +91,33 @@ public class EncFun {
 		
 	}
 
+	public EncFun(File file) {
+		IO.loadFile(this, file);
+	}
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		
+//		System.out.println(ENC_TYPE.valueOf("Paillier").equals(ENC_TYPE.Paillier));
 	}
 
+	@Override
+	public void read(DataInputStream ds) {
+		// TODO Auto-generated method stub
+		type = ENC_TYPE.valueOf(IO.readString(ds));
+		mod = IO.readBigInteger(ds);
+		paillier = new Paillier(false); 
+		paillier.read(ds);
+		kInv = IO.readBigInteger(ds);
+	}
+
+	@Override
+	public void write(DataOutputStream ds) {
+		// TODO Auto-generated method stub
+		IO.writeString(ds, type.toString());
+		IO.writeBigInteger(ds, mod);
+		paillier.write(ds);
+		IO.writeBigInteger(ds, kInv);
+	}
 }

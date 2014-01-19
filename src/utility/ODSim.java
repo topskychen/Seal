@@ -23,6 +23,7 @@ import utility.EncFun.ENC_TYPE;
  */
 public class ODSim extends Simulator {
 
+	String fileName = "./data/OD1000";
 	/**
 	 * @param trustedRegister
 	 * @param dataOwners
@@ -44,9 +45,8 @@ public class ODSim extends Simulator {
 		serviceProvider 	= new ServiceProvider();
 		client 				= new Client();
 		TrustedRegister.sk 	= AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier);
+		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, fileName);
 		serviceProvider.specifyIndex(INDEX_TYPE.BTree);
-
 	}
 	
 	
@@ -58,14 +58,14 @@ public class ODSim extends Simulator {
 	public void run() {
 		// TODO Auto-generated method stub
 		// Data owners prepare data 
-		DataOwner.initOneDim(dataOwners, "./data/test");
+		DataOwner.initOneDim(dataOwners, fileName);
 		
 		// Service Provider collects data.
 		// Currently, the index will not be stored to file.
 		serviceProvider.collectDataOnce(dataOwners);		
 		// Client Make queries
 //		client
-		client.rangeQuery(serviceProvider, "./data/test");
+		client.rangeQuery(serviceProvider, fileName);
 	}
 
 	/**
@@ -73,6 +73,9 @@ public class ODSim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		if (args.length != 0) {
+			System.out.println(args[0]);
+		} else {}
 		ODSim odSim = new ODSim();
 		odSim.init();
 		odSim.run();

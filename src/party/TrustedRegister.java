@@ -3,13 +3,13 @@
  */
 package party;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.HashMap;
 
 import io.IO;
 import io.RW;
 import crypto.AES;
-import sun.org.mozilla.javascript.internal.ast.NewExpression;
 import utility.EncFun;
 import utility.EncFun.ENC_TYPE;
 import utility.Utility;
@@ -23,7 +23,7 @@ public class TrustedRegister {
 	public static byte[] sk = null;
 	public static EncFun encFun = null;
 	public static ENC_TYPE type;
-	public static BigInteger mod = BigInteger.ONE.shiftLeft(184 * 8 + 128 + 24);
+	public static BigInteger mod = BigInteger.ONE.shiftLeft(184 * 8 + 24 + 128 + 24);
 	public static HashMap<Integer, BigInteger> secretShares = new HashMap<>();
 	public static BigInteger totalSS =  null;
 	
@@ -35,12 +35,18 @@ public class TrustedRegister {
 	 */
 	public static BigInteger genSecretShare(int id, RW value) {
 		byte[] content = IO.concat(new Integer(id).toString().getBytes(), IO.toBytes(value));
-		return Utility.getBI(AES.encrypt(sk, content));
+		return Utility.getBI(AES.encrypt(sk, content)).mod(mod);
 	}
 	
-	public static void specifyEncFun(ENC_TYPE type) {
+	public static void specifyEncFun(ENC_TYPE type, String fileName) {
 		TrustedRegister.type = type;
-		TrustedRegister.encFun = new EncFun(type, mod);
+		File file = new File(fileName + ".st");
+		if (file.exists()) {
+			TrustedRegister.encFun = new EncFun(file);
+		} else {
+			TrustedRegister.encFun = new EncFun(type, mod);
+			IO.toFile(TrustedRegister.encFun, file);
+		}
 	}
 	
 	public static void addSecretShare(int id, BigInteger secretShare) {

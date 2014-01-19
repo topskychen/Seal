@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import crypto.Constants;
 import utility.Tuple;
 
 /**
@@ -106,6 +107,7 @@ public class DataOwner implements RW{
 	public static void initOneDim(ArrayList<DataOwner> dataOwners, String fileName) {
 		File doFile = new File(fileName + ".do");
 		TrustedRegister.secretShares.clear();
+		TrustedRegister.totalSS = BigInteger.ZERO;
 		if (doFile.exists()) {
 			try {
 				DataInputStream ds = new DataInputStream(new BufferedInputStream(new FileInputStream(doFile)));
@@ -113,8 +115,8 @@ public class DataOwner implements RW{
 				for (int i = 0; i < size; i ++) {
 					DataOwner dataOwner = new DataOwner(i); dataOwner.read(ds);
 					dataOwners.add(dataOwner);
-					System.out.println(dataOwner.entries.get(0).getSeal().getCnt(null));
 					TrustedRegister.addSecretShare(i, dataOwner.secretShare);
+					TrustedRegister.totalSS = TrustedRegister.totalSS.add(dataOwner.secretShare);
 				}
 				ds.close();
 			} catch (FileNotFoundException e) {
@@ -133,10 +135,11 @@ public class DataOwner implements RW{
 					DataOwner dataOwner = new DataOwner(i);
 					dataOwner.addValue(values.get(i));
 					dataOwner.setSecretShare(TrustedRegister.genSecretShare(i, dataOwner.getFirstEntry().getTuple()));
+//					dataOwner.setSecretShare(Constants.PRIME_P);
 					dataOwner.prepareSeals();
 					dataOwner.write(ds);
 					dataOwners.add(dataOwner);
-					System.out.println(dataOwner.entries.get(0).getSeal().getCnt(null));
+					TrustedRegister.totalSS = TrustedRegister.totalSS.add(dataOwner.secretShare);
 				}
 				ds.close();
 			} catch (FileNotFoundException e) {
@@ -187,8 +190,8 @@ public class DataOwner implements RW{
 		if (entries == null) IO.writeInt(ds, 0);
 		else {
 			IO.writeInt(ds, entries.size());
-			for (int i = 0; i < entries.size(); i ++) {
-				entries.get(i).write(ds);
+			for (Entry e : entries) {
+				e.write(ds);
 			}
 		}
 		IO.writeBigInteger(ds, secretShare);

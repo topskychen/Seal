@@ -24,23 +24,39 @@ public class VOCell implements RW{
 	ArrayList<Integer> 	ids 		= null;
 	ArrayList<Tuple>	tuples 		= null;
 	Entry 				entry		= null;
+	BigInteger 			ps 			= null;
 	
+	/**
+	 * Get the partial secret share.
+	 * @return
+	 */
+	public BigInteger getPartialSS() {
+		return ps;
+	}
+	
+	/**
+	 * See algorithm in paper.
+	 * @param query
+	 * @return
+	 */
 	public boolean verify(Query query) {
 		//TODO
 		BigInteger random = Constants.PRIME_Q.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())
 			);
 		if (query.inRange(entry.getLB(), entry.getHB())) {
-			BigInteger ps = BigInteger.ZERO;
+			ps = BigInteger.ZERO;
 			for (int i = 0; i < ids.size(); i ++) {
 				BigInteger secretShare = TrustedRegister.genSecretShare(ids.get(i), tuples.get(i));
-				ps = ps.add(secretShare).mod(TrustedRegister.mod);
+				ps = ps.add(secretShare);
 			}
-			BigInteger rs = entry.getSeal().getSecretShare(random).mod(TrustedRegister.mod);
+			BigInteger rs = entry.getSeal().getSecretShare(random);
 			if (!ps.equals(rs)) return false;
+		} else {
+			ps = entry.getSeal().getSecretShare(random);
 		}
-		int[] comPre = Utility.comPre(entry.getLowVal(), entry.getHiVal(), 4);
-		Utility.pi22(comPre[0]);
+		int[] comPre = entry.getComPre();
+//		Utility.pi22(comPre[0]);
 		BigInteger cnt = entry.getSeal().getCnt(random);
 		BigInteger dig = entry.getSeal().getDig(random, comPre[1]);
 		if (!Utility.getBI(Hasher.hashBytes(new Integer(comPre[0]).toString().getBytes())).multiply(cnt).equals(dig)) {
@@ -106,4 +122,9 @@ public class VOCell implements RW{
 		entry.write(ds);
 	}
 
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(entry);
+		return sb.toString();
+	}
 }

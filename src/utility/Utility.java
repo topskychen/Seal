@@ -36,18 +36,19 @@ public class Utility {
 	 * @param d
 	 * @return
 	 */
-	public static int[] comPre(int x, int y, int d) { 
+	public static int[] comPre(int[] x, int[] y, int d) { 
 //		pi22(x);
 //		pi22(y);
-		int i, z = 0;
-		for (i = 0; i < 32 / d; i ++) {
+		int i, z = 0, b = Math.min(x[1], y[1]);
+		for (i = 0; i < b + 1; i ++) {
 //			System.out.println(Long.toBinaryString(mask));
-			int shift = (32 / d - i - 1);
-			if ((x >> (shift * d)) != (y >> (shift * d))) {
+			int shiftx = (x[1] - i);
+			int shifty = (y[1] - i);
+			if ((x[0] >> (shiftx * d)) != (y[0] >> (shifty * d))) {
 				break;
 			} else {
 //				System.out.println(Long.toBinaryString(lx & mask));
-				z = x >> (i * d);
+				z = x[0] >> (shiftx * d);
 			}
 		}
 		return new int[]{z, i - 1};

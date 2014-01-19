@@ -71,5 +71,15 @@ public class Point implements RW{
 		// TODO Auto-generated method stub
 		IO.writeIntArrays(ds, coords);
 	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer("[");
+		for (int i = 0; i < getDim(); i ++) {
+			if (i != 0) sb.append(", ");
+			else sb.append(getCoord(i));
+		}
+		sb.append(']');
+		return sb.toString();
+	}
 
 }
