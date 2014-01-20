@@ -54,7 +54,13 @@ public class ODGenerator {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		new ODGenerator(10, "./data/OD10");
+		if (args.length == 2) {
+			new ODGenerator(Integer.parseInt(args[0]), args[1]);
+		} else if (args.length == 0) {
+			new ODGenerator(10, "./data/OD10");
+		} else {
+			System.out.println("Error!");
+		}
 	}
 
 }

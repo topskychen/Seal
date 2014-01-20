@@ -51,7 +51,10 @@ public class VOCell implements RW{
 				ps = ps.add(secretShare);
 			}
 			BigInteger rs = entry.getSeal().getSecretShare(random);
-			if (!ps.equals(rs)) return false;
+			if (!ps.equals(rs)) { 
+//				System.out.println("x");
+				return false;
+			}
 		} else {
 			ps = entry.getSeal().getSecretShare(random);
 		}
@@ -91,11 +94,11 @@ public class VOCell implements RW{
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
 		int size = IO.readInt(ds);
-		ids = new ArrayList<>(size);
+		ids = new ArrayList<Integer>(size);
 		for (int i = 0; i < size; i ++) {
 			ids.add(IO.readInt(ds));
 		}
-		tuples = new ArrayList<>(size);
+		tuples = new ArrayList<Tuple>(size);
 		for (int i = 0; i < size; i ++) {
 			Tuple tuple = new Tuple();
 			tuple.read(ds);
@@ -124,6 +127,12 @@ public class VOCell implements RW{
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
+		if (ids != null) {
+			sb.append("[ans] = " + ids.size());
+		} else {
+			sb.append("[no]");
+		}
+		sb.append("\n");
 		sb.append(entry);
 		return sb.toString();
 	}

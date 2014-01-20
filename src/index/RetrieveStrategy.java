@@ -32,8 +32,8 @@ public class RetrieveStrategy implements IQueryStrategy {
 	 */
 	public RetrieveStrategy() {
 		// TODO Auto-generated constructor stub
-		ids = new ArrayList<>();
-		tuples = new ArrayList<>();
+		ids = new ArrayList<Integer>();
+		tuples = new ArrayList<Tuple>();
 	}
 
 	/* (non-Javadoc)

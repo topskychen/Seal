@@ -38,6 +38,7 @@ public class ServiceProvider {
 		}
 		
 		index.buildIndex(entries);
+		System.out.println("Index prepared!");
 	}
 	
 	public VO rangeQuery(Query query) {

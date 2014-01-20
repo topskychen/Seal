@@ -89,7 +89,8 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	class RangeQueryStrategy implements IQueryStrategy {
 
 		private ArrayList<BinaryTree> toVisit = new ArrayList<BinaryTree>();
-		private ArrayList<BinaryTree> trees = new ArrayList<BinaryTree>();
+		private ArrayList<BinaryTree> inRange = new ArrayList<BinaryTree>();
+		private ArrayList<BinaryTree> outRange = new ArrayList<BinaryTree>();
 		private int lBound, rBound;
 		
 		
@@ -100,11 +101,14 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		}
 
 		public ArrayList<VOCell> getVOCells() {
-			ArrayList<VOCell> voCells = new ArrayList<>();
-			for (BinaryTree tree : trees) {
+			ArrayList<VOCell> voCells = new ArrayList<VOCell>();
+			for (BinaryTree tree : inRange) {
 				RetrieveStrategy qs = new RetrieveStrategy();
 				queryStrategy(tree, qs);
 				voCells.add(new VOCell(qs.getIds(), qs.getTuples(), (Entry)tree.getValue()));
+			}
+			for (BinaryTree tree: outRange) {
+				voCells.add(new VOCell(null, null, (Entry) tree.getValue()));
 			}
 			return voCells;
 		}
@@ -134,10 +138,10 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		boolean visitData(BinaryTree tree) {
 			Entry data = (Entry) tree.getValue(); 
 			if (data.getLowVal() >= lBound && data.getHiVal() <= rBound) {
-				trees.add(tree);
+				inRange.add(tree);
 				return false;
 			} else if (data.getLowVal() > rBound || data.getHiVal() < lBound) {
-				trees.add(tree);
+				outRange.add(tree);
 				return false;
 			}
 			return true;

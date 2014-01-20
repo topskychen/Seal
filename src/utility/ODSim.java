@@ -23,7 +23,7 @@ import utility.EncFun.ENC_TYPE;
  */
 public class ODSim extends Simulator {
 
-	String fileName = "./data/OD1000";
+	String fileName = "./data/OD100000";
 	/**
 	 * @param trustedRegister
 	 * @param dataOwners
@@ -34,6 +34,10 @@ public class ODSim extends Simulator {
 		super();
 		// TODO Auto-generated constructor stub
 	}
+	
+	public ODSim(String fileName) {
+		this.fileName = fileName;
+	}
 
 	/* (non-Javadoc)
 	 * @see utility.Simulator#init()
@@ -41,7 +45,7 @@ public class ODSim extends Simulator {
 	@Override
 	public void init() {
 		// TODO Auto-generated method stub
-		dataOwners 			= new ArrayList<>();
+		dataOwners 			= new ArrayList<DataOwner>();
 		serviceProvider 	= new ServiceProvider();
 		client 				= new Client();
 		TrustedRegister.sk 	= AES.getSampleKey();
@@ -73,12 +77,14 @@ public class ODSim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		ODSim odSim = null;
 		if (args.length != 0) {
-			System.out.println(args[0]);
-		} else {}
-		ODSim odSim = new ODSim();
+			odSim = new ODSim(args[0]);
+		} else {
+			odSim = new ODSim();
+		}
 		odSim.init();
-		odSim.run();
+		odSim.run();			
 	}
 
 }

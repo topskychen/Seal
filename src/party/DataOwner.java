@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import multithread.MultiThread;
+import multithread.Task;
 import crypto.Constants;
 import utility.Tuple;
 
@@ -34,6 +36,10 @@ public class DataOwner implements RW{
 	private ArrayList<Entry> 	entries 		= null;
 	private Iterator<Entry> 	iter 			= null;
 	private BigInteger			secretShare 	= null;
+	
+	public int getId() {
+		return id;
+	}
 	
 	/**
 	 * Prepare Seals.
@@ -128,18 +134,19 @@ public class DataOwner implements RW{
 			}
 		} else {
 			try {
-				DataOutputStream ds = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(doFile)));
 				ArrayList<Integer> values = loadValuesFromFile(fileName + ".pl");
-				IO.writeInt(ds, values.size());
+				BuildTask[] tasks = new BuildTask[values.size()]; 
 				for (int i = 0; i < values.size(); i ++) {
-					DataOwner dataOwner = new DataOwner(i);
-					dataOwner.addValue(values.get(i));
-					dataOwner.setSecretShare(TrustedRegister.genSecretShare(i, dataOwner.getFirstEntry().getTuple()));
-//					dataOwner.setSecretShare(Constants.PRIME_P);
-					dataOwner.prepareSeals();
-					dataOwner.write(ds);
-					dataOwners.add(dataOwner);
-					TrustedRegister.totalSS = TrustedRegister.totalSS.add(dataOwner.secretShare);
+					tasks[i] = new BuildTask(i, values.get(i));
+				}
+				new MultiThread(tasks, utility.Constants.THREAD_NUM, true, tasks.length / 50).run();
+				DataOutputStream ds = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(doFile)));
+				IO.writeInt(ds, values.size());
+				for (int i = 0; i < tasks.length; i ++) {
+					DataOwner owner = tasks[i].getOwner();
+					dataOwners.add(owner);
+					owner.write(ds);
+					TrustedRegister.totalSS = TrustedRegister.totalSS.add(owner.secretShare);					
 				}
 				ds.close();
 			} catch (FileNotFoundException e) {
@@ -154,7 +161,7 @@ public class DataOwner implements RW{
 	
 	public static ArrayList<Integer> loadValuesFromFile(String file) {
 		try {
-			ArrayList<Integer> data = new ArrayList<>();
+			ArrayList<Integer> data = new ArrayList<Integer>();
 			Scanner in = new Scanner(new File(file));
 			while(in.hasNext()) {
 				data.add(Integer.parseInt(in.nextLine()));
@@ -196,6 +203,30 @@ public class DataOwner implements RW{
 		}
 		IO.writeBigInteger(ds, secretShare);
 	}
-	
+}
 
+class BuildTask extends Task{
+	DataOwner 	dataOwner 	= null;
+	int 		value 		= -1;
+	
+	public BuildTask(int id, int value) {
+		// TODO Auto-generated constructor stub
+		this.dataOwner 	= new DataOwner(id);
+		this.value 		= value;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		dataOwner.addValue(value);
+		dataOwner.setSecretShare(TrustedRegister.genSecretShare(dataOwner.getId(), dataOwner.getFirstEntry().getTuple()));
+//		dataOwner.setSecretShare(Constants.PRIME_P);
+		dataOwner.prepareSeals();
+//		dataOwner.write(ds);
+//		dataOwners.add(dataOwner);
+	} 
+	
+	public DataOwner getOwner() {
+		return dataOwner;
+	}
 }

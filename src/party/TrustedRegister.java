@@ -10,6 +10,7 @@ import java.util.HashMap;
 import io.IO;
 import io.RW;
 import crypto.AES;
+import utility.Constants;
 import utility.EncFun;
 import utility.EncFun.ENC_TYPE;
 import utility.Utility;
@@ -24,7 +25,7 @@ public class TrustedRegister {
 	public static EncFun encFun = null;
 	public static ENC_TYPE type;
 	public static BigInteger mod = BigInteger.ONE.shiftLeft(184 * 8 + 24 + 128 + 24);
-	public static HashMap<Integer, BigInteger> secretShares = new HashMap<>();
+	public static HashMap<Integer, BigInteger> secretShares = new HashMap<Integer, BigInteger>();
 	public static BigInteger totalSS =  null;
 	
 	/**
@@ -35,7 +36,7 @@ public class TrustedRegister {
 	 */
 	public static BigInteger genSecretShare(int id, RW value) {
 		byte[] content = IO.concat(new Integer(id).toString().getBytes(), IO.toBytes(value));
-		return Utility.getBI(AES.encrypt(sk, content)).mod(mod);
+		return Utility.getBI(AES.encrypt(sk, content)).and(Constants.BITS128);
 	}
 	
 	public static void specifyEncFun(ENC_TYPE type, String fileName) {

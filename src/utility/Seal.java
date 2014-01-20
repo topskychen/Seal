@@ -84,19 +84,19 @@ public class Seal implements RW{
 	
 	public BigInteger getSecretShare(BigInteger random) {
 		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
-		BigInteger ss = content.shiftRight((160 + 24) * 8 + 24).and(Utility.getBits1(128 + 24));
+		BigInteger ss = content.shiftRight((160 + 24) * 8 + 24).and(utility.Constants.BITS152);
 		return ss;
 	}
 	
 	public BigInteger getCnt(BigInteger random) {
 		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
-		BigInteger cnt = content.shiftRight((160 + 24) * 8).and(Utility.getBits1(24));
+		BigInteger cnt = content.shiftRight((160 + 24) * 8).and(utility.Constants.BITS24);
 		return cnt;
 	}
 	
 	public BigInteger getDig(BigInteger random, int p) {
 		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
-		BigInteger dig = content.shiftRight((160 + 24) * p).and(Utility.getBits1(160 + 24));
+		BigInteger dig = content.shiftRight((160 + 24) * p).and(utility.Constants.BITS184);
 		return dig;
 	}
 	
@@ -137,5 +137,9 @@ public class Seal implements RW{
 		sb.append("[" + getSecretShare(null) + ", " + getCnt(null)  + "]");
 		return sb.toString();
 	}
+	
+	public BigInteger getContent() {
+		return content;
+	} 
 
 }

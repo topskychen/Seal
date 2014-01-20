@@ -21,6 +21,7 @@ import timer.Timer;
  */
 public class VO implements RW{
 
+	boolean 			verbose			= false;
 	private Timer 		timer 			= null;
 	private double 		prepareTime 	= -1;
 	private double 		verifyTime 		= -1;
@@ -115,11 +116,11 @@ public class VO implements RW{
 		sb.append("PrepareTime: " + prepareTime + "ms\n");
 		sb.append("VerifyTime: " + verifyTime + "ms\n");
 		sb.append("VOSize: " + voSize + "bytes, " + voSize / 1024.0 + " KB\n");
-//		if(!precise){
-//			for (int i = 0; i < voCells.size(); i ++) {
-//				sb.append((i + 1)  + " [ " + voCells.get(i).toString() + " ] : " + Data.TYPE_NAMES[voCells.get(i).voType] + "\n");
-//			}
-//		}
+		if(verbose){
+			for (int i = 0; i < voCells.size(); i ++) {
+				sb.append(voCells.get(i));
+			}
+		}
 		return sb.toString();
 	}
 
