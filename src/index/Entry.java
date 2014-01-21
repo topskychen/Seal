@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 
+import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
 import utility.Constants;
@@ -20,22 +21,14 @@ import utility.Utility;
  */
 public class Entry implements RW{
 
-	private int		id 		= -1;
 	private Tuple 	tuple 	= null;
 	private Seal 	seal 	= null;
 	private int 	no		= 0;
-	private int[] 	comPre	= null;
 
 	public Entry (Entry e) {
-		this.id 	= e.id;
 		this.tuple 	= new Tuple(e.getTuple());
 		this.seal 	= new Seal(e.getSeal());
 		this.no		= e.no;
-		this.comPre	= e.getComPre();
-	}
-	
-	public int[] getComPre() {
-		return comPre;
 	}
 	
 	/**
@@ -47,20 +40,30 @@ public class Entry implements RW{
 		tuple = new Tuple(a.tuple, b.tuple);
 		seal = new Seal(a.seal, b.seal);
 		no = a.no + b.no;
-		comPre = Utility.comPre(a.comPre, b.comPre, Constants.D);
+	}
+	
+	public Entry(int id, Entry[] entries) {
+		Tuple[] tuples = new Tuple[entries.length];
+		Seal[]	seals = new Seal[entries.length];
+		no = 0;
+		for (int i = 0; i < entries.length; i ++) {
+			tuples[i] = entries[i].getTuple();
+			seals[i] = entries[i].getSeal();
+			no += entries[i].no;
+		}
+		tuple = new Tuple(id, tuples);
+		seal = new Seal(seals);
 	}
 	
 	/**
-	 * Construct an entry.
+	 * Construct an entry for one dim.
 	 * @param tuple
 	 * @param seal
 	 */
-	public Entry(int id, Tuple tuple, Seal seal) {
-		this.id 	= id;
+	public Entry(Tuple tuple, Seal seal) {
 		this.tuple 	= tuple;
 		this.seal 	= seal;
 		this.no 	= 1;
-		this.comPre	= new int[]{tuple.getLowPoint().getCoord(0), Constants.L};
 	}
 	
 	/**
@@ -69,10 +72,6 @@ public class Entry implements RW{
 	 */
 	public int getNO() {
 		return no;
-	}
-	
-	public int getId() {
-		return id;
 	}
 	
 	/**
@@ -118,8 +117,7 @@ public class Entry implements RW{
 	/**
 	 * 
 	 */
-	public Entry(int id) {
-		this.id = id;
+	public Entry() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -135,13 +133,11 @@ public class Entry implements RW{
 	@Override
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
-		id = IO.readInt(ds);
 		tuple = new Tuple();
 		tuple.read(ds);
 		seal = new Seal();
 		seal.read(ds);
 		no = IO.readInt(ds);
-		comPre = IO.readIntArrays(ds);
 	}
 
 
@@ -149,11 +145,9 @@ public class Entry implements RW{
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
-		IO.writeInt(ds, id);
 		tuple.write(ds);
 		seal.write(ds);
 		IO.writeInt(ds, no);
-		IO.writeIntArrays(ds, comPre);
 	}
 	
 	public Point getLB() {
@@ -184,11 +178,9 @@ public class Entry implements RW{
 	
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("id : " + id + "\n");
 		sb.append("tuple : " + tuple + "\n");
 		sb.append("seal : " + seal + "\n");
 		sb.append("no : " + no + "\n");
-		sb.append("comPre : " + comPre[0] + ", " + comPre[1] + "\n");
 		return sb.toString();
 	}
 }

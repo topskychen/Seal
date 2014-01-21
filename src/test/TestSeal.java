@@ -4,6 +4,8 @@
 package test;
 
 import static org.junit.Assert.*;
+import index.Point;
+import index.SearchIndex.INDEX_TYPE;
 
 import java.math.BigInteger;
 
@@ -16,6 +18,7 @@ import crypto.Hasher;
 import party.TrustedRegister;
 import timer.Timer;
 import utility.EncFun.ENC_TYPE;
+import utility.Constants;
 import utility.Seal;
 import utility.Tuple;
 import utility.Utility;
@@ -26,6 +29,8 @@ import utility.Utility;
  */
 public class TestSeal {
 
+	static Tuple tuple1 = new Tuple(1, new Point(128), 0, null, INDEX_TYPE.BTree);
+	static Tuple tuple2 = new Tuple(2, new Point(64), 0, null, INDEX_TYPE.BTree);
 	static Seal seal1 = null, seal2 = null;
 	static Timer timer = new Timer();
 	
@@ -33,8 +38,8 @@ public class TestSeal {
 	public static void init() {
 		TrustedRegister.sk = AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, "./data/test");
-		seal1 = new Seal(new Tuple(128, 0), TrustedRegister.genSecretShare(1, new Tuple(128, 0)));
-		seal2 = new Seal(new Tuple(64, 0), TrustedRegister.genSecretShare(2, new Tuple(64, 0)));
+		seal1 = new Seal(tuple1, TrustedRegister.genSecretShare(tuple1));
+		seal2 = new Seal(tuple2, TrustedRegister.genSecretShare(tuple2));
 	
 	}
 	
@@ -50,15 +55,16 @@ public class TestSeal {
 	@Test
 	public void testSecretShare() {
 		Seal seal3 = new Seal(seal1, seal2);
-		assertEquals(seal3.getSecretShare(null), TrustedRegister.genSecretShare(1, new Tuple(128, 0)).add(TrustedRegister.genSecretShare(2, new Tuple(64, 0))));
+		assertEquals(seal3.getSecretShare(null), TrustedRegister.genSecretShare(tuple1).add(TrustedRegister.genSecretShare(tuple2)));
 	}
 	
 	@Test
 	public void testDig() {
+		Tuple tuple3 = new Tuple(tuple1, tuple2);
 		Seal seal3 = new Seal(seal1, seal2);
-		int[] comPre = Utility.comPre(new int[]{128, 7}, new int[]{64, 7}, 4);
-		BigInteger dig = Utility.getBI(Hasher.hashBytes(new Integer(comPre[0]).toString().getBytes())).multiply(new BigInteger("2"));
-		assertEquals(dig, seal3.getDig(null, comPre[1]));
+		int[] comPre = tuple3.getComPre();
+		BigInteger dig = Utility.getBI(Hasher.hashBytes(new Integer(comPre[comPre.length - 1]).toString().getBytes())).multiply(new BigInteger("2"));
+		assertEquals(dig, seal3.getDig(null, Constants.L - comPre.length));
 	}
 	
 	@Test
@@ -67,8 +73,8 @@ public class TestSeal {
 		Seal[] seals = new Seal[num];
 		BigInteger ps = BigInteger.ZERO;
 		for (int i = 0; i < num; i ++) {
-			seals[i] = new Seal(new Tuple(i, 0), TrustedRegister.genSecretShare(i, new Tuple(i, 0)));
-			ps = ps.add(TrustedRegister.genSecretShare(i, new Tuple(i, 0)));
+			seals[i] = new Seal(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree), TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
+			ps = ps.add(TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
 		}
 		timer.reset();
 		Seal sealA = seals[0];
@@ -87,8 +93,8 @@ public class TestSeal {
 		Seal[] seals = new Seal[num];
 		BigInteger ps = BigInteger.ZERO;
 		for (int i = 0; i < num; i ++) {
-			seals[i] = new Seal(new Tuple(i, 0), TrustedRegister.genSecretShare(i, new Tuple(i, 0)));
-			ps = ps.add(TrustedRegister.genSecretShare(i, new Tuple(i, 0)));
+			seals[i] = new Seal(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree), TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
+			ps = ps.add(TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
 		}
 		timer.reset();
 		while(num > 1) {

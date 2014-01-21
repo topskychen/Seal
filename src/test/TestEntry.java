@@ -9,6 +9,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import index.Entry;
+import index.Point;
+import index.SearchIndex.INDEX_TYPE;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,7 +29,6 @@ import utility.EncFun.ENC_TYPE;
 public class TestEntry {
 
 	static ArrayList<Entry> entries = null;
-	static ArrayList<Integer> ids = null;
 	static ArrayList<Tuple> tuples = null;
 	
 	@BeforeClass
@@ -36,13 +37,11 @@ public class TestEntry {
 		TrustedRegister.sk = AES.getSampleKey();
 		int num = 32;
 		entries = new ArrayList<>();
-		ids = new ArrayList<>();
 		tuples = new ArrayList<>();
 		for (int i = 0; i < num; i ++) {
-			ids.add(i);
-			tuples.add(new Tuple(i, 0));
-			entries.add(new Entry(i, tuples.get(i), null));
-			BigInteger ss = TrustedRegister.genSecretShare(ids.get(i), tuples.get(i));
+			tuples.add(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree));
+			entries.add(new Entry(tuples.get(i), null));
+			BigInteger ss = TrustedRegister.genSecretShare(tuples.get(i));
 //			System.out.println(ss);
 			entries.get(i).prepareSeal(ss);
 //			System.out.println(entries.get(i).getSeal().getSecretShare(null));
@@ -55,8 +54,8 @@ public class TestEntry {
 		Entry e1 = entries.get(0);
 		Entry e2 = entries.get(1);
 		Entry e3 = new Entry(e1, e2);
-		BigInteger ss1 = TrustedRegister.genSecretShare(ids.get(0), tuples.get(0));
-		BigInteger ss2 = TrustedRegister.genSecretShare(ids.get(1), tuples.get(1));
+		BigInteger ss1 = TrustedRegister.genSecretShare(tuples.get(0));
+		BigInteger ss2 = TrustedRegister.genSecretShare(tuples.get(1));
 		System.out.println(ss1.add(ss2));
 		System.out.println(e3.getSeal().getSecretShare(null));
 		assertEquals(ss1.add(ss2), e3.getSeal().getSecretShare(null));
@@ -93,14 +92,14 @@ public class TestEntry {
 	@Test
 	public void testSecretShare() {
 		BigInteger ps = BigInteger.ZERO;
-		for (int i = 0; i < ids.size(); i ++) {
-			BigInteger secretShare = TrustedRegister.genSecretShare(ids.get(i), tuples.get(i));
+		for (int i = 0; i < tuples.size(); i ++) {
+			BigInteger secretShare = TrustedRegister.genSecretShare(tuples.get(i));
 			ps = ps.add(secretShare);
 		}
 		Entry entry = buildTree();
 		BigInteger rs = entry.getSeal().getSecretShare(null);
-		System.out.println(ps);
-		System.out.println(rs);
+//		System.out.println(ps);
+//		System.out.println(rs);
 		assertEquals(ps, rs);
 	}
 

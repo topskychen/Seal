@@ -34,9 +34,8 @@ public class TrustedRegister {
 	 * @param value
 	 * @return
 	 */
-	public static BigInteger genSecretShare(int id, RW value) {
-		byte[] content = IO.concat(new Integer(id).toString().getBytes(), IO.toBytes(value));
-		return Utility.getBI(AES.encrypt(sk, content)).and(Constants.BITS128);
+	public static BigInteger genSecretShare(RW value) {
+		return Utility.getBI(AES.encrypt(sk, IO.toBytes(value))).and(Constants.BITS128);
 	}
 	
 	public static void specifyEncFun(ENC_TYPE type, String fileName) {

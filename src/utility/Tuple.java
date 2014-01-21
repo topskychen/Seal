@@ -4,9 +4,8 @@
 package utility;
 
 import index.Point;
+import index.SearchIndex.INDEX_TYPE;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
@@ -19,13 +18,16 @@ import io.RW;
  */
 public class Tuple implements RW{
 
-	
+	private int		id 		= -1;
 	private Point[] point 	= null;
 	private int[] 	tiStp	= null;
+	private int[] 	comPre	= null;
 	
 	public Tuple(Tuple tuple) {
-		point = tuple.point;
-		tiStp = tuple.tiStp;
+		id		= tuple.id;
+		point 	= tuple.point;
+		tiStp 	= tuple.tiStp;
+		comPre	= tuple.comPre;
 	}
 	
 	/**
@@ -38,10 +40,26 @@ public class Tuple implements RW{
 	public Tuple(Tuple t1, Tuple t2) {
 		this.point = new Point[2];
 		this.tiStp = new int[2];
-		this.point[0] = t1.getLowPoint();
-		this.point[1] = t2.getHiPoint();
-		this.tiStp[0] = t1.getLowTiStp();
-		this.tiStp[1] = t2.getHiTiStp();
+		this.point[0] = Point.lower(t1.getLowPoint(), t2.getLowPoint());
+		this.point[1] = Point.larger(t1.getHiPoint(), t2.getHiPoint());
+		this.tiStp[0] = Math.min(t1.getLowTiStp(), t2.getLowTiStp());
+		this.tiStp[1] = Math.max(t1.getHiTiStp(), t2.getHiTiStp());
+		this.comPre = Utility.comPre(t1.getComPre(), t2.getComPre());
+	}
+	
+	/**
+	 * Construct a tuple based on multi tuples.
+	 * @param tuples
+	 */
+	public Tuple(int id, Tuple[] tuples) {
+		this.id = id;
+		Tuple tuple = tuples[0];
+		for (int i = 1; i < tuples.length; i ++) {
+			tuple = new Tuple(tuple, tuples[i]);
+		}
+		point 	= tuple.point;
+		tiStp 	= tuple.tiStp;
+		comPre 	= tuple.comPre;
 	}
 	
 	/**
@@ -49,13 +67,24 @@ public class Tuple implements RW{
 	 * @param v
 	 * @param t
 	 */
-	public Tuple(int v, int t) {
+	public Tuple(int id, Point p, int t, int[] comPre, INDEX_TYPE type) {
+		this.id = id;
 		this.point = new Point[2];
 		this.tiStp = new int[2];
-		this.point[0] = new Point(v);
+		this.point[0] = p;
 		this.point[1] = this.point[0];
 		this.tiStp[0] = t;
 		this.tiStp[1] = t;
+		if (type == INDEX_TYPE.BTree) {
+			int value = p.getCoord(0);
+			this.comPre = new int[Constants.L];
+			for (int i = 0; i < Constants.L; i ++) {
+				int v = (value >> (Constants.D * i));
+				this.comPre[Constants.L - i - 1] = v;
+			}
+		} else if (type == INDEX_TYPE.RTree) {
+			this.comPre = comPre;
+		}
 	}
 	
 	/**
@@ -85,6 +114,14 @@ public class Tuple implements RW{
 		return point[0].getDim();
 	}
 	
+	public int[] getComPre() {
+		return comPre;
+	}
+	
+	public int getId() {
+		return id;
+	}
+	
 	/**
 	 * @param args
 	 */
@@ -96,6 +133,7 @@ public class Tuple implements RW{
 	@Override
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
+		id = IO.readInt(ds);
 		int num = IO.readInt(ds);
 		point = new Point[num];
 		for (int i = 0; i < num; i ++) {
@@ -103,24 +141,34 @@ public class Tuple implements RW{
 			point[i].read(ds);
 		}
 		tiStp = IO.readIntArrays(ds);
+		comPre = IO.readIntArrays(ds);
 	}
 
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
+		IO.writeInt(ds, id);
 		IO.writeInt(ds, point.length);
 		for (int i = 0; i < point.length; i ++) {
 			point[i].write(ds);			
 		}
 		IO.writeIntArrays(ds, tiStp);
+		IO.writeIntArrays(ds, comPre);
 	}
 	
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
+		sb.append("@" + id + "\n");
 		for (int i = 0; i < point.length; i ++) {
 			if (i != 0) sb.append(", ");
 			sb.append(point[i].toString());
 		}
+		sb.append("\n[");
+		for (int i = 0; i < comPre.length; i ++) {
+			if (i != 0) sb.append(", ");
+			sb.append(comPre[i]);
+		}
+		sb.append("]");
 		return sb.toString();
 	}
 

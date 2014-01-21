@@ -4,6 +4,9 @@
 package party;
 
 import index.Entry;
+import index.MemRTree;
+import index.Point;
+import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
 
@@ -82,10 +85,13 @@ public class DataOwner implements RW{
 	/**
 	 * Append a value to the data owner.
 	 * Remember to call the function prepareSeals afterward.
+	 * Pay attention, only the one-dim case is considered.
 	 * @param p
+	 * @param comPre
+	 * @param type
 	 */
-	public void addValue(int v) {
-		entries.add(new Entry(id, new Tuple(v, 0), null));
+	public void addValue(Point p, int[] comPre, INDEX_TYPE type) {
+		entries.add(new Entry(new Tuple(id, p, 0, comPre, type), null));
 	}
 	
 	public void clear() {
@@ -110,7 +116,7 @@ public class DataOwner implements RW{
 
 	}
 	
-	public static void initOneDim(ArrayList<DataOwner> dataOwners, String fileName) {
+	public static void initDim(ArrayList<DataOwner> dataOwners, String fileName, INDEX_TYPE type) {
 		File doFile = new File(fileName + ".do");
 		TrustedRegister.secretShares.clear();
 		TrustedRegister.totalSS = BigInteger.ZERO;
@@ -134,10 +140,33 @@ public class DataOwner implements RW{
 			}
 		} else {
 			try {
-				ArrayList<Integer> values = loadValuesFromFile(fileName + ".pl");
+				ArrayList<Point> values = loadPointsFromFile(fileName + ".pl");
+				MemRTree rtree = null;
+				if (type == INDEX_TYPE.RTree) {
+					rtree = MemRTree.createTree();
+					for (int i = 0; i < values.size(); i ++) {
+						rtree.insertData(null, new spatialindex.Point(values.get(i).doubleCoords()), i);
+					}
+				}
 				BuildTask[] tasks = new BuildTask[values.size()]; 
 				for (int i = 0; i < values.size(); i ++) {
-					tasks[i] = new BuildTask(i, values.get(i));
+					if (type == INDEX_TYPE.BTree) {
+						tasks[i] = new BuildTask(i, values.get(i), null, type);
+					} else if (type == INDEX_TYPE.RTree) {
+						ArrayList<Integer> path = new ArrayList<Integer>();
+						rtree.getPath(rtree.getRootId(), new spatialindex.Point(values.get(i).doubleCoords()), i, path);
+						int[] comPre = new int[utility.Constants.L];
+						for (int j = utility.Constants.L - 1; j >= 0; j --) {
+							if (j - utility.Constants.L +  path.size() < 0) {
+								comPre[j] = 0;
+							} else {
+								comPre[j] = path.get(j - utility.Constants.L +  path.size());
+							}
+						}
+						tasks[i] = new BuildTask(i, values.get(i), comPre, type);
+					} else if (type == INDEX_TYPE.QTree) {
+						//TODO
+					}
 				}
 				new MultiThread(tasks, utility.Constants.THREAD_NUM, true, tasks.length / 50).run();
 				DataOutputStream ds = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(doFile)));
@@ -159,12 +188,17 @@ public class DataOwner implements RW{
 		}
 	}
 	
-	public static ArrayList<Integer> loadValuesFromFile(String file) {
+	public static ArrayList<Point> loadPointsFromFile(String file) {
 		try {
-			ArrayList<Integer> data = new ArrayList<Integer>();
+			ArrayList<Point> data = new ArrayList<Point>();
 			Scanner in = new Scanner(new File(file));
 			while(in.hasNext()) {
-				data.add(Integer.parseInt(in.nextLine()));
+				String[] tks = in.nextLine().split(" ");
+				int[] coords = new int[tks.length];
+				for (int i = 0; i < coords.length; i ++) {
+					coords[i] = Integer.parseInt(tks[i]);
+				}
+				data.add(new Point(coords));
 			}
 			in.close();
 			return data;
@@ -183,7 +217,7 @@ public class DataOwner implements RW{
 		if (size != 0) {
 			entries = new ArrayList<Entry>();
 			for (int i = 0; i < size; i ++) {
-				Entry e = new Entry(-1); e.read(ds);
+				Entry e = new Entry(); e.read(ds);
 				entries.add(e);
 			}
 		}
@@ -207,19 +241,23 @@ public class DataOwner implements RW{
 
 class BuildTask extends Task{
 	DataOwner 	dataOwner 	= null;
-	int 		value 		= -1;
+	Point 		value 		= null;
+	int[] 		comPre		= null;
+	INDEX_TYPE 	type 		= null;
 	
-	public BuildTask(int id, int value) {
+	public BuildTask(int id, Point value, int[] comPre, INDEX_TYPE type) {
 		// TODO Auto-generated constructor stub
 		this.dataOwner 	= new DataOwner(id);
 		this.value 		= value;
+		this.comPre		= comPre;
+		this.type		= type;
 	}
 
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		dataOwner.addValue(value);
-		dataOwner.setSecretShare(TrustedRegister.genSecretShare(dataOwner.getId(), dataOwner.getFirstEntry().getTuple()));
+		dataOwner.addValue(value, comPre, type);
+		dataOwner.setSecretShare(TrustedRegister.genSecretShare(dataOwner.getFirstEntry().getTuple()));
 //		dataOwner.setSecretShare(Constants.PRIME_P);
 		dataOwner.prepareSeals();
 //		dataOwner.write(ds);

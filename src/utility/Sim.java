@@ -21,22 +21,32 @@ import utility.EncFun.ENC_TYPE;
  * @author chenqian
  *
  */
-public class ODSim extends Simulator {
+public class Sim extends Simulator {
 
-	String fileName = "./data/OD100000";
+	String 			fileName 	= "./data/TD10";
+	INDEX_TYPE 		type 		= INDEX_TYPE.RTree;
 	/**
 	 * @param trustedRegister
 	 * @param dataOwners
 	 * @param serviceProvider
 	 * @param client
 	 */
-	public ODSim() {
+	public Sim() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 	
-	public ODSim(String fileName) {
+	public Sim(String fileName, String type) {
 		this.fileName = fileName;
+		if (type.equalsIgnoreCase("btree")) {
+			this.type = INDEX_TYPE.BTree;
+		} else if (type.equalsIgnoreCase("rtree")) {
+			this.type = INDEX_TYPE.RTree;
+		} else if (type.equalsIgnoreCase("qtree")) {
+			this.type = INDEX_TYPE.QTree;
+		} else {
+			throw new IllegalStateException("No such tree choice.");
+		}
 	}
 
 	/* (non-Javadoc)
@@ -50,7 +60,7 @@ public class ODSim extends Simulator {
 		client 				= new Client();
 		TrustedRegister.sk 	= AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, fileName);
-		serviceProvider.specifyIndex(INDEX_TYPE.BTree);
+		serviceProvider.specifyIndex(this.type);
 	}
 	
 	
@@ -62,7 +72,7 @@ public class ODSim extends Simulator {
 	public void run() {
 		// TODO Auto-generated method stub
 		// Data owners prepare data 
-		DataOwner.initOneDim(dataOwners, fileName);
+		DataOwner.initDim(dataOwners, fileName, type);
 		
 		// Service Provider collects data.
 		// Currently, the index will not be stored to file.
@@ -77,14 +87,17 @@ public class ODSim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		ODSim odSim = null;
-		if (args.length != 0) {
-			odSim = new ODSim(args[0]);
+		Sim sim = null;
+		if (args.length == 2) {
+			sim = new Sim(args[0], args[1]);
+		} else if (args.length == 0){
+			sim = new Sim();
 		} else {
-			odSim = new ODSim();
+			System.out.println("The args should be [fileName treeType].");
+			return;
 		}
-		odSim.init();
-		odSim.run();			
+		sim.init();
+		sim.run();			
 	}
 
 }

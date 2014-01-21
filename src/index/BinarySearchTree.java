@@ -3,25 +3,16 @@
  */
 package index;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
 import utility.Query;
-import utility.VO;
+import utility.Tuple;
 import utility.VOCell;
 import memoryindex.BinaryTree;
 import memoryindex.IQueryStrategy;
-import multithread.MultiThread;
-import multithread.Task;
 
 /**
  * @author chenqian
@@ -51,7 +42,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	@Override
 	public ArrayList<VOCell> rangeQuery(Query query) {
 		// TODO Auto-generated method stub
-		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query.getLB().getCoord(0), query.getHB().getCoord(0));
+		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
 		queryStrategy(rangeQueryStrategy);
 		return rangeQueryStrategy.getVOCells();
 	}
@@ -88,16 +79,15 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		
 	class RangeQueryStrategy implements IQueryStrategy {
 
-		private ArrayList<BinaryTree> toVisit = new ArrayList<BinaryTree>();
-		private ArrayList<BinaryTree> inRange = new ArrayList<BinaryTree>();
-		private ArrayList<BinaryTree> outRange = new ArrayList<BinaryTree>();
-		private int lBound, rBound;
+		private ArrayList<BinaryTree> 	toVisit 	= new ArrayList<BinaryTree>();
+		private ArrayList<BinaryTree> 	inRange 	= new ArrayList<BinaryTree>();
+		private ArrayList<BinaryTree> 	outRange 	= new ArrayList<BinaryTree>();
+		private Query 					query 		= null;
 		
 		
-		public RangeQueryStrategy(int lBound, int rBound) {
+		public RangeQueryStrategy(Query query) {
 			super();
-			this.lBound = lBound;
-			this.rBound = rBound;
+			this.query = query;
 		}
 
 		public ArrayList<VOCell> getVOCells() {
@@ -105,10 +95,10 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 			for (BinaryTree tree : inRange) {
 				RetrieveStrategy qs = new RetrieveStrategy();
 				queryStrategy(tree, qs);
-				voCells.add(new VOCell(qs.getIds(), qs.getTuples(), (Entry)tree.getValue()));
+				voCells.add(new VOCell(qs.getTuples(), (Entry)tree.getValue()));
 			}
 			for (BinaryTree tree: outRange) {
-				voCells.add(new VOCell(null, null, (Entry) tree.getValue()));
+				voCells.add(new VOCell(null, (Entry) tree.getValue()));
 			}
 			return voCells;
 		}
@@ -137,16 +127,61 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		
 		boolean visitData(BinaryTree tree) {
 			Entry data = (Entry) tree.getValue(); 
-			if (data.getLowVal() >= lBound && data.getHiVal() <= rBound) {
+			Point p1 = new Point(data.getLowVal());
+			Point p2 = new Point(data.getHiVal());
+			if (query.inRange(p1, p2)) {
 				inRange.add(tree);
 				return false;
-			} else if (data.getLowVal() > rBound || data.getHiVal() < lBound) {
+			} else if (query.outRange(p1, p2)) {
 				outRange.add(tree);
 				return false;
 			}
 			return true;
 		}
 		
+	}
+	
+	class RetrieveStrategy implements IQueryStrategy {
+
+		private ArrayList<BinaryTree> 	toVisit = new ArrayList<BinaryTree>();
+		ArrayList<Tuple> 				tuples	= null;
+		
+		public ArrayList<Tuple> getTuples() {
+			return tuples;
+		}
+		
+		/**
+		 * 
+		 */
+		public RetrieveStrategy() {
+			// TODO Auto-generated constructor stub
+			tuples = new ArrayList<Tuple>();
+		}
+
+		/* (non-Javadoc)
+		 * @see memoryindex.IQueryStrategy#getNextEntry(memoryindex.BinaryTree, memoryindex.BinaryTree[], boolean[])
+		 */
+		@Override
+		public void getNextEntry(BinaryTree n, BinaryTree[] next, boolean[] hasNext) {
+			// TODO Auto-generated method stub
+			if (!n.isLeftChildEmpty()) {
+				toVisit.add(n.getLeftChild());
+			}
+			if (!n.isRightChildEmpty()) {
+				toVisit.add(n.getRightChild());
+			}
+			if (n.isLeaf()) {
+				Entry data = (Entry) n.getValue();
+				tuples.add(data.getTuple());
+			}
+			if (!toVisit.isEmpty()) {
+				next[0] = toVisit.remove(0);
+				hasNext[0] = true;
+			} else {
+				hasNext[0] = false;
+			}
+		}
+
 	}
 	
 	public void queryStrategy(BinaryTree tree, final IQueryStrategy qs) {

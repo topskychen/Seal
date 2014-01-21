@@ -14,7 +14,7 @@ import utility.VOCell;
  */
 public interface SearchIndex {
 
-	public static enum INDEX_TYPE {BTree, Rtree, Qtree};
+	public static enum INDEX_TYPE {BTree, RTree, QTree};
 
 	public abstract ArrayList<VOCell> rangeQuery(Query query);
 	public abstract void buildIndex(ArrayList<Entry> entries);

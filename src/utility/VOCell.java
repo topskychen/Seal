@@ -21,7 +21,6 @@ import io.RW;
  */
 public class VOCell implements RW{
 
-	ArrayList<Integer> 	ids 		= null;
 	ArrayList<Tuple>	tuples 		= null;
 	Entry 				entry		= null;
 	BigInteger 			ps 			= null;
@@ -46,8 +45,8 @@ public class VOCell implements RW{
 			);
 		if (query.inRange(entry.getLB(), entry.getHB())) {
 			ps = BigInteger.ZERO;
-			for (int i = 0; i < ids.size(); i ++) {
-				BigInteger secretShare = TrustedRegister.genSecretShare(ids.get(i), tuples.get(i));
+			for (int i = 0; i < tuples.size(); i ++) {
+				BigInteger secretShare = TrustedRegister.genSecretShare(tuples.get(i));
 				ps = ps.add(secretShare);
 			}
 			BigInteger rs = entry.getSeal().getSecretShare(random);
@@ -58,11 +57,11 @@ public class VOCell implements RW{
 		} else {
 			ps = entry.getSeal().getSecretShare(random);
 		}
-		int[] comPre = entry.getComPre();
+		int[] comPre = entry.getTuple().getComPre();
 //		Utility.pi22(comPre[0]);
 		BigInteger cnt = entry.getSeal().getCnt(random);
-		BigInteger dig = entry.getSeal().getDig(random, comPre[1]);
-		if (!Utility.getBI(Hasher.hashBytes(new Integer(comPre[0]).toString().getBytes())).multiply(cnt).equals(dig)) {
+		BigInteger dig = entry.getSeal().getDig(random, utility.Constants.L - comPre.length);
+		if (!Utility.getBI(Hasher.hashBytes(new Integer(comPre[comPre.length - 1]).toString().getBytes())).multiply(cnt).equals(dig)) {
 			return false;
 		}
 		return true;
@@ -70,9 +69,8 @@ public class VOCell implements RW{
 	/**
 	 * 
 	 */
-	public VOCell(ArrayList<Integer> ids, ArrayList<Tuple> tuples, Entry entry) {
+	public VOCell(ArrayList<Tuple> tuples, Entry entry) {
 		// TODO Auto-generated constructor stub
-		this.ids 	= ids;
 		this.entry 	= entry;
 		this.tuples = tuples;
 	}
@@ -94,30 +92,22 @@ public class VOCell implements RW{
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
 		int size = IO.readInt(ds);
-		ids = new ArrayList<Integer>(size);
-		for (int i = 0; i < size; i ++) {
-			ids.add(IO.readInt(ds));
-		}
 		tuples = new ArrayList<Tuple>(size);
 		for (int i = 0; i < size; i ++) {
 			Tuple tuple = new Tuple();
 			tuple.read(ds);
 			tuples.add(tuple);
 		}
-		entry = new Entry(-1);
+		entry = new Entry();
 		entry.read(ds);
 	}
 
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
-		if (ids == null) {
+		if (tuples == null) {
 			IO.writeInt(ds, 0);
 		} else {
-			IO.writeInt(ds, ids.size());
-			for (int i = 0; i < ids.size(); i ++) {
-				IO.writeInt(ds, ids.get(i));
-			}
 			for (Tuple tuple : tuples) {
 				tuple.write(ds);
 			}
@@ -127,8 +117,8 @@ public class VOCell implements RW{
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		if (ids != null) {
-			sb.append("[ans] = " + ids.size());
+		if (tuples != null) {
+			sb.append("[ans] = " + tuples.size());
 		} else {
 			sb.append("[no]");
 		}

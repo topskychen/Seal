@@ -28,30 +28,42 @@ public class Utility {
 	public static void pl22(int i) {
 		System.out.println(Integer.toBinaryString(i));
 	}
+//	
+//	/**
+//	 * Get the common prefix of two integers.
+//	 * @param x
+//	 * @param y
+//	 * @param d
+//	 * @return
+//	 */
+//	public static int[] comPre(int[] x, int[] y, int d) { 
+////		pi22(x);
+////		pi22(y);
+//		int i, z = 0, b = Math.min(x[1], y[1]);
+//		for (i = 0; i < b + 1; i ++) {
+////			System.out.println(Long.toBinaryString(mask));
+//			int shiftx = (x[1] - i);
+//			int shifty = (y[1] - i);
+//			if ((x[0] >> (shiftx * d)) != (y[0] >> (shifty * d))) {
+//				break;
+//			} else {
+////				System.out.println(Long.toBinaryString(lx & mask));
+//				z = x[0] >> (shiftx * d);
+//			}
+//		}
+//		return new int[]{z, i - 1};
+//	}
 	
-	/**
-	 * Get the common prefix of two integers.
-	 * @param x
-	 * @param y
-	 * @param d
-	 * @return
-	 */
-	public static int[] comPre(int[] x, int[] y, int d) { 
-//		pi22(x);
-//		pi22(y);
-		int i, z = 0, b = Math.min(x[1], y[1]);
-		for (i = 0; i < b + 1; i ++) {
-//			System.out.println(Long.toBinaryString(mask));
-			int shiftx = (x[1] - i);
-			int shifty = (y[1] - i);
-			if ((x[0] >> (shiftx * d)) != (y[0] >> (shifty * d))) {
+	public static int[] comPre(int[] cp1, int[] cp2) {
+		int i, len = Math.min(cp1.length, cp2.length);
+		for (i = 0; i < len; i ++) {
+			if (cp1[i] != cp2[i]) {
 				break;
-			} else {
-//				System.out.println(Long.toBinaryString(lx & mask));
-				z = x[0] >> (shiftx * d);
 			}
 		}
-		return new int[]{z, i - 1};
+		int[] comPre = new int[i];
+		System.arraycopy(cp1, 0, comPre, 0, i);
+		return comPre;
 	}
 	
 	/**

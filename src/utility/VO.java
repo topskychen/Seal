@@ -21,7 +21,7 @@ import timer.Timer;
  */
 public class VO implements RW{
 
-	boolean 			verbose			= false;
+	boolean 			verbose			= true;
 	private Timer 		timer 			= null;
 	private double 		prepareTime 	= -1;
 	private double 		verifyTime 		= -1;
@@ -53,7 +53,7 @@ public class VO implements RW{
 		for (VOCell voCell : voCells) {
 			if (!voCell.verify(query)) {
 				isVerify = false;
-				System.out.print("x");
+				System.out.print("x\n");
 				System.out.println(voCell);
 				break;
 			} else {

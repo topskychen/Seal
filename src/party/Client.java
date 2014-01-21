@@ -30,9 +30,16 @@ public class Client {
 			in = new Scanner(new File(fileName + ".qr"));
 			while(in.hasNext()) {
 				String[] tks = in.nextLine().split(" ");
-				if (tks.length != 2) {
-					//TODO
-				} else {
+				if (tks.length == 4) {
+					Query query = new Query(Integer.parseInt(tks[0]), Integer.parseInt(tks[1]), Integer.parseInt(tks[2]), Integer.parseInt(tks[3]));
+					VO vo = serviceProvider.rangeQuery(query);
+					if (!vo.verify(query)) {
+						System.out.println("Fail verify!");
+					} else {
+						System.out.println("Pass verify!");
+					}
+					System.out.println(vo.toString());
+				} else if (tks.length == 2){
 					Query query = new Query(Integer.parseInt(tks[0]), Integer.parseInt(tks[1]));
 					VO vo = serviceProvider.rangeQuery(query);
 					if (!vo.verify(query)) {

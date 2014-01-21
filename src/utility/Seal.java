@@ -11,6 +11,8 @@ import party.TrustedRegister;
 import utility.EncFun.ENC_TYPE;
 import crypto.Constants;
 import crypto.Hasher;
+import index.Point;
+import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
 
@@ -27,6 +29,13 @@ public class Seal implements RW{
 		cipher = seal.cipher;
 	}
 	
+	public Seal(Seal[] seals) {
+		//TODO
+		cipher = seals[0].cipher;
+		for (int i = 1; i < seals.length; i ++) {
+			cipher = fold(cipher, seals[i].cipher);
+		}
+	}
 	/**
 	 * Construction based on two children
 	 * @param a
@@ -61,25 +70,16 @@ public class Seal implements RW{
 		content = secretShare;
 		content = content.shiftLeft(24);
 		content = content.add(BigInteger.ONE);
-		if (tuple.getDim() == 1) {
-			// Index every four bits, total 8 segments, 24 bits padding
-			// 160 bits secret share, 24 bits counting
-			// total = (160 + 24) * 8 + 128 + 24
-			int value = tuple.getLowPoint().getCoord(0);
-			for (int i = 0; i < 8; i ++) {
-				content = content.shiftLeft(24 + 160);
-				int v = (value >> (4 * i));
-				byte[] hash = Hasher.hashBytes(new Integer(v).toString().getBytes());
-				content = content.xor(Utility.getBI(hash));
-			}
-			// Encrypt with Paillier or one-time pad
-			cipher = TrustedRegister.encFun.encrypt(content, Constants.PRIME_P);
-			
-		} else if (tuple.getDim() == 2) {
-			
-		} else {
-			throw new IllegalStateException("Dim " + tuple.getDim() + " is not supported yet.");
+//		int value = tuple.getLowPoint().getCoord(0);
+		int[] comPre = tuple.getComPre();
+		for (int i = 0; i < utility.Constants.L; i ++) {
+			content = content.shiftLeft(24 + 160);
+//			int v = (value >> (4 * i));
+			byte[] hash = Hasher.hashBytes(new Integer(comPre[i]).toString().getBytes());
+			content = content.xor(Utility.getBI(hash));
 		}
+		// Encrypt with Paillier or one-time pad
+		cipher = TrustedRegister.encFun.encrypt(content, Constants.PRIME_P);
 	}
 	
 	public BigInteger getSecretShare(BigInteger random) {
@@ -115,9 +115,7 @@ public class Seal implements RW{
 //		int value = 101, i = 0;
 //		int v = (int) (value & ((1L << (31 * 4 + 4)) - 1));
 //		System.out.println(Integer.toBinaryString(value));
-		Tuple tuple = new Tuple(1, 1);
-		Seal seal = new Seal(tuple, null);
-		System.out.println(seal.cipher.toString(2));
+		
 	}
 
 	@Override

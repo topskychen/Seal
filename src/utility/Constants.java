@@ -11,7 +11,7 @@ import java.math.BigInteger;
  */
 public class Constants {
 	public static int 			D 			= 4;
-	public static int 			L 			= 7;
+	public static int 			L 			= 8;
 	public static int 			THREAD_NUM 	= 4;
 	public static BigInteger 	BITS24 		= Utility.getBits1(24);
 	public static BigInteger 	BITS128 	= Utility.getBits1(128);

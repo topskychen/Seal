@@ -4,6 +4,8 @@
 package test;
 
 import static org.junit.Assert.*;
+import index.Point;
+import index.SearchIndex.INDEX_TYPE;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,7 +29,7 @@ public class TestTrustRegister {
 	
 	@Test
 	public void test() {
-		System.out.println(TrustedRegister.genSecretShare(1, new Tuple(1, 0)).bitLength());
+		System.out.println(TrustedRegister.genSecretShare(new Tuple(1, new Point(1), 0, null, INDEX_TYPE.BTree)).bitLength());
 	}
 
 }

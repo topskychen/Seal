@@ -3,18 +3,13 @@
  */
 package party;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 
-import memoryindex.BinaryTree;
-import memoryindex.IQueryStrategy;
 import utility.Query;
-import utility.Seal;
 import utility.VO;
-import utility.VOCell;
 import index.BinarySearchTree;
 import index.Entry;
-import index.RetrieveStrategy;
+import index.MemRTree;
 import index.SearchIndex;
 import index.SearchIndex.INDEX_TYPE;
 
@@ -34,9 +29,7 @@ public class ServiceProvider {
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
 			entries.add(dataOwners.get(i).getFirstEntry());
-//			System.out.println(entries.get(i));
 		}
-		
 		index.buildIndex(entries);
 		System.out.println("Index prepared!");
 	}
@@ -50,8 +43,13 @@ public class ServiceProvider {
 	public void specifyIndex(INDEX_TYPE type) {
 		if (type == INDEX_TYPE.BTree) {
 			index = new BinarySearchTree(Entry.class);
+		} else if (type == INDEX_TYPE.RTree) {
+			index = MemRTree.createTree();
+		} else if (type == INDEX_TYPE.QTree) {
+			
 		}
 	}
+	
 	
 	/**
 	 * 
