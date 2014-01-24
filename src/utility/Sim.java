@@ -23,7 +23,7 @@ import utility.EncFun.ENC_TYPE;
  */
 public class Sim extends Simulator {
 
-	String 			fileName 	= "./data/TD10";
+	String 			fileName 	= "./data/TD1000";
 	INDEX_TYPE 		type 		= INDEX_TYPE.RTree;
 	/**
 	 * @param trustedRegister

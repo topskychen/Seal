@@ -24,7 +24,7 @@ import storagemanager.RandomEvictionsBuffer;
  * @author chenqian
  *
  */
-public class TestRTreeInMem {
+public class TestMemRTree {
 
 	static ISpatialIndex tree = null;
 	/**

@@ -20,6 +20,7 @@ import storagemanager.IStorageManager;
 import storagemanager.MemoryStorageManager;
 import storagemanager.PropertySet;
 import storagemanager.RandomEvictionsBuffer;
+import utility.Constants;
 import utility.Query;
 import utility.Tuple;
 import utility.VOCell;
@@ -28,7 +29,7 @@ import utility.VOCell;
  * @author chenqian
  *
  */
-public class MemRTree extends RTree implements SearchIndex{
+public class MemRTree extends RTree implements SearchIndex {
 
 	HashMap<Integer, Entry> innerEntries 	= null;
 	HashMap<Integer, Entry> leafEntries 	= null;
@@ -45,8 +46,8 @@ public class MemRTree extends RTree implements SearchIndex{
 		IBuffer buffer = new RandomEvictionsBuffer(sm, 10, false);
 		PropertySet ps = new PropertySet();
 		ps.setProperty("FillFactor", new Double(0.7));
-		ps.setProperty("IndexCapacity", new Integer(5));
-		ps.setProperty("LeafCapacity", new Integer(5));
+		ps.setProperty("IndexCapacity", new Integer(Constants.F));
+		ps.setProperty("LeafCapacity", new Integer(Constants.F));
 		ps.setProperty("Dimension", new Integer(2));
 		return new MemRTree(ps, buffer);
 	}
@@ -62,19 +63,8 @@ public class MemRTree extends RTree implements SearchIndex{
 	@Override
 	public ArrayList<VOCell> rangeQuery(Query query) {
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
-		queryStrategy(rangeQueryStrategy);
+		queryStrategy(getRootId(), rangeQueryStrategy);
 		return rangeQueryStrategy.getVOCells(); 
-	}
-	
-	public void queryStrategy(int id, final IQueryStrategy qs) {
-
-		int[] next = new int[] {id};
-		while (true) {
-			Node n = readNode(next[0]);
-			boolean[] hasNext = new boolean[] {false};
-			qs.getNextEntry(n, next, hasNext);
-			if (hasNext[0] == false) break;
-		}
 	}
 
 	@Override
@@ -93,11 +83,12 @@ public class MemRTree extends RTree implements SearchIndex{
 		Entry[] entries = new Entry[node.getChildrenCount()];
 		for (int i = 0; i < node.getChildrenCount(); i ++) {
 			//TODO
+			int cId = node.getChildIdentifier(i);
 			if (node.getLevel() != 0) {
-				buildIndex(node.getChildIdentifier(i));
-				entries[i] = innerEntries.get(node.getChildIdentifier(i));
+				buildIndex(cId);
+				entries[i] = innerEntries.get(cId);
 			} else {
-				entries[i] = leafEntries.get(node.getChildIdentifier(i));
+				entries[i] = leafEntries.get(cId);
 			}
 		}
 		innerEntries.put(id, new Entry(id, entries));
@@ -110,12 +101,13 @@ public class MemRTree extends RTree implements SearchIndex{
 			if (node.getLevel() != 0) {
 				if (node.getChildShape(i).contains(p)) {
 					if (getPath(node.getChildIdentifier(i), p, id, path)) {
-						path.add(id);
+						path.add(node.getChildIdentifier(i));
 						return true;
 					}
 				}
 			} else {
 				if (node.getChildIdentifier(i) == id) {
+					path.add(id);
 					return true;
 				}
 			}

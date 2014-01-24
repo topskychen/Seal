@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.Random;
 
+import utility.Constants;
+
 /**
  * @author chenqian
  *
@@ -32,8 +34,8 @@ public class TDGenerator {
 			pw = new PrintWriter(file);
 			Point[] data = new Point[size];
 			for (int i = 0; i < size; i ++) {
-				data[i] = new Point(Math.abs(random.nextInt(1 << 20)), 
-						Math.abs(random.nextInt(1 << 20)));
+				data[i] = new Point(Math.abs(random.nextInt(Constants.BOUND)), 
+						Math.abs(random.nextInt(Constants.BOUND)));
 			}
 			for (int i = 0; i < size; i ++) {
 				pw.println(data[i].getCoord(0) + " " + data[i].getCoord(1));
@@ -53,7 +55,7 @@ public class TDGenerator {
 		if (args.length == 2) {
 			new TDGenerator(Integer.parseInt(args[0]), args[1]);
 		} else if (args.length == 0) {
-			new TDGenerator(10, "./data/TD10");
+			new TDGenerator(1000, "./data/TD1000");
 		} else {
 			System.out.println("Error!");
 		}

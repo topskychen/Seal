@@ -12,7 +12,7 @@ import utility.Query;
 import utility.Tuple;
 import utility.VOCell;
 import memoryindex.BinaryTree;
-import memoryindex.IQueryStrategy;
+import memoryindex.IQueryStrategyBT;
 
 /**
  * @author chenqian
@@ -43,7 +43,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	public ArrayList<VOCell> rangeQuery(Query query) {
 		// TODO Auto-generated method stub
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
-		queryStrategy(rangeQueryStrategy);
+		queryStrategy(this, rangeQueryStrategy);
 		return rangeQueryStrategy.getVOCells();
 	}
 
@@ -77,7 +77,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	}
 
 		
-	class RangeQueryStrategy implements IQueryStrategy {
+	class RangeQueryStrategy implements IQueryStrategyBT {
 
 		private ArrayList<BinaryTree> 	toVisit 	= new ArrayList<BinaryTree>();
 		private ArrayList<BinaryTree> 	inRange 	= new ArrayList<BinaryTree>();
@@ -141,7 +141,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		
 	}
 	
-	class RetrieveStrategy implements IQueryStrategy {
+	class RetrieveStrategy implements IQueryStrategyBT {
 
 		private ArrayList<BinaryTree> 	toVisit = new ArrayList<BinaryTree>();
 		ArrayList<Tuple> 				tuples	= null;
@@ -182,16 +182,6 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 			}
 		}
 
-	}
-	
-	public void queryStrategy(BinaryTree tree, final IQueryStrategy qs) {
-		BinaryTree[] next = new BinaryTree[]{tree};
-		while (true) {
-			BinaryTree n = next[0];
-			boolean[] hasNext = new boolean[] {false};
-			qs.getNextEntry(n, next, hasNext);
-			if (hasNext[0] == false) break;
-		}
 	}
 
 	

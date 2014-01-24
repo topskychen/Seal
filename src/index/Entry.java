@@ -183,4 +183,8 @@ public class Entry implements RW{
 		sb.append("no : " + no + "\n");
 		return sb.toString();
 	}
+	
+	public int getId() {
+		return tuple.getId();
+	}
 }

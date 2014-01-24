@@ -21,7 +21,7 @@ import timer.Timer;
  */
 public class VO implements RW{
 
-	boolean 			verbose			= true;
+	boolean 			verbose			= false;
 	private Timer 		timer 			= null;
 	private double 		prepareTime 	= -1;
 	private double 		verifyTime 		= -1;
@@ -113,6 +113,7 @@ public class VO implements RW{
 	
 	public String toString() {
 		StringBuffer sb = new StringBuffer("");
+		sb.append("VOCells : " + voCells.size() + "\n");
 		sb.append("PrepareTime: " + prepareTime + "ms\n");
 		sb.append("VerifyTime: " + verifyTime + "ms\n");
 		sb.append("VOSize: " + voSize + "bytes, " + voSize / 1024.0 + " KB\n");

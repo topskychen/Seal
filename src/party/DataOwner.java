@@ -117,7 +117,7 @@ public class DataOwner implements RW{
 	}
 	
 	public static void initDim(ArrayList<DataOwner> dataOwners, String fileName, INDEX_TYPE type) {
-		File doFile = new File(fileName + ".do");
+		File doFile = new File(fileName + "." + type);
 		TrustedRegister.secretShares.clear();
 		TrustedRegister.totalSS = BigInteger.ZERO;
 		if (doFile.exists()) {
@@ -147,6 +147,7 @@ public class DataOwner implements RW{
 					for (int i = 0; i < values.size(); i ++) {
 						rtree.insertData(null, new spatialindex.Point(values.get(i).doubleCoords()), i);
 					}
+					System.out.println(rtree);
 				}
 				BuildTask[] tasks = new BuildTask[values.size()]; 
 				for (int i = 0; i < values.size(); i ++) {
@@ -155,17 +156,17 @@ public class DataOwner implements RW{
 					} else if (type == INDEX_TYPE.RTree) {
 						ArrayList<Integer> path = new ArrayList<Integer>();
 						rtree.getPath(rtree.getRootId(), new spatialindex.Point(values.get(i).doubleCoords()), i, path);
+						path.add(rtree.getRootId());
 						int[] comPre = new int[utility.Constants.L];
-						for (int j = utility.Constants.L - 1; j >= 0; j --) {
-							if (j - utility.Constants.L +  path.size() < 0) {
-								comPre[j] = 0;
-							} else {
-								comPre[j] = path.get(j - utility.Constants.L +  path.size());
-							}
+						for (int j = 0; j < utility.Constants.L; j ++) comPre[j] = i;
+						for (int j = 0, k = path.size() - 1; j < utility.Constants.L && k >=0 ; j ++, k --) {
+							comPre[j] = path.get(k);
 						}
 						tasks[i] = new BuildTask(i, values.get(i), comPre, type);
 					} else if (type == INDEX_TYPE.QTree) {
-						//TODO
+						tasks[i] = new BuildTask(i, values.get(i), null, type);
+					} else {
+						throw new IllegalStateException("No such index!");
 					}
 				}
 				new MultiThread(tasks, utility.Constants.THREAD_NUM, true, tasks.length / 50).run();
@@ -178,6 +179,7 @@ public class DataOwner implements RW{
 					TrustedRegister.totalSS = TrustedRegister.totalSS.add(owner.secretShare);					
 				}
 				ds.close();
+				System.out.println("Index is built.");
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

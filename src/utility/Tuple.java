@@ -8,6 +8,7 @@ import index.SearchIndex.INDEX_TYPE;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.util.ArrayList;
 
 import io.IO;
 import io.RW;
@@ -84,6 +85,14 @@ public class Tuple implements RW{
 			}
 		} else if (type == INDEX_TYPE.RTree) {
 			this.comPre = comPre;
+		} else if (type == INDEX_TYPE.QTree) {
+			ArrayList<Integer> ids = Constants.G_QTREE.getPath(new spatialindex.Point(p.doubleCoords()));
+			this.comPre = new int[Constants.L];
+			for (int i = 0; i < Constants.L; i ++) {
+				this.comPre[i] = ids.get(i);
+			}
+		} else {
+			throw new IllegalStateException("No such index!");
 		}
 	}
 	

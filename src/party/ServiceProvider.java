@@ -5,10 +5,12 @@ package party;
 
 import java.util.ArrayList;
 
+import utility.Constants;
 import utility.Query;
 import utility.VO;
 import index.BinarySearchTree;
 import index.Entry;
+import index.MemQTree;
 import index.MemRTree;
 import index.SearchIndex;
 import index.SearchIndex.INDEX_TYPE;
@@ -46,7 +48,7 @@ public class ServiceProvider {
 		} else if (type == INDEX_TYPE.RTree) {
 			index = MemRTree.createTree();
 		} else if (type == INDEX_TYPE.QTree) {
-			
+			index = new MemQTree(4, Constants.G_BOUND);
 		}
 	}
 	
