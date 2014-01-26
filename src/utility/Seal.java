@@ -84,13 +84,13 @@ public class Seal implements RW{
 	
 	public BigInteger getSecretShare(BigInteger random) {
 		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
-		BigInteger ss = content.shiftRight((160 + 24) * 8 + 24).and(utility.Constants.BITS152);
+		BigInteger ss = content.shiftRight((160 + 24) * utility.Constants.L + 24).and(utility.Constants.BITS152);
 		return ss;
 	}
 	
 	public BigInteger getCnt(BigInteger random) {
 		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
-		BigInteger cnt = content.shiftRight((160 + 24) * 8).and(utility.Constants.BITS24);
+		BigInteger cnt = content.shiftRight((160 + 24) * utility.Constants.L).and(utility.Constants.BITS24);
 		return cnt;
 	}
 	
@@ -138,6 +138,11 @@ public class Seal implements RW{
 	
 	public BigInteger getContent() {
 		return content;
+	}
+
+	public void setContent(BigInteger content) {
+		// TODO Auto-generated method stub
+		this.content = content;
 	} 
 
 }

@@ -26,6 +26,7 @@ public class VO implements RW{
 	private double 		prepareTime 	= -1;
 	private double 		verifyTime 		= -1;
 	private int 		voSize 			= -1;
+	private int			ansNo			= -1;
 	ArrayList<VOCell> 	voCells 		= null;
 	Query				query 			= null;
 	
@@ -50,6 +51,7 @@ public class VO implements RW{
 	public boolean verify(Query query) {
 		timer.reset();
 		boolean isVerify = true;
+		ansNo = 0;
 		for (VOCell voCell : voCells) {
 			if (!voCell.verify(query)) {
 				isVerify = false;
@@ -59,6 +61,7 @@ public class VO implements RW{
 			} else {
 				System.out.print(".");
 			}
+			ansNo += voCell.getAnsNo();
 		}
 		if (!verifyComplete()) {
 			isVerify = false;
@@ -114,6 +117,7 @@ public class VO implements RW{
 	public String toString() {
 		StringBuffer sb = new StringBuffer("");
 		sb.append("VOCells : " + voCells.size() + "\n");
+		sb.append("AnsNo : " + ansNo + "\n");
 		sb.append("PrepareTime: " + prepareTime + "ms\n");
 		sb.append("VerifyTime: " + verifyTime + "ms\n");
 		sb.append("VOSize: " + voSize + "bytes, " + voSize / 1024.0 + " KB\n");

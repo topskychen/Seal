@@ -44,7 +44,7 @@ public class EncFun implements RW{
 	public BigInteger encrypt(BigInteger content, BigInteger random) {
 		BigInteger cipher = null;
 		if (type == ENC_TYPE.Paillier) {
-			cipher = paillier.Encrypt(content, random);
+			cipher = paillier.encrypt(content, random);
 		} else {
 			cipher = (Constants.PRIME_Q.multiply(content)).add(random).mod(mod);
 		}
@@ -62,7 +62,7 @@ public class EncFun implements RW{
 	public BigInteger decrypt(BigInteger cipher, BigInteger random) {
 		BigInteger content = null;
 		if (type == ENC_TYPE.Paillier) {
-			content = paillier.Decrypt(cipher);
+			content = paillier.decrypt(cipher);
 		} else {
 			content = cipher.subtract(random);
 			if (content.signum() < 0 ){
