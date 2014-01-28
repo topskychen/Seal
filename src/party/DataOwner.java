@@ -117,7 +117,7 @@ public class DataOwner implements RW{
 	}
 	
 	public static void initDim(ArrayList<DataOwner> dataOwners, String fileName, INDEX_TYPE type) {
-		File doFile = new File(fileName + "." + type);
+		File doFile = new File(fileName + "." + type + "." + TrustedRegister.type);
 		TrustedRegister.secretShares.clear();
 		TrustedRegister.totalSS = BigInteger.ZERO;
 		if (doFile.exists()) {

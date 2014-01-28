@@ -40,7 +40,7 @@ public class TrustedRegister {
 	
 	public static void specifyEncFun(ENC_TYPE type, String fileName) {
 		TrustedRegister.type = type;
-		File file = new File(fileName + ".st");
+		File file = new File(fileName + "." + type);
 		if (file.exists()) {
 			TrustedRegister.encFun = new EncFun(file);
 		} else {

@@ -22,11 +22,12 @@ import utility.EncFun.ENC_TYPE;
  */
 public class TestEncFun {
 
-	EncFun encFunP;
-	EncFun encFunO;
-	BigInteger mod;
+	static EncFun encFunP;
+	static EncFun encFunO;
+	static BigInteger mod;
+	
 	@BeforeClass
-	public void init() {
+	public static void init() {
 		mod = new BigInteger("65536");
 		encFunP = new EncFun(ENC_TYPE.Paillier, mod);
 		encFunO = new EncFun(ENC_TYPE.OTPad, mod);
@@ -46,7 +47,7 @@ public class TestEncFun {
 	@Test
 	public void testFoldOTPad() {
 		BigInteger b1 = new BigInteger("491511231");
-		BigInteger b2 = new BigInteger("491511233");
+		BigInteger b2 = new BigInteger("234");
 		BigInteger c1 = encFunO.encrypt(b1, Constants.PRIME_P);
 		BigInteger c2 = encFunO.encrypt(b2, Constants.PRIME_P);
 		BigInteger c3 = c1.add(c2).mod(mod);

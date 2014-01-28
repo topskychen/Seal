@@ -59,7 +59,7 @@ public class Sim extends Simulator {
 		serviceProvider 	= new ServiceProvider();
 		client 				= new Client();
 		TrustedRegister.sk 	= AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, fileName);
+		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
 		serviceProvider.specifyIndex(this.type);
 	}
 	

@@ -3,3 +3,4 @@
 .project
 bin
 data/
+.DS_Store

@@ -3,7 +3,6 @@
  */
 package index;
 
-import index.BinarySearchTree.RangeQueryStrategy;
 import io.RW;
 
 import java.util.ArrayList;
@@ -15,18 +14,20 @@ import utility.Constants;
 import utility.Query;
 import utility.Tuple;
 import utility.VOCell;
-import memoryindex.BinaryTree;
-import memoryindex.IQueryStrategyBT;
 import memoryindex.IQueryStrategyQT;
 import memoryindex.QuadTree;
 
 /**
+ * 
+ * For lazy update, the 
  * @author chenqian
  *
  */
 public class MemQTree extends QuadTree implements SearchIndex {
 
-	Entry entry = null;	
+	public static boolean LAZY_MODE 			= false;
+	private	HashMap<Integer, Entry> insEntries 	= null;
+	private	HashMap<Integer, Entry> delEntries 	= null;
 	
 	/**
 	 * @param capacity
@@ -34,6 +35,8 @@ public class MemQTree extends QuadTree implements SearchIndex {
 	 */
 	public MemQTree(int capacity, Region boundary) {
 		super(capacity, boundary);
+		insEntries = new HashMap<Integer, Entry>();
+		delEntries = new HashMap<Integer, Entry>();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -151,7 +154,14 @@ public class MemQTree extends QuadTree implements SearchIndex {
 					} else if (chTrees[i].getBoundary().intersects(query)) {
 						toVisit.add(chTrees[i]);
 					} else {
-						voCells.add(new VOCell(null, (Entry) values.get(i)));
+						Entry entry = (Entry) values.get(i);
+						if (entry.getTuple().getComPre().length == 0) {
+							RetrieveStrategy qs = new RetrieveStrategy();
+							queryStrategy(chTrees[i], qs);
+							voCells.add(new VOCell(qs.getTuples(), (Entry) values.get(i)));
+						} else {
+							voCells.add(new VOCell(null, entry));
+						}
 					}
 				}
 			}

@@ -25,7 +25,6 @@ public class Constants {
 	public static int 			BOUND		= 10000;
 	public static Region 		G_BOUND		= new Region(new double[] {0, 0}, new double[] {BOUND, BOUND});
 	public static MemQTree		G_QTREE		= new MemQTree(4, G_BOUND);
-	
 			
 	/**
 	 * 

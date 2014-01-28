@@ -107,9 +107,12 @@ public class EncFun implements RW{
 		// TODO Auto-generated method stub
 		type = ENC_TYPE.valueOf(IO.readString(ds));
 		mod = IO.readBigInteger(ds);
-		paillier = new Paillier(false); 
-		paillier.read(ds);
-		kInv = IO.readBigInteger(ds);
+		if (type.equals(EncFun.paillier)) {			
+			paillier = new Paillier(false); 
+			paillier.read(ds);
+		} else {
+			kInv = IO.readBigInteger(ds);
+		}
 	}
 
 	@Override
@@ -117,7 +120,10 @@ public class EncFun implements RW{
 		// TODO Auto-generated method stub
 		IO.writeString(ds, type.toString());
 		IO.writeBigInteger(ds, mod);
-		paillier.write(ds);
-		IO.writeBigInteger(ds, kInv);
+		if (type.equals(EncFun.paillier)) {
+			paillier.write(ds);			
+		} else {			
+			IO.writeBigInteger(ds, kInv);
+		}
 	}
 }

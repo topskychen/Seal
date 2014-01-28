@@ -41,7 +41,7 @@ public class VOCell implements RW{
 	public boolean verify(Query query) {
 		//TODO
 		entry.getSeal().setContent(null);
-		BigInteger random = Constants.PRIME_Q.multiply(
+		BigInteger random = Constants.PRIME_P.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())
 			);
 		if (query.inRange(entry.getLB(), entry.getHB())) {
