@@ -27,17 +27,17 @@ public class ServiceProvider {
 	 * Collect the data once, and build the index.
 	 * @param dataOwners
 	 */
-	public void collectDataOnce(ArrayList<DataOwner> dataOwners) {
+	public void collectDataOnce(ArrayList<DataOwner> dataOwners, int runId) {
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
-			entries.add(dataOwners.get(i).getFirstEntry());
+			entries.add(dataOwners.get(i).getEntry(runId));
 		}
 		index.buildIndex(entries);
 		System.out.println("Index prepared!");
 	}
 	
-	public VO rangeQuery(Query query) {
-		VO vo = new VO();
+	public VO rangeQuery(Query query, int runId) {
+		VO vo = new VO(runId);
 		vo.prepare(index, query);
 		return vo;
 	}

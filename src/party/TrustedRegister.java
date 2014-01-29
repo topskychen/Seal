@@ -26,7 +26,7 @@ public class TrustedRegister {
 	public static ENC_TYPE type;
 	public static BigInteger mod = BigInteger.ONE.shiftLeft(184 * 8 + 24 + 128 + 24);
 	public static HashMap<Integer, BigInteger> secretShares = new HashMap<Integer, BigInteger>();
-	public static BigInteger totalSS =  null;
+	public static HashMap<Integer, BigInteger> totalSS =  new HashMap<Integer, BigInteger>();
 	
 	/**
 	 * Generate Secret Share
@@ -36,6 +36,10 @@ public class TrustedRegister {
 	 */
 	public static BigInteger genSecretShare(RW value) {
 		return Utility.getBI(AES.encrypt(sk, IO.toBytes(value))).and(Constants.BITS128);
+	}
+	
+	public static BigInteger genSecretShare(int runId) {
+		return Utility.getBI(AES.encrypt(sk, new Integer(runId).toString().getBytes())).and(Constants.BITS128);
 	}
 	
 	public static void specifyEncFun(ENC_TYPE type, String fileName) {

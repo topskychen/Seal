@@ -29,12 +29,14 @@ public class VO implements RW{
 	private int			ansNo			= -1;
 	ArrayList<VOCell> 	voCells 		= null;
 	Query				query 			= null;
+	private int			runId 			= -1;
 	
 	/**
 	 * 
 	 */
-	public VO() {
+	public VO(int runId) {
 		// TODO Auto-generated constructor stub
+		this.runId = runId;
 		timer = new Timer();
 	}
 	
@@ -53,7 +55,7 @@ public class VO implements RW{
 		boolean isVerify = true;
 		ansNo = 0;
 		for (VOCell voCell : voCells) {
-			if (!voCell.verify(query)) {
+			if (!voCell.verify(query, runId)) {
 				isVerify = false;
 				System.out.print("x\n");
 				System.out.println(voCell);

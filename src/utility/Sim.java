@@ -24,7 +24,7 @@ import utility.EncFun.ENC_TYPE;
 public class Sim extends Simulator {
 
 	String 			fileName 	= "./data/TD1000";
-	INDEX_TYPE 		type 		= INDEX_TYPE.QTree;
+	INDEX_TYPE 		type 		= INDEX_TYPE.RTree;
 	/**
 	 * @param trustedRegister
 	 * @param dataOwners
@@ -61,6 +61,7 @@ public class Sim extends Simulator {
 		TrustedRegister.sk 	= AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
 		serviceProvider.specifyIndex(this.type);
+		DataOwner.initData(dataOwners, fileName, type);
 	}
 	
 	
@@ -69,17 +70,17 @@ public class Sim extends Simulator {
 	 * @see utility.Simulator#run()
 	 */
 	@Override
-	public void run() {
+	public void run(int runId) {
 		// TODO Auto-generated method stub
 		// Data owners prepare data 
-		DataOwner.initDim(dataOwners, fileName, type);
+		DataOwner.prepare(dataOwners, type, runId);
 		
 		// Service Provider collects data.
 		// Currently, the index will not be stored to file.
-		serviceProvider.collectDataOnce(dataOwners);		
+		serviceProvider.collectDataOnce(dataOwners, runId);		
 		// Client Make queries
 //		client
-		client.rangeQuery(serviceProvider, fileName);
+		client.rangeQuery(serviceProvider, fileName, runId);
 	}
 
 	/**
@@ -97,7 +98,7 @@ public class Sim extends Simulator {
 			return;
 		}
 		sim.init();
-		sim.run();			
+		sim.run(0);			
 	}
 
 }

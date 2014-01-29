@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
+import math.MathUtility;
 import io.IO;
 import io.RW;
 
@@ -158,6 +159,14 @@ public class Point implements RW{
 			coords[i] = Math.max(p1.getCoord(i), p2.getCoord(i));
 		}
 		return new Point(coords);
+	}
+	
+	public boolean equals(Point q) {
+		if (getDim() != q.getDim()) return false;
+		for (int i = 0; i < coords.length; i ++) {
+			if (MathUtility.D(coords[i] - q.getCoord(i)) != 0) return false; 
+		}
+		return true;
 	}
 
 }

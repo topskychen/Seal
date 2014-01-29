@@ -38,7 +38,7 @@ public class VOCell implements RW{
 	 * @param query
 	 * @return
 	 */
-	public boolean verify(Query query) {
+	public boolean verify(Query query, int runId) {
 		//TODO
 		entry.getSeal().setContent(null);
 		BigInteger random = Constants.PRIME_P.multiply(
@@ -47,7 +47,7 @@ public class VOCell implements RW{
 		if (query.inRange(entry.getLB(), entry.getHB())) {
 			ps = BigInteger.ZERO;
 			for (int i = 0; i < tuples.size(); i ++) {
-				BigInteger secretShare = TrustedRegister.genSecretShare(tuples.get(i));
+				BigInteger secretShare = TrustedRegister.genSecretShare(runId);
 				ps = ps.add(secretShare);
 			}
 			BigInteger rs = entry.getSeal().getSecretShare(random);

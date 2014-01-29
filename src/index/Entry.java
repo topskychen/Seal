@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 
+import party.TrustedRegister;
 import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;

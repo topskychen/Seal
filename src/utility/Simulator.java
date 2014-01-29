@@ -42,7 +42,7 @@ public abstract class Simulator {
 	/**
 	 * Run multi times
 	 */
-	public abstract void run();
+	public abstract void run(int runId);
 	
 	
 	/**

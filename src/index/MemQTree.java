@@ -7,7 +7,9 @@ import io.RW;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
+import apple.laf.JRSUIState.ValueState;
 import spatialindex.Point;
 import spatialindex.Region;
 import utility.Constants;
@@ -25,9 +27,10 @@ import memoryindex.QuadTree;
  */
 public class MemQTree extends QuadTree implements SearchIndex {
 
-	public static boolean LAZY_MODE 			= false;
+	public static boolean 			LAZY_MODE 	= false;
 	private	HashMap<Integer, Entry> insEntries 	= null;
 	private	HashMap<Integer, Entry> delEntries 	= null;
+	
 	
 	/**
 	 * @param capacity
@@ -64,10 +67,10 @@ public class MemQTree extends QuadTree implements SearchIndex {
 			Point p = new Point(entry.getLB().doubleCoords());
 			this.insert(p, entry);
 		}
-		buildIndex(this);
+		buildIndex(this, null);
 	}
 	
-	public Entry buildIndex(QuadTree tree) {
+	public Entry buildIndex(QuadTree tree, HashSet<Long> modified) {
 		if (tree.getCnt() == 0) return null;
 		ArrayList<Point> points = tree.getPoints();
 		if (points == null) {
@@ -75,7 +78,14 @@ public class MemQTree extends QuadTree implements SearchIndex {
 			ArrayList<Entry> entries = new ArrayList<Entry>();
 			ArrayList<RW> values = new ArrayList<RW>();
 			for (int i = 0; i < getDim(); i ++) {
-				Entry entry = buildIndex(chTree[i]);
+				Entry entry = null;
+				if (modified == null || 
+						modified.contains(chTree[i].getId()) == true) {
+					//
+					entry = buildIndex(chTree[i], modified);
+				} else {
+					entry = (Entry) tree.getValue(i);
+				}
 				values.add(entry);
 				if (entry != null) {
 					entries.add(entry);
@@ -111,6 +121,18 @@ public class MemQTree extends QuadTree implements SearchIndex {
 			}
 		}
 	}
+	
+	public void reBuild(ArrayList<QuadTree> path) {
+		HashSet<Long> modified = new HashSet<Long>();
+		for (QuadTree tree : path) {
+			if (tree != null && tree.getId() != -1) {
+				modified.add(tree.getId());
+			}
+		}
+		buildIndex(this, modified);
+	}
+	
+	
 	
 	class RangeQueryStrategy implements IQueryStrategyQT {
 
