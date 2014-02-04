@@ -18,5 +18,6 @@ public interface SearchIndex {
 
 	public abstract ArrayList<VOCell> rangeQuery(Query query);
 	public abstract void buildIndex(ArrayList<Entry> entries);
+	public abstract INDEX_TYPE getType();
 
 }

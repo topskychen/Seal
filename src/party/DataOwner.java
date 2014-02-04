@@ -7,27 +7,16 @@ import index.Entry;
 import index.MemRTree;
 import index.Point;
 import index.SearchIndex.INDEX_TYPE;
-import io.IO;
-import io.P;
-import io.RW;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Scanner;
 
-import multithread.MultiThread;
-import multithread.Task;
-import crypto.Constants;
+import utility.Constants;
 import utility.Seal;
 import utility.Tuple;
 
@@ -87,6 +76,7 @@ public class DataOwner {
 		this.SSs		= new ArrayList<BigInteger>(points.size());
 		for (int i = 0; i < points.size(); i ++) {
 			this.SSs.add(TrustedRegister.genSecretShare(i));
+			this.entries.add(null);
 		} 
 	}
 
@@ -117,7 +107,7 @@ public class DataOwner {
 			for (DataOwner owner : dataOwners) {
 				rtree.insertData(null, new spatialindex.Point(owner.getPoint(runId).doubleCoords()), owner.getId());
 			}
-			System.out.println(rtree);
+			if (Constants.RT_VERBOSE) System.out.println(rtree);
 		} 
 		BigInteger totalSS = BigInteger.ZERO;
 		for (DataOwner owner : dataOwners) {
@@ -130,7 +120,7 @@ public class DataOwner {
 			}
 			totalSS = totalSS.add(owner.getSS(runId));
 		}
-		TrustedRegister.secretShares.put(runId, totalSS);
+		TrustedRegister.totalSS.put(runId, totalSS);
 	}
 	
 	public static void initData(ArrayList<DataOwner> dataOwners, String fileName, INDEX_TYPE type) {

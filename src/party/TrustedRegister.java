@@ -25,7 +25,7 @@ public class TrustedRegister {
 	public static EncFun encFun = null;
 	public static ENC_TYPE type;
 	public static BigInteger mod = BigInteger.ONE.shiftLeft(184 * 8 + 24 + 128 + 24);
-	public static HashMap<Integer, BigInteger> secretShares = new HashMap<Integer, BigInteger>();
+//	public static HashMap<Integer, BigInteger> secretShares = new HashMap<Integer, BigInteger>();
 	public static HashMap<Integer, BigInteger> totalSS =  new HashMap<Integer, BigInteger>();
 	
 	/**
@@ -53,13 +53,13 @@ public class TrustedRegister {
 		}
 	}
 	
-	public static void addSecretShare(int id, BigInteger secretShare) {
-		secretShares.put(id, secretShare);
-	}
-	
-	public static BigInteger getSecretShare(int id) {
-		return secretShares.get(id);
-	}
+//	public static void addSecretShare(int id, BigInteger secretShare) {
+//		secretShares.put(id, secretShare);
+//	}
+//	
+//	public static BigInteger getSecretShare(int id) {
+//		return secretShares.get(id);
+//	}
 	
 	/**
 	 * Construct a trustedRegister with the type.

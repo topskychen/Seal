@@ -229,4 +229,10 @@ public class MemRTree extends RTree implements SearchIndex {
 		}
 
 	}
+
+	@Override
+	public INDEX_TYPE getType() {
+		// TODO Auto-generated method stub
+		return INDEX_TYPE.RTree;
+	}
 }

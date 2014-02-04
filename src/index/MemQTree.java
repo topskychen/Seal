@@ -244,4 +244,11 @@ public class MemQTree extends QuadTree implements SearchIndex {
 	}
 
 
+	@Override
+	public INDEX_TYPE getType() {
+		// TODO Auto-generated method stub
+		return INDEX_TYPE.QTree;
+	}
+
+
 }

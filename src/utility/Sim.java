@@ -5,10 +5,7 @@ package utility;
 
 import index.SearchIndex.INDEX_TYPE;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import crypto.AES;
 import party.Client;
@@ -24,7 +21,7 @@ import utility.EncFun.ENC_TYPE;
 public class Sim extends Simulator {
 
 	String 			fileName 	= "./data/TD1000";
-	INDEX_TYPE 		type 		= INDEX_TYPE.RTree;
+	INDEX_TYPE 		type 		= INDEX_TYPE.QTree;
 	/**
 	 * @param trustedRegister
 	 * @param dataOwners
@@ -60,7 +57,6 @@ public class Sim extends Simulator {
 		client 				= new Client();
 		TrustedRegister.sk 	= AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
-		serviceProvider.specifyIndex(this.type);
 		DataOwner.initData(dataOwners, fileName, type);
 	}
 	
@@ -77,9 +73,9 @@ public class Sim extends Simulator {
 		
 		// Service Provider collects data.
 		// Currently, the index will not be stored to file.
-		serviceProvider.collectDataOnce(dataOwners, runId);		
+		serviceProvider.collectDataOnce(dataOwners, type, runId);		
 		// Client Make queries
-//		client
+		//		client
 		client.rangeQuery(serviceProvider, fileName, runId);
 	}
 
@@ -88,9 +84,11 @@ public class Sim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Sim sim = null;
-		if (args.length == 2) {
+		Sim sim 		= null;
+		int runTimes 	= 10;
+		if (args.length == 3) {
 			sim = new Sim(args[0], args[1]);
+			runTimes = Integer.parseInt(args[2]);
 		} else if (args.length == 0){
 			sim = new Sim();
 		} else {
@@ -98,7 +96,11 @@ public class Sim extends Simulator {
 			return;
 		}
 		sim.init();
-		sim.run(0);			
+		System.out.println("Init fin!");
+		for (int i = 0; i < runTimes; i ++) {
+			System.out.println("--------------------"+ i +"---------------------");
+			sim.run(i);			
+		}
 	}
 
 }

@@ -27,7 +27,8 @@ public class ServiceProvider {
 	 * Collect the data once, and build the index.
 	 * @param dataOwners
 	 */
-	public void collectDataOnce(ArrayList<DataOwner> dataOwners, int runId) {
+	public void collectDataOnce(ArrayList<DataOwner> dataOwners, INDEX_TYPE type, int runId) {
+		specifyIndex(type);
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
 			entries.add(dataOwners.get(i).getEntry(runId));

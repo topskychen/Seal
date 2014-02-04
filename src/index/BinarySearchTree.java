@@ -228,4 +228,10 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	public BigInteger cnt(BinaryTree node) {
 		return ((Entry) node.getValue()).getSeal().getCnt(null);
 	}
+
+	@Override
+	public INDEX_TYPE getType() {
+		// TODO Auto-generated method stub
+		return INDEX_TYPE.BTree;
+	}
 }

@@ -39,7 +39,10 @@ public class TDGenerator {
 	}
 	
 	/**
-	 * 
+	 * The no. of owners, the length of trajectory, and the output file name.
+	 * @param ownerNo
+	 * @param traLen
+	 * @param fileName
 	 */
 	public TDGenerator(int ownerNo, int traLen, String fileName) {
 		File file = new File(fileName + ".pl");
@@ -51,8 +54,8 @@ public class TDGenerator {
 		data = new Point[traLen][];
 		for (int j = 0; j < traLen; j ++) {
 			data[j] = generate(ownerNo);
-			saveToFile(ownerNo, traLen, file);
 		}
+		saveToFile(ownerNo, traLen, file);
 		System.out.println("Gen fin!");
 	}
 	
@@ -75,6 +78,7 @@ public class TDGenerator {
 			pw.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
+			file.delete();
 			e.printStackTrace();
 		}
 	}
@@ -83,10 +87,10 @@ public class TDGenerator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if (args.length == 2) {
+		if (args.length == 3) {
 			new TDGenerator(Integer.parseInt(args[0]), Integer.parseInt(args[1]), args[2]);
 		} else if (args.length == 0) {
-			new TDGenerator(1000, 1, "./data/TD1000");
+			new TDGenerator(1000, 10, "./data/TD1000");
 		} else {
 			System.out.println("Error!");
 		}

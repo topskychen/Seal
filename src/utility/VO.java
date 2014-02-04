@@ -79,7 +79,7 @@ public class VO implements RW{
 		for (VOCell voCell : voCells) {
 			ss = ss.add(voCell.getPartialSS());
 		}
-		return ss.equals(TrustedRegister.totalSS);
+		return ss.equals(TrustedRegister.totalSS.get(runId));
 	}
 
 	/**
@@ -120,9 +120,9 @@ public class VO implements RW{
 		StringBuffer sb = new StringBuffer("");
 		sb.append("VOCells : " + voCells.size() + "\n");
 		sb.append("AnsNo : " + ansNo + "\n");
-		sb.append("PrepareTime: " + prepareTime + "ms\n");
-		sb.append("VerifyTime: " + verifyTime + "ms\n");
-		sb.append("VOSize: " + voSize + "bytes, " + voSize / 1024.0 + " KB\n");
+		sb.append("PrepareTime: " + prepareTime + " ms\n");
+		sb.append("VerifyTime: " + verifyTime + " ms\n");
+		sb.append("VOSize: " + voSize + " bytes, " + voSize / 1024.0 + " KB\n");
 		if(verbose){
 			for (int i = 0; i < voCells.size(); i ++) {
 				sb.append(voCells.get(i));
