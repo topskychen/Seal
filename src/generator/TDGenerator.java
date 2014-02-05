@@ -18,6 +18,9 @@ import java.util.Random;
 import utility.Constants;
 
 /**
+ * 
+ * The generator guarantees at a specific time stamp the points will not 
+ * conflict. Further more, the points are generated nearby.
  * @author chenqian
  *
  */
@@ -26,16 +29,33 @@ public class TDGenerator {
 	Random random 		= new Random();
 	Point[][] data		= null;
 	
-	public Point[] generate(int no) {
-		HashSet<Point> points = new HashSet<>();
+	public int nextPos(int x) {
+		return (x + random.nextInt(Constants.RANGE) - Constants.RANGE / 2 + Constants.BOUND) % Constants.BOUND;
+	}
+	
+	public Point[] generate(Point[] lastPoints, int no) {
+		HashSet<Point> hashSet = new HashSet<Point>();
+		Point[] points = new Point[no];
 		for (int i = 0; i < no; i ++) {
-			Point p = new Point(random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND));
-			while(points.contains(p)) {
+			Point p = null;
+			if (lastPoints == null) {
 				p = new Point(random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND));
+			} else {
+				p = new Point(nextPos(lastPoints[i].getCoord(0)), 
+						nextPos(lastPoints[i].getCoord(1)));
 			}
-			points.add(p);
+			while(hashSet.contains(p)) {
+				if (lastPoints == null) {
+					p = new Point(random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND));
+				} else {
+					p = new Point(nextPos(lastPoints[i].getCoord(0)), 
+							nextPos(lastPoints[i].getCoord(1)));
+				}
+			}
+			hashSet.add(p);
+			points[i] = p;
 		}
-		return points.toArray(new Point[0]);
+		return points;
 	}
 	
 	/**
@@ -53,7 +73,8 @@ public class TDGenerator {
 		
 		data = new Point[traLen][];
 		for (int j = 0; j < traLen; j ++) {
-			data[j] = generate(ownerNo);
+			if (j == 0) data[j] = generate(null, ownerNo);
+			else data[j] = generate(data[j - 1], ownerNo);
 		}
 		saveToFile(ownerNo, traLen, file);
 		System.out.println("Gen fin!");
