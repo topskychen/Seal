@@ -20,8 +20,8 @@ import io.RW;
 public class Tuple implements RW{
 
 	private int		id 		= -1;
-	private Point[] point 	= null;
-	private int[] 	tiStp	= null;
+	private Point	point 	= null;
+	private int 	tiStp	= -1;
 	private int[] 	comPre	= null;
 	
 	public Tuple(Tuple tuple) {
@@ -39,12 +39,12 @@ public class Tuple implements RW{
 	 * @param t2
 	 */
 	public Tuple(Tuple t1, Tuple t2) {
-		this.point = new Point[2];
-		this.tiStp = new int[2];
-		this.point[0] = Point.lower(t1.getLowPoint(), t2.getLowPoint());
-		this.point[1] = Point.larger(t1.getHiPoint(), t2.getHiPoint());
-		this.tiStp[0] = Math.min(t1.getLowTiStp(), t2.getLowTiStp());
-		this.tiStp[1] = Math.max(t1.getHiTiStp(), t2.getHiTiStp());
+//		this.point = new Point[2];
+//		this.tiStp = new int[2];
+//		this.point[0] = Point.lower(t1.getLowPoint(), t2.getLowPoint());
+//		this.point[1] = Point.larger(t1.getHiPoint(), t2.getHiPoint());
+//		this.tiStp[0] = Math.min(t1.getLowTiStp(), t2.getLowTiStp());
+//		this.tiStp[1] = Math.max(t1.getHiTiStp(), t2.getHiTiStp());
 		this.comPre = Utility.comPre(t1.getComPre(), t2.getComPre());
 	}
 	
@@ -58,8 +58,8 @@ public class Tuple implements RW{
 		for (int i = 1; i < tuples.length; i ++) {
 			tuple = new Tuple(tuple, tuples[i]);
 		}
-		point 	= tuple.point;
-		tiStp 	= tuple.tiStp;
+//		point 	= tuple.point;
+//		tiStp 	= tuple.tiStp;
 		comPre 	= tuple.comPre;
 	}
 	
@@ -70,12 +70,12 @@ public class Tuple implements RW{
 	 */
 	public Tuple(int id, Point p, int t, int[] comPre, INDEX_TYPE type) {
 		this.id = id;
-		this.point = new Point[2];
-		this.tiStp = new int[2];
-		this.point[0] = p;
-		this.point[1] = this.point[0];
-		this.tiStp[0] = t;
-		this.tiStp[1] = t;
+		this.point = p;
+		this.tiStp = t;
+//		this.point[0] = p;
+//		this.point[1] = this.point[0];
+//		this.tiStp[0] = t;
+//		this.tiStp[1] = t;
 		if (type == INDEX_TYPE.BTree) {
 			int value = p.getCoord(0);
 			this.comPre = new int[Constants.L];
@@ -103,24 +103,8 @@ public class Tuple implements RW{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Point getLowPoint() {
-		return point[0];
-	}
-	
-	public int getLowTiStp() {
-		return tiStp[0];
-	}
-	
-	public Point getHiPoint() {
-		return point[1];
-	}
-	
-	public int getHiTiStp() {
-		return tiStp[1];
-	}
-	
-	public int getDim() {
-		return point[0].getDim();
+	public Point getPoint() {
+		return point;
 	}
 	
 	public int[] getComPre() {
@@ -143,13 +127,11 @@ public class Tuple implements RW{
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
 		id = IO.readInt(ds);
-		int num = IO.readInt(ds);
-		point = new Point[num];
-		for (int i = 0; i < num; i ++) {
-			point[i] = new Point(); 
-			point[i].read(ds);
+		if (IO.readBoolean(ds)) {
+			point = new Point();
+			point.read(ds);
 		}
-		tiStp = IO.readIntArrays(ds);
+		tiStp = IO.readInt(ds);
 		comPre = IO.readIntArrays(ds);
 	}
 
@@ -157,20 +139,21 @@ public class Tuple implements RW{
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
 		IO.writeInt(ds, id);
-		IO.writeInt(ds, point.length);
-		for (int i = 0; i < point.length; i ++) {
-			point[i].write(ds);			
+		if (point == null) {
+			IO.writeBoolean(ds, false);
+		} else {
+			IO.writeBoolean(ds, true);
+			point.write(ds);
 		}
-		IO.writeIntArrays(ds, tiStp);
+		IO.writeInt(ds, tiStp);
 		IO.writeIntArrays(ds, comPre);
 	}
 	
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("@" + id + "\n");
-		for (int i = 0; i < point.length; i ++) {
-			if (i != 0) sb.append(", ");
-			sb.append(point[i].toString());
+		if (point != null) {
+			point.toString();
 		}
 		sb.append("\n[");
 		for (int i = 0; i < comPre.length; i ++) {

@@ -21,7 +21,7 @@ import utility.EncFun.ENC_TYPE;
 public class Sim extends Simulator {
 
 	String 			fileName 	= "./data/TD1000";
-	INDEX_TYPE 		type 		= INDEX_TYPE.QTree;
+	INDEX_TYPE 		type 		= INDEX_TYPE.RTree;
 	/**
 	 * @param trustedRegister
 	 * @param dataOwners

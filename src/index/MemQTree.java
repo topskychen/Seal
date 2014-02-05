@@ -21,15 +21,17 @@ import memoryindex.QuadTree;
 
 /**
  * 
- * For lazy update, the 
+ * For lazy update.
+ * L is short for lastest updated.
+ * U is short for un-updated ones. 
  * @author chenqian
  *
  */
 public class MemQTree extends QuadTree implements SearchIndex {
 
 	public static boolean 			LAZY_MODE 	= false;
-	private	HashMap<Integer, Entry> insEntries 	= null;
-	private	HashMap<Integer, Entry> delEntries 	= null;
+	private	HashMap<Integer, Entry> L 			= null;
+	private	HashMap<Integer, Entry> U 			= null;
 	
 	
 	/**
@@ -38,8 +40,8 @@ public class MemQTree extends QuadTree implements SearchIndex {
 	 */
 	public MemQTree(int capacity, Region boundary) {
 		super(capacity, boundary);
-		insEntries = new HashMap<Integer, Entry>();
-		delEntries = new HashMap<Integer, Entry>();
+		L = new HashMap<Integer, Entry>();
+		U = new HashMap<Integer, Entry>();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -68,6 +70,38 @@ public class MemQTree extends QuadTree implements SearchIndex {
 			this.insert(p, entry);
 		}
 		buildIndex(this, null);
+	}
+	
+	public void putU (int id, Entry entry){
+		U.put(id, entry);
+	}
+	
+	public void update() {
+		for (java.util.Map.Entry<Integer, Entry> uEntry : U.entrySet()) {
+			int 	key 	= uEntry.getKey();
+			Entry 	entryU 	= uEntry.getValue();
+			Point	pU		= new Point(entryU.getLB().doubleCoords());
+			Entry 	entryL 	= uEntry.getValue();
+			Point	pL		= new Point(entryL.getLB().doubleCoords());
+			QuadTree[] chTrees = getChTrees();
+			int iL = -1, iU = -1;
+			for (int i = 0; i < getDim(); i ++) {
+				if (iL != -1 && chTrees[i].getBoundary().contains(pL)) {
+					iL = i;
+				}
+				if (iU != -1 && chTrees[i].getBoundary().contains(pU)) {
+					iU = i;
+				}
+			}
+			if (iL == iU) {
+				ArrayList<RW> values = getValues();
+				Entry entry = (Entry) values.get(iL);
+//				entry
+				//TODO replace 
+			} else {
+				//TODO delete and insert
+			}
+		}
 	}
 	
 	public Entry buildIndex(QuadTree tree, HashSet<Long> modified) {

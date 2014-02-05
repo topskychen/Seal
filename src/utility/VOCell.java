@@ -25,6 +25,7 @@ public class VOCell implements RW{
 	Entry 				entry		= null;
 	BigInteger 			ps 			= null;
 	int					ansNo		= -1;
+	
 	/**
 	 * Get the partial secret share.
 	 * @return
@@ -44,7 +45,7 @@ public class VOCell implements RW{
 		BigInteger random = Constants.PRIME_P.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())
 			);
-		if (query.inRange(entry.getLB(), entry.getHB())) {
+		if (ansNo != -1) {
 			ps = BigInteger.ZERO;
 			for (int i = 0; i < tuples.size(); i ++) {
 				BigInteger secretShare = TrustedRegister.genSecretShare(runId);
@@ -55,10 +56,8 @@ public class VOCell implements RW{
 //				System.out.println("x");
 				return false;
 			}
-			ansNo = tuples.size();
 		} else {
 			ps = entry.getSeal().getSecretShare(random);
-			ansNo = 0;
 		}
 		int[] comPre = entry.getTuple().getComPre();
 //		Utility.pi22(comPre[0]);
@@ -80,6 +79,8 @@ public class VOCell implements RW{
 		// TODO Auto-generated constructor stub
 		this.entry 	= entry;
 		this.tuples = tuples;
+		if (tuples != null)
+			this.ansNo = tuples.size();
 	}
 	
 	

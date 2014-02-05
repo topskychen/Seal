@@ -56,6 +56,10 @@ public class Entry implements RW{
 		seal = new Seal(seals);
 	}
 	
+	public void update(Entry newEntry) {
+		
+	}
+	
 	/**
 	 * Construct an entry for one dim.
 	 * @param tuple
@@ -152,11 +156,11 @@ public class Entry implements RW{
 	}
 	
 	public Point getLB() {
-		return tuple.getLowPoint();
+		return tuple.getPoint();
 	}
 	
 	public Point getHB() {
-		return tuple.getHiPoint();
+		return tuple.getPoint();
 	}
 	
 	/**
@@ -165,7 +169,7 @@ public class Entry implements RW{
 	 * @return
 	 */
 	public int getLowVal() {
-		return tuple.getLowPoint().getCoord(0);
+		return tuple.getPoint().getCoord(0);
 	}
 	
 	/**
@@ -174,7 +178,7 @@ public class Entry implements RW{
 	 * @return
 	 */
 	public int getHiVal() {
-		return tuple.getHiPoint().getCoord(0);
+		return tuple.getPoint().getCoord(0);
 	}
 	
 	public String toString() {
