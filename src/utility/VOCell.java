@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import crypto.Constants;
 import crypto.Hasher;
@@ -24,7 +25,8 @@ public class VOCell implements RW{
 	ArrayList<Tuple>	tuples 		= null;
 	Entry 				entry		= null;
 	BigInteger 			ps 			= null;
-	int					ansNo		= -1;
+	int					ansNo		= 0;
+	
 	
 	/**
 	 * Get the partial secret share.
@@ -39,17 +41,17 @@ public class VOCell implements RW{
 	 * @param query
 	 * @return
 	 */
-	public boolean verify(Query query, int runId) {
-		//TODO
+	public boolean verify(Query query, int runId, TreeSet<Integer> ansIds) {
 		entry.getSeal().setContent(null);
 		BigInteger random = Constants.PRIME_P.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())
 			);
-		if (ansNo != -1) {
+		if (ansNo != 0) {
 			ps = BigInteger.ZERO;
 			for (int i = 0; i < tuples.size(); i ++) {
 				BigInteger secretShare = TrustedRegister.genSecretShare(runId);
 				ps = ps.add(secretShare);
+				ansIds.add(tuples.get(i).getId());
 			}
 			BigInteger rs = entry.getSeal().getSecretShare(random);
 			if (!ps.equals(rs)) { 
@@ -83,9 +85,17 @@ public class VOCell implements RW{
 			this.ansNo = tuples.size();
 	}
 	
+	public VOCell(Tuple tuple, Entry entry) {
+		this.entry = entry;
+		this.tuples = new ArrayList<Tuple>();
+		this.tuples.add(tuple);
+		if (tuples != null) {
+			this.ansNo = tuples.size();
+		}
+	}
+	
 	
 	public VOCell() {
-		
 	}
 
 	/**

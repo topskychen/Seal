@@ -3,7 +3,6 @@
  */
 package index;
 
-import index.BinarySearchTree.RangeQueryStrategy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +71,7 @@ public class MemRTree extends RTree implements SearchIndex {
 		// TODO Auto-generated method stub
 		for (int i = 0; i < entries.size(); i ++) {
 			Entry entry = entries.get(i);
-			insertData(null, new spatialindex.Point(entry.getLB().doubleCoords()), entry.getTuple().getId());
+			insertData(null, new spatialindex.Point(entry.getPoint().doubleCoords()), entry.getTuple().getId());
 			leafEntries.put(entry.getTuple().getId(), entry);
 		}
 		buildIndex(getRootId());
@@ -91,7 +90,7 @@ public class MemRTree extends RTree implements SearchIndex {
 				entries[i] = leafEntries.get(cId);
 			}
 		}
-		innerEntries.put(id, new Entry(id, entries));
+		innerEntries.put(id, new Entry(id, entries, -1));
 		return;
 	}
 	
@@ -137,18 +136,16 @@ public class MemRTree extends RTree implements SearchIndex {
 					queryStrategy(entry.getKey(), rs);
 					voCells.add(new VOCell(rs.getTuples(), innerEntries.get(entry.getKey())));
 				} else {
-					voCells.add(new VOCell(null, innerEntries.get(entry.getKey())));
+					voCells.add(new VOCell(new ArrayList<Tuple>(), innerEntries.get(entry.getKey())));
 				}
 			}
 			for (java.util.Map.Entry<Integer, Boolean> entry : leafEntryHM.entrySet()) {
 				Entry e = leafEntries.get(entry.getKey());
+				ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 				if (entry.getValue()) {
-					ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 					tuples.add(e.getTuple());
-					voCells.add(new VOCell(tuples, e));
-				} else {
-					voCells.add(new VOCell(null, e));
 				}
+				voCells.add(new VOCell(tuples, e));
 			}
 			return voCells;
 		}

@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
 
+
 import io.IO;
 import io.RW;
 
@@ -24,42 +25,42 @@ public class Tuple implements RW{
 	private int 	tiStp	= -1;
 	private int[] 	comPre	= null;
 	
-	public Tuple(Tuple tuple) {
-		id		= tuple.id;
-		point 	= tuple.point;
-		tiStp 	= tuple.tiStp;
-		comPre	= tuple.comPre;
+	public Tuple(int id, Point point, int tiStp, int[] comPre) {
+		this.id 	= id;
+		this.point 	= point;
+		this.tiStp 	= tiStp;
+		this.comPre = comPre;
 	}
+	
 	
 	/**
 	 * Construct a tuple based on two tuples.
 	 * The points tracks the bounds of two tuples.
 	 * And the timeStp also are the bounds.
+	 * lev is 0-based.
 	 * @param t1
 	 * @param t2
+	 * @param lev
 	 */
-	public Tuple(Tuple t1, Tuple t2) {
-//		this.point = new Point[2];
-//		this.tiStp = new int[2];
-//		this.point[0] = Point.lower(t1.getLowPoint(), t2.getLowPoint());
-//		this.point[1] = Point.larger(t1.getHiPoint(), t2.getHiPoint());
-//		this.tiStp[0] = Math.min(t1.getLowTiStp(), t2.getLowTiStp());
-//		this.tiStp[1] = Math.max(t1.getHiTiStp(), t2.getHiTiStp());
-		this.comPre = Utility.comPre(t1.getComPre(), t2.getComPre());
+	public Tuple(Tuple t1, Tuple t2, int lev) {
+		if (lev == -1 || t1.getComPre().length < lev + 1 || t2.getComPre().length < lev + 1) {
+			this.comPre = Utility.comPre(t1.getComPre(), t2.getComPre());
+		} else {
+			this.comPre = new int[lev + 1];
+			System.arraycopy(t1.getComPre(), 0, comPre, 0, lev + 1);
+		}
 	}
 	
 	/**
 	 * Construct a tuple based on multi tuples.
 	 * @param tuples
 	 */
-	public Tuple(int id, Tuple[] tuples) {
+	public Tuple(int id, Tuple[] tuples, int lev) {
 		this.id = id;
 		Tuple tuple = tuples[0];
 		for (int i = 1; i < tuples.length; i ++) {
-			tuple = new Tuple(tuple, tuples[i]);
+			tuple = new Tuple(tuple, tuples[i], lev);
 		}
-//		point 	= tuple.point;
-//		tiStp 	= tuple.tiStp;
 		comPre 	= tuple.comPre;
 	}
 	
@@ -163,5 +164,14 @@ public class Tuple implements RW{
 		sb.append("]");
 		return sb.toString();
 	}
+	
+	public int getTS() {
+		return tiStp;
+	}
 
+	public Tuple clone() {
+		int[] newComPre	= new int[comPre.length];
+		System.arraycopy(comPre, 0, newComPre, 0, comPre.length);
+		return new Tuple(id, point.clone(), tiStp, newComPre);
+	}
 }

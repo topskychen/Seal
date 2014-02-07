@@ -3,8 +3,6 @@
  */
 package index;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
@@ -167,6 +165,12 @@ public class Point implements RW{
 			if (MathUtility.D(coords[i] - q.getCoord(i)) != 0) return false; 
 		}
 		return true;
+	}
+	
+	public Point clone() {
+		int[] newCoords = new int[coords.length];
+		System.arraycopy(coords, 0, newCoords, 0, coords.length);
+		return new Point(newCoords);
 	}
 
 }

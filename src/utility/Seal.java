@@ -11,8 +11,6 @@ import party.TrustedRegister;
 import utility.EncFun.ENC_TYPE;
 import crypto.Constants;
 import crypto.Hasher;
-import index.Point;
-import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
 
@@ -36,15 +34,33 @@ public class Seal implements RW{
 			cipher = fold(cipher, seals[i].cipher);
 		}
 	}
+	
 	/**
 	 * Construction based on two children
+	 * The reverse indicate whether reverse the b or not
 	 * @param a
 	 * @param b
+	 * @param reserse
 	 */
-	public Seal(Seal a, Seal b) {
-		cipher = fold(a.cipher, b.cipher);
+	public Seal(Seal a, Seal b, boolean reverse) {
+		if (reverse) {
+			cipher = reverseFold(a.cipher, b.cipher);
+		} else {
+			cipher = fold(a.cipher, b.cipher);			
+		}
 	}
 	
+	private BigInteger reverseFold(BigInteger cipher1, BigInteger cipher2) {
+		// TODO Auto-generated method stub
+		BigInteger ans = null;
+		if (TrustedRegister.type == ENC_TYPE.Paillier) {
+			ans = cipher1.multiply(cipher2.modInverse(EncFun.paillier.nsquare)).mod(EncFun.paillier.nsquare);
+		} else {
+			ans = cipher1.subtract(cipher2).add(TrustedRegister.mod).mod(TrustedRegister.mod);
+		}
+		return ans;
+	}
+
 	/**
 	 * Fold two seals according to different types.
 	 * @param content1
@@ -106,6 +122,11 @@ public class Seal implements RW{
 	public Seal() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	public Seal(BigInteger cipher) {
+		this.cipher = cipher;
+	}
+	
 
 	/**
 	 * @param args
@@ -144,5 +165,9 @@ public class Seal implements RW{
 		// TODO Auto-generated method stub
 		this.content = content;
 	} 
+	
+	public Seal clone() {
+		return new Seal(cipher);
+	}
 
 }

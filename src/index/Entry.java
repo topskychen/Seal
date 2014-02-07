@@ -7,14 +7,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 
-import party.TrustedRegister;
-import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
-import utility.Constants;
 import utility.Seal;
 import utility.Tuple;
-import utility.Utility;
 
 /**
  * @author chenqian
@@ -26,9 +22,15 @@ public class Entry implements RW{
 	private Seal 	seal 	= null;
 	private int 	no		= 0;
 
+	public Entry(Tuple tuple, Seal seal, int no) {
+		this.tuple 	= tuple;
+		this.seal	= seal;
+		this.no 	= no;
+	}
+	
 	public Entry (Entry e) {
-		this.tuple 	= new Tuple(e.getTuple());
-		this.seal 	= new Seal(e.getSeal());
+		this.tuple 	= e.getTuple();
+		this.seal 	= e.getSeal();
 		this.no		= e.no;
 	}
 	
@@ -37,13 +39,13 @@ public class Entry implements RW{
 	 * @param a
 	 * @param b
 	 */
-	public Entry(Entry a, Entry b) {
-		tuple = new Tuple(a.tuple, b.tuple);
-		seal = new Seal(a.seal, b.seal);
+	public Entry(Entry a, Entry b, int lev) {
+		tuple = new Tuple(a.tuple, b.tuple, lev);
+		seal = new Seal(a.seal, b.seal, false);
 		no = a.no + b.no;
 	}
 	
-	public Entry(int id, Entry[] entries) {
+	public Entry(int id, Entry[] entries, int lev) {
 		Tuple[] tuples = new Tuple[entries.length];
 		Seal[]	seals = new Seal[entries.length];
 		no = 0;
@@ -52,12 +54,25 @@ public class Entry implements RW{
 			seals[i] = entries[i].getSeal();
 			no += entries[i].no;
 		}
-		tuple = new Tuple(id, tuples);
+		tuple = new Tuple(id, tuples, lev);
 		seal = new Seal(seals);
 	}
 	
-	public void update(Entry newEntry) {
-		
+	public void update(Entry oldEntry, Entry newEntry) {
+		if (oldEntry == null) {
+			seal = new Seal(seal, newEntry.seal, false);
+			tuple = new Tuple(tuple, newEntry.getTuple(), -1);
+			no ++;
+		} else if (newEntry == null) {
+			seal = new Seal(seal, oldEntry.seal, true);
+			no --;
+		} else if (oldEntry != null && newEntry != null) {
+			seal = new Seal(seal, oldEntry.seal, true);
+			tuple = new Tuple(tuple, newEntry.getTuple(), -1);
+			seal = new Seal(seal, newEntry.seal, false);
+		} else {
+			throw new IllegalStateException("The old/new entry is illegal.");
+		}
 	}
 	
 	/**
@@ -146,6 +161,13 @@ public class Entry implements RW{
 	}
 
 
+	public Point getPoint() {
+		return tuple.getPoint();
+	}
+	
+	public spatialindex.Point getSPoint() {
+		return new spatialindex.Point(getPoint().doubleCoords());
+	}
 
 	@Override
 	public void write(DataOutputStream ds) {
@@ -153,14 +175,6 @@ public class Entry implements RW{
 		tuple.write(ds);
 		seal.write(ds);
 		IO.writeInt(ds, no);
-	}
-	
-	public Point getLB() {
-		return tuple.getPoint();
-	}
-	
-	public Point getHB() {
-		return tuple.getPoint();
 	}
 	
 	/**
@@ -192,4 +206,12 @@ public class Entry implements RW{
 	public int getId() {
 		return tuple.getId();
 	}
+	
+	public int getTS() {
+		return tuple.getTS();
+	}
+	
+	public Entry clone() {
+		return new Entry(tuple.clone(), seal.clone(), no);
+	} 
 }

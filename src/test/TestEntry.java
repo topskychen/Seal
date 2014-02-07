@@ -53,7 +53,7 @@ public class TestEntry {
 	public void testSS() {
 		Entry e1 = entries.get(0);
 		Entry e2 = entries.get(1);
-		Entry e3 = new Entry(e1, e2);
+		Entry e3 = new Entry(e1, e2, -1);
 		BigInteger ss1 = TrustedRegister.genSecretShare(tuples.get(0));
 		BigInteger ss2 = TrustedRegister.genSecretShare(tuples.get(1));
 		System.out.println(ss1.add(ss2));
@@ -75,7 +75,7 @@ public class TestEntry {
 				} else {
 					Entry l = entries2[i];
 					Entry r = entries2[i + 1];
-					entries2[newNum ++] = new Entry(l, r);
+					entries2[newNum ++] = new Entry(l, r, -1);
 				}
 			}
 			num = newNum;

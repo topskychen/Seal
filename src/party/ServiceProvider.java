@@ -28,7 +28,10 @@ public class ServiceProvider {
 	 * @param dataOwners
 	 */
 	public void collectDataOnce(ArrayList<DataOwner> dataOwners, INDEX_TYPE type, int runId) {
-		specifyIndex(type);
+		if (Constants.LAZY_MODE) {
+			if (index == null) specifyIndex(type);
+		} else 
+			specifyIndex(type);
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
 			entries.add(dataOwners.get(i).getEntry(runId));
@@ -49,7 +52,7 @@ public class ServiceProvider {
 		} else if (type == INDEX_TYPE.RTree) {
 			index = MemRTree.createTree();
 		} else if (type == INDEX_TYPE.QTree) {
-			index = new MemQTree(4, Constants.G_BOUND);
+			index = new MemQTree(4, Constants.G_BOUND, 0, 0);
 		}
 	}
 	

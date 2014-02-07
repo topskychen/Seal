@@ -11,6 +11,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import party.TrustedRegister;
 import timer.Timer;
@@ -30,14 +31,17 @@ public class VO implements RW{
 	ArrayList<VOCell> 	voCells 		= null;
 	Query				query 			= null;
 	private int			runId 			= -1;
+	TreeSet<Integer>	ansIds			= null;
+	
 	
 	/**
 	 * 
 	 */
 	public VO(int runId) {
 		// TODO Auto-generated constructor stub
-		this.runId = runId;
-		timer = new Timer();
+		this.runId 	= runId;
+		timer 		= new Timer();
+		ansIds 		= new TreeSet<Integer>();
 	}
 	
 	/**
@@ -55,7 +59,7 @@ public class VO implements RW{
 		boolean isVerify = true;
 		ansNo = 0;
 		for (VOCell voCell : voCells) {
-			if (!voCell.verify(query, runId)) {
+			if (!voCell.verify(query, runId, ansIds)) {
 				isVerify = false;
 				System.out.print("x\n");
 				System.out.println(voCell);
@@ -119,7 +123,13 @@ public class VO implements RW{
 	public String toString() {
 		StringBuffer sb = new StringBuffer("");
 		sb.append("VOCells : " + voCells.size() + "\n");
-		sb.append("AnsNo : " + ansNo + "\n");
+		sb.append("AnsNo : " + ansNo + " [");
+		Integer[] ids = ansIds.toArray(new Integer[0]);
+		for (int i = 0; i < ids.length && i < Constants.PRINT_LIM; i ++) {
+			if (i != 0) sb.append(" ");
+			sb.append(ids[i]);
+		}
+		sb.append("]\n");
 		sb.append("PrepareTime: " + prepareTime + " ms\n");
 		sb.append("VerifyTime: " + verifyTime + " ms\n");
 		sb.append("VOSize: " + voSize + " bytes, " + voSize / 1024.0 + " KB\n");

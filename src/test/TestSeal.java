@@ -46,22 +46,22 @@ public class TestSeal {
 	@Test
 	public void testFold() {
 //		fail("Not yet implemented");
-		Seal seal3 = new Seal(seal1, seal2);
+		Seal seal3 = new Seal(seal1, seal2, false);
 		assertEquals(seal3.getCnt(null), new BigInteger("2"));
-		Seal seal4 = new Seal(seal3, seal2);
+		Seal seal4 = new Seal(seal3, seal2, false);
 		assertEquals(seal4.getCnt(null), new BigInteger("3"));
 	}
 	
 	@Test
 	public void testSecretShare() {
-		Seal seal3 = new Seal(seal1, seal2);
+		Seal seal3 = new Seal(seal1, seal2, false);
 		assertEquals(seal3.getSecretShare(null), TrustedRegister.genSecretShare(tuple1).add(TrustedRegister.genSecretShare(tuple2)));
 	}
 	
 	@Test
 	public void testDig() {
-		Tuple tuple3 = new Tuple(tuple1, tuple2);
-		Seal seal3 = new Seal(seal1, seal2);
+		Tuple tuple3 = new Tuple(tuple1, tuple2, -1);
+		Seal seal3 = new Seal(seal1, seal2, false);
 		int[] comPre = tuple3.getComPre();
 		BigInteger dig = Utility.getBI(Hasher.hashBytes(new Integer(comPre[comPre.length - 1]).toString().getBytes())).multiply(new BigInteger("2"));
 		assertEquals(dig, seal3.getDig(null, Constants.L - comPre.length));
@@ -79,7 +79,7 @@ public class TestSeal {
 		timer.reset();
 		Seal sealA = seals[0];
 		for (int i = 1; i < num; i ++) {
-			sealA = new Seal(sealA, seals[i]);
+			sealA = new Seal(sealA, seals[i], false);
 		}
 		timer.stop();
 //		System.out.println("Time consumes: " + timer.timeElapseinMs() + " ms");
@@ -105,7 +105,7 @@ public class TestSeal {
 				} else {
 					Seal l = seals[i];
 					Seal r = seals[i + 1];
-					seals[newNum ++] = new Seal(l, r);
+					seals[newNum ++] = new Seal(l, r, false);
 				}
 			}
 			num = newNum;

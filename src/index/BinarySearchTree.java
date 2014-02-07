@@ -98,7 +98,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 				voCells.add(new VOCell(qs.getTuples(), (Entry)tree.getValue()));
 			}
 			for (BinaryTree tree: outRange) {
-				voCells.add(new VOCell(null, (Entry) tree.getValue()));
+				voCells.add(new VOCell(new ArrayList<Tuple>(), (Entry) tree.getValue()));
 			}
 			return voCells;
 		}
@@ -201,7 +201,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 					BinaryTree<Integer, Entry> leftNode = nodes[i];
 					BinaryTree<Integer, Entry> rightNode = nodes[i + 1];
 					nodes[newSize ++] = new BinaryTree(null,
-							new Entry((Entry)leftNode.getValue(), (Entry)rightNode.getValue()),
+							new Entry((Entry)leftNode.getValue(), (Entry)rightNode.getValue(), -1),
 							leftNode,
 							rightNode,
 							getClassValue()
