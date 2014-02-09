@@ -7,12 +7,12 @@ package utility;
  * @author chenqian
  *
  */
-public class Statistics {
+public class StatisticsQuery {
 
-	double prepareTime = 0;
-	double verifyTime = 0;
-	double voSize = 0;
-	int num = 0;
+	double 	prepareTime	= 0;
+	double 	verifyTime 	= 0;
+	double 	voSize 		= 0;
+	int 	num 		= 0;
 	
 	public void append(double prepareTime, double verifyTime, long voSize) {
 		this.prepareTime += prepareTime;
@@ -20,6 +20,8 @@ public class Statistics {
 		this.voSize += voSize;
 		num ++;
 	}
+	
+	
 	
 	public double getAvePrepareTime() {
 		return prepareTime / num;
@@ -35,15 +37,15 @@ public class Statistics {
 	
 	public void reSet() {
 		prepareTime = 0;
-		verifyTime = 0;
-		voSize = 0;
-		num = 0;
+		verifyTime 	= 0;
+		voSize 		= 0;
+		num 		= 0;
 	}
 	
 	/**
 	 * 
 	 */
-	public Statistics() {
+	public StatisticsQuery() {
 		// TODO Auto-generated constructor stub
 	}
 

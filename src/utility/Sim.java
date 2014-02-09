@@ -20,8 +20,11 @@ import utility.EncFun.ENC_TYPE;
  */
 public class Sim extends Simulator {
 
-	String 			fileName 	= "./data/TD1000";
-	INDEX_TYPE 		type 		= INDEX_TYPE.QTree;
+	String 				fileName 	= "./data/TD1000";
+	INDEX_TYPE 			type 		= INDEX_TYPE.QTree;
+	StatisticsUpdate 	statU		= new StatisticsUpdate();
+	StatisticsQuery 	statQ		= new StatisticsQuery();
+	
 	/**
 	 * @param trustedRegister
 	 * @param dataOwners
@@ -53,8 +56,8 @@ public class Sim extends Simulator {
 	public void init() {
 		// TODO Auto-generated method stub
 		dataOwners 			= new ArrayList<DataOwner>();
-		serviceProvider 	= new ServiceProvider();
-		client 				= new Client();
+		serviceProvider 	= new ServiceProvider(statU, statQ);
+		client 				= new Client(statU, statQ);
 		TrustedRegister.sk 	= AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
 		DataOwner.initData(dataOwners, fileName, type);

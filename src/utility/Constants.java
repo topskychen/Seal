@@ -15,6 +15,7 @@ import spatialindex.Region;
  */
 public class Constants {
 	public static enum 			OP			{ADD, DEL};
+	public static enum			MODE		{LAZY, UPDATE, REBUILD};
 	public static int 			D 			= 4;
 	public static int 			L 			= 6;
 	public static int 			THREAD_NUM 	= 4;
@@ -28,8 +29,9 @@ public class Constants {
 	public static Region 		G_BOUND		= new Region(new double[] {0, 0}, new double[] {BOUND, BOUND});
 	public static MemQTree		G_QTREE		= new MemQTree(4, G_BOUND, 0, 0);
 	public static boolean		RT_VERBOSE	= false;
-	public static boolean 		LAZY_MODE	= false;
 	public static int			PRINT_LIM	= 1000;
+	public static int 			BUFFER_SIZE	= 50;
+	public static MODE			G_MODE		= MODE.UPDATE;
 			
 	/**
 	 * 

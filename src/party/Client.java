@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 import utility.Query;
+import utility.StatisticsQuery;
+import utility.StatisticsUpdate;
 import utility.VO;
 
 /**
@@ -16,12 +18,15 @@ import utility.VO;
  */
 public class Client {
 
+	StatisticsUpdate 	statU = null;
+	StatisticsQuery		statQ = null;
 	
 	/**
 	 * 
 	 */
-	public Client() {
-		// TODO Auto-generated constructor stub
+	public Client(StatisticsUpdate statU, StatisticsQuery statQ) {
+		this.statU	= statU;
+		this.statQ	= statQ;
 	}
 	
 	public void rangeQuery(ServiceProvider serviceProvider, String fileName, int runId) {
@@ -29,10 +34,11 @@ public class Client {
 		try {
 			in = new Scanner(new File(fileName + ".qr"));
 			while(in.hasNext()) {
-				String[] tks = in.nextLine().split(" ");
+				String[] 	tks = in.nextLine().split(" ");
+				VO 			vo 	= null;
 				if (tks.length == 4) {
 					Query query = new Query(Integer.parseInt(tks[0]), Integer.parseInt(tks[1]), Integer.parseInt(tks[2]), Integer.parseInt(tks[3]));
-					VO vo = serviceProvider.rangeQuery(query, runId);
+					vo = serviceProvider.rangeQuery(query, runId);
 					if (!vo.verify(query)) {
 						System.out.println("Fail verify!");
 					} else {
@@ -41,7 +47,7 @@ public class Client {
 					System.out.println(vo.toString());
 				} else if (tks.length == 2){
 					Query query = new Query(Integer.parseInt(tks[0]), Integer.parseInt(tks[1]));
-					VO vo = serviceProvider.rangeQuery(query, runId);
+					vo = serviceProvider.rangeQuery(query, runId);
 					if (!vo.verify(query)) {
 						System.out.println("Fail verify!");
 					} else {
@@ -49,6 +55,7 @@ public class Client {
 					}
 					System.out.println(vo.toString());
 				}
+				statQ.append(vo.getPrepareTime(), vo.getVerifyTime(), vo.getVOSize());
 			}
 			in.close();
 		} catch (FileNotFoundException e) {

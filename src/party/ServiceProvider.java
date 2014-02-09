@@ -5,9 +5,13 @@ package party;
 
 import java.util.ArrayList;
 
+import timer.Timer;
 import utility.Constants;
 import utility.Query;
+import utility.StatisticsQuery;
+import utility.StatisticsUpdate;
 import utility.VO;
+import utility.Constants.MODE;
 import index.BinarySearchTree;
 import index.Entry;
 import index.MemQTree;
@@ -21,23 +25,29 @@ import index.SearchIndex.INDEX_TYPE;
  */
 public class ServiceProvider {
 
-	SearchIndex index = null;
+	SearchIndex 		index = null;
+	Timer 				timer = null;
+	StatisticsUpdate 	statU = null;
+	StatisticsQuery		statQ = null;
 	
 	/**
 	 * Collect the data once, and build the index.
 	 * @param dataOwners
 	 */
 	public void collectDataOnce(ArrayList<DataOwner> dataOwners, INDEX_TYPE type, int runId) {
-		if (Constants.LAZY_MODE) {
-			if (index == null) specifyIndex(type);
-		} else 
+		if (Constants.G_MODE != MODE.REBUILD) {
+			if (index == null) specifyIndex(type);			
+		} else {			
 			specifyIndex(type);
+		}
+		timer.reset();
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
 			entries.add(dataOwners.get(i).getEntry(runId));
 		}
 		index.buildIndex(entries);
-		System.out.println("Index prepared!");
+		timer.stop();
+		System.out.println("Index prepared! consumes: " + timer.timeElapseinMs() + " ms");
 	}
 	
 	public VO rangeQuery(Query query, int runId) {
@@ -60,8 +70,11 @@ public class ServiceProvider {
 	/**
 	 * 
 	 */
-	public ServiceProvider() {
+	public ServiceProvider(StatisticsUpdate statU, StatisticsQuery statQ) {
 		// TODO Auto-generated constructor stub
+		this.timer = new Timer();
+		this.statU = statU;
+		this.statQ = statQ;
 	}
 
 	/**

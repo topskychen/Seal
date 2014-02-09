@@ -141,4 +141,15 @@ public class VO implements RW{
 		return sb.toString();
 	}
 
+	public double getPrepareTime() {
+		return prepareTime;
+	}
+	
+	public double getVerifyTime() {
+		return verifyTime;
+	}
+	
+	public int getVOSize() {
+		return voSize;
+	}
 }
