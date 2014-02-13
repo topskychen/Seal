@@ -9,6 +9,7 @@ import java.math.BigInteger;
 
 import io.IO;
 import io.RW;
+import spatialindex.IShape;
 import utility.Seal;
 import utility.Tuple;
 
@@ -161,14 +162,10 @@ public class Entry implements RW{
 	}
 
 
-	public Point getPoint() {
-		return tuple.getPoint();
+	public IShape getShape() {
+		return tuple.getShape();
 	}
 	
-	public spatialindex.Point getSPoint() {
-		return new spatialindex.Point(getPoint().doubleCoords());
-	}
-
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
@@ -177,24 +174,24 @@ public class Entry implements RW{
 		IO.writeInt(ds, no);
 	}
 	
-	/**
-	 * Get the lower value of the entry.
-	 * This function called only the one-dimensional data.
-	 * @return
-	 */
-	public int getLowVal() {
-		return tuple.getPoint().getCoord(0);
-	}
-	
-	/**
-	 * Get the higher value of the entry.
-	 * This function called only the one-dimensional data.
-	 * @return
-	 */
-	public int getHiVal() {
-		return tuple.getPoint().getCoord(0);
-	}
-	
+//	/**
+//	 * Get the lower value of the entry.
+//	 * This function called only the one-dimensional data.
+//	 * @return
+//	 */
+//	public int getLowVal() {
+//		return tuple.getPoint().getCoord(0);
+//	}
+//	
+//	/**
+//	 * Get the higher value of the entry.
+//	 * This function called only the one-dimensional data.
+//	 * @return
+//	 */
+//	public int getHiVal() {
+//		return tuple.getPoint().getCoord(0);
+//	}
+//	
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("tuple : " + tuple + "\n");

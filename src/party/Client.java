@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-import utility.Query;
+import spatialindex.Region;
 import utility.StatisticsQuery;
 import utility.StatisticsUpdate;
 import utility.VO;
@@ -37,7 +37,7 @@ public class Client {
 				String[] 	tks = in.nextLine().split(" ");
 				VO 			vo 	= null;
 				if (tks.length == 4) {
-					Query query = new Query(Integer.parseInt(tks[0]), Integer.parseInt(tks[1]), Integer.parseInt(tks[2]), Integer.parseInt(tks[3]));
+					Region query = new Region(new double[] {Integer.parseInt(tks[0]), Integer.parseInt(tks[1])}, new double[] {Integer.parseInt(tks[2]), Integer.parseInt(tks[3])});
 					vo = serviceProvider.rangeQuery(query, runId);
 					if (!vo.verify(query)) {
 						System.out.println("Fail verify!");
@@ -46,7 +46,7 @@ public class Client {
 					}
 					System.out.println(vo.toString());
 				} else if (tks.length == 2){
-					Query query = new Query(Integer.parseInt(tks[0]), Integer.parseInt(tks[1]));
+					Region query = new Region(new double[] {Integer.parseInt(tks[0])}, new double[] {Integer.parseInt(tks[1])});
 					vo = serviceProvider.rangeQuery(query, runId);
 					if (!vo.verify(query)) {
 						System.out.println("Fail verify!");

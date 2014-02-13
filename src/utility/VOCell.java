@@ -12,6 +12,7 @@ import java.util.TreeSet;
 import crypto.Constants;
 import crypto.Hasher;
 import party.TrustedRegister;
+import spatialindex.IShape;
 import index.Entry;
 import io.IO;
 import io.RW;
@@ -41,7 +42,7 @@ public class VOCell implements RW{
 	 * @param query
 	 * @return
 	 */
-	public boolean verify(Query query, int runId, TreeSet<Integer> ansIds) {
+	public boolean verify(IShape query, int runId, TreeSet<Integer> ansIds) {
 		entry.getSeal().setContent(null);
 		BigInteger random = Constants.PRIME_P.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())

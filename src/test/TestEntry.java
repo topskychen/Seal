@@ -9,7 +9,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import index.Entry;
-import index.Point;
 import index.SearchIndex.INDEX_TYPE;
 
 import org.junit.Before;
@@ -18,6 +17,7 @@ import org.junit.Test;
 
 import crypto.AES;
 import party.TrustedRegister;
+import spatialindex.Point;
 import utility.Seal;
 import utility.Tuple;
 import utility.EncFun.ENC_TYPE;
@@ -39,7 +39,7 @@ public class TestEntry {
 		entries = new ArrayList<>();
 		tuples = new ArrayList<>();
 		for (int i = 0; i < num; i ++) {
-			tuples.add(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree));
+			tuples.add(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree));
 			entries.add(new Entry(tuples.get(i), null));
 			BigInteger ss = TrustedRegister.genSecretShare(tuples.get(i));
 //			System.out.println(ss);

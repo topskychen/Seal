@@ -5,9 +5,9 @@ package party;
 
 import java.util.ArrayList;
 
+import spatialindex.IShape;
 import timer.Timer;
 import utility.Constants;
-import utility.Query;
 import utility.StatisticsQuery;
 import utility.StatisticsUpdate;
 import utility.VO;
@@ -50,7 +50,7 @@ public class ServiceProvider {
 		System.out.println("Index prepared! consumes: " + timer.timeElapseinMs() + " ms");
 	}
 	
-	public VO rangeQuery(Query query, int runId) {
+	public VO rangeQuery(IShape query, int runId) {
 		VO vo = new VO(runId);
 		vo.prepare(index, query);
 		return vo;

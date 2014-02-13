@@ -5,7 +5,6 @@ package party;
 
 import index.Entry;
 import index.MemRTree;
-import index.Point;
 import index.SearchIndex.INDEX_TYPE;
 
 import java.io.BufferedInputStream;
@@ -16,6 +15,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import spatialindex.IShape;
+import spatialindex.Point;
 import utility.Constants;
 import utility.Seal;
 import utility.Tuple;
@@ -27,7 +28,7 @@ import utility.Tuple;
 public class DataOwner {
 
 	private int						id				= -1;
-	private ArrayList<Point>		points			= null;
+	private ArrayList<IShape>		points			= null;
 	private ArrayList<Entry> 		entries 		= null;
 	private ArrayList<BigInteger>	SSs			 	= null;
 	
@@ -43,7 +44,7 @@ public class DataOwner {
 		return entries.get(i);
 	}
 	
-	public Point getPoint(int i) {
+	public IShape getPoint(int i) {
 		return points.get(i);
 	}
 	
@@ -69,7 +70,7 @@ public class DataOwner {
 		entries.clear();
 	}
 	
-	public DataOwner(int id, ArrayList<Point> points) {
+	public DataOwner(int id, ArrayList<IShape> points) {
 		this.id 		= id;
 		this.points 	= points;
 		this.entries 	= new ArrayList<Entry>(points.size());
@@ -90,7 +91,7 @@ public class DataOwner {
 	
 	public int[] comPre(MemRTree rtree, int runId) {
 		ArrayList<Integer> path = new ArrayList<Integer>();
-		rtree.getPath(rtree.getRootId(), new spatialindex.Point(getPoint(runId).doubleCoords()), id, path);
+		rtree.getPath(rtree.getRootId(), getPoint(runId), id, path);
 		path.add(rtree.getRootId());
 		int[] comPre = new int[utility.Constants.L];
 		for (int j = 0; j < utility.Constants.L; j ++) comPre[j] = id;
@@ -105,7 +106,7 @@ public class DataOwner {
 		if (type == INDEX_TYPE.RTree) {
 			rtree = MemRTree.createTree();
 			for (DataOwner owner : dataOwners) {
-				rtree.insertData(null, new spatialindex.Point(owner.getPoint(runId).doubleCoords()), owner.getId());
+				rtree.insertData(null, owner.getPoint(runId), owner.getId());
 			}
 			if (Constants.RT_VERBOSE) System.out.println(rtree);
 		} 
@@ -133,7 +134,7 @@ public class DataOwner {
 				Scanner in = new Scanner(new BufferedInputStream(new FileInputStream(file)));
 				while (in.hasNext()) {
 					int id = Integer.parseInt(in.nextLine());
-					ArrayList<Point> points = parsePoints(in.nextLine());
+					ArrayList<IShape> points = parsePoints(in.nextLine());
 					dataOwners.add(new DataOwner(id, points));
 				}
 				in.close();
@@ -146,18 +147,18 @@ public class DataOwner {
 		}
 	}
 	
-	public static Point parsePoint(String line) {
+	public static IShape parsePoint(String line) {
 		String[] tks = line.split(" ");
-		int[] coords = new int[tks.length];
+		double[] coords = new double[tks.length];
 		for (int i = 0; i < coords.length; i ++) {
 			coords[i] = Integer.parseInt(tks[i]);
 		}
-		return new Point(coords);
+		return (IShape) new Point(coords);
 	}
 	
-	public static ArrayList<Point> parsePoints(String points) {
+	public static ArrayList<IShape> parsePoints(String points) {
 		String[] lines = points.split("\t");
-		ArrayList<Point> data = new ArrayList<Point>();
+		ArrayList<IShape> data = new ArrayList<IShape>();
 		for (String line : lines) {
 			data.add(parsePoint(line));
 		}

@@ -3,7 +3,6 @@
  */
 package generator;
 
-import index.Point;
 import io.P;
 
 import java.io.BufferedOutputStream;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 
+import spatialindex.Point;
 import utility.Constants;
 
 /**
@@ -39,17 +39,17 @@ public class TDGenerator {
 		for (int i = 0; i < no; i ++) {
 			Point p = null;
 			if (lastPoints == null) {
-				p = new Point(random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND));
+				p = new Point(new double[] {random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND)});
 			} else {
-				p = new Point(nextPos(lastPoints[i].getCoord(0)), 
-						nextPos(lastPoints[i].getCoord(1)));
+				p = new Point(new double[] {nextPos((int) lastPoints[i].getCoord(0)), 
+						nextPos((int) lastPoints[i].getCoord(1))});
 			}
 			while(hashSet.contains(p)) {
 				if (lastPoints == null) {
-					p = new Point(random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND));
+					p = new Point(new double[] {random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND)});
 				} else {
-					p = new Point(nextPos(lastPoints[i].getCoord(0)), 
-							nextPos(lastPoints[i].getCoord(1)));
+					p = new Point(new double[] {nextPos((int) lastPoints[i].getCoord(0)), 
+							nextPos((int) lastPoints[i].getCoord(1))});
 				}
 			}
 			hashSet.add(p);
@@ -88,7 +88,7 @@ public class TDGenerator {
 				pw.println(i);
 				for (int j = 0; j < traLen; j ++) {
 					if (j != 0) pw.print("\t");
-					for (int k = 0; k < data[j][i].getDim(); k ++) {
+					for (int k = 0; k < data[j][i].getDimension(); k ++) {
 						if (k != 0) pw.print(" ");
 						pw.print(data[j][i].getCoord(k));
 					}

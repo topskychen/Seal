@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-import utility.Query;
+import spatialindex.IShape;
+import spatialindex.Point;
+import spatialindex.Region;
 import utility.Tuple;
 import utility.VOCell;
 import memoryindex.BinaryTree;
@@ -40,7 +42,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	 * @see index.SearchIndex#rangeQuery(index.Query)
 	 */
 	@Override
-	public ArrayList<VOCell> rangeQuery(Query query) {
+	public ArrayList<VOCell> rangeQuery(IShape query) {
 		// TODO Auto-generated method stub
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
 		queryStrategy(this, rangeQueryStrategy);
@@ -82,10 +84,10 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		private ArrayList<BinaryTree> 	toVisit 	= new ArrayList<BinaryTree>();
 		private ArrayList<BinaryTree> 	inRange 	= new ArrayList<BinaryTree>();
 		private ArrayList<BinaryTree> 	outRange 	= new ArrayList<BinaryTree>();
-		private Query 					query 		= null;
+		private IShape 					query 		= null;
 		
 		
-		public RangeQueryStrategy(Query query) {
+		public RangeQueryStrategy(IShape query) {
 			super();
 			this.query = query;
 		}
@@ -127,12 +129,11 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		
 		boolean visitData(BinaryTree tree) {
 			Entry data = (Entry) tree.getValue(); 
-			Point p1 = new Point(data.getLowVal());
-			Point p2 = new Point(data.getHiVal());
-			if (query.inRange(p1, p2)) {
+			IShape p = data.getShape();
+			if (query.contains(p)) {
 				inRange.add(tree);
 				return false;
-			} else if (query.outRange(p1, p2)) {
+			} else if (!query.intersects(p)) {
 				outRange.add(tree);
 				return false;
 			}

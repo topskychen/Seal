@@ -4,7 +4,6 @@
 package test;
 
 import static org.junit.Assert.*;
-import index.Point;
 import index.SearchIndex.INDEX_TYPE;
 
 import java.math.BigInteger;
@@ -16,6 +15,7 @@ import org.junit.Test;
 import crypto.AES;
 import crypto.Hasher;
 import party.TrustedRegister;
+import spatialindex.Point;
 import timer.Timer;
 import utility.EncFun.ENC_TYPE;
 import utility.Constants;
@@ -29,8 +29,8 @@ import utility.Utility;
  */
 public class TestSeal {
 
-	static Tuple tuple1 = new Tuple(1, new Point(128), 0, null, INDEX_TYPE.BTree);
-	static Tuple tuple2 = new Tuple(2, new Point(64), 0, null, INDEX_TYPE.BTree);
+	static Tuple tuple1 = new Tuple(1, new Point(new double[] {128}), 0, null, INDEX_TYPE.BTree);
+	static Tuple tuple2 = new Tuple(2, new Point(new double[] {64}), 0, null, INDEX_TYPE.BTree);
 	static Seal seal1 = null, seal2 = null;
 	static Timer timer = new Timer();
 	
@@ -73,8 +73,8 @@ public class TestSeal {
 		Seal[] seals = new Seal[num];
 		BigInteger ps = BigInteger.ZERO;
 		for (int i = 0; i < num; i ++) {
-			seals[i] = new Seal(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree), TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
-			ps = ps.add(TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
+			seals[i] = new Seal(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree), TrustedRegister.genSecretShare(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree)));
+			ps = ps.add(TrustedRegister.genSecretShare(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree)));
 		}
 		timer.reset();
 		Seal sealA = seals[0];
@@ -93,8 +93,8 @@ public class TestSeal {
 		Seal[] seals = new Seal[num];
 		BigInteger ps = BigInteger.ZERO;
 		for (int i = 0; i < num; i ++) {
-			seals[i] = new Seal(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree), TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
-			ps = ps.add(TrustedRegister.genSecretShare(new Tuple(i, new Point(i), 0, null, INDEX_TYPE.BTree)));
+			seals[i] = new Seal(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree), TrustedRegister.genSecretShare(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree)));
+			ps = ps.add(TrustedRegister.genSecretShare(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree)));
 		}
 		timer.reset();
 		while(num > 1) {

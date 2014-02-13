@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import spatialindex.IShape;
 import spatialindex.Point;
 import spatialindex.Region;
 import utility.Constants;
 import utility.Constants.MODE;
 import utility.Constants.OP;
-import utility.Query;
 import utility.Tuple;
 import utility.VOCell;
 import memoryindex.IQueryStrategyQT;
@@ -64,7 +64,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 	}
 
 	@Override
-	public ArrayList<VOCell> rangeQuery(Query query) {
+	public ArrayList<VOCell> rangeQuery(IShape query) {
 		// TODO Auto-generated method stub
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
 		queryStrategy(this, rangeQueryStrategy);
@@ -84,7 +84,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 			}
 		} else{			
 			for (Entry entry : entries) {
-				this.insert(entry.getSPoint(), entry);
+				this.insert((Point) entry.getShape(), entry);
 			}
 			buildIndex(this, null, 0);
 		}
@@ -226,7 +226,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 	
 	
 	public boolean contains(Entry entry) {
-		return this.getBoundary().contains(entry.getSPoint());
+		return this.getBoundary().contains(entry.getShape());
 	}
 	
 	public Entry buildIndex(QuadTree tree, HashSet<Long> modified, int lev) {
@@ -262,7 +262,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 		}
 	}
 	
-	public ArrayList<Integer> getPath(spatialindex.Point p) {
+	public ArrayList<Integer> getPath(Point p) {
 		ArrayList<Integer> path = new ArrayList<Integer>();
 		getPath(path, p, getBoundary(), 0, 1);
 		return path;
@@ -361,12 +361,12 @@ public class MemQTree extends QuadTree implements SearchIndex {
 
 		private ArrayList<QuadTree> toVisit = new ArrayList<QuadTree>();
 		private ArrayList<VOCell> 	voCells = new ArrayList<VOCell>();
-		private Region 				query 	= null;
+		private IShape 				query 	= null;
 		
 		
-		public RangeQueryStrategy(Query query) {
+		public RangeQueryStrategy(IShape query) {
 			super();
-			this.query = new Region(query.getLB().doubleCoords(), query.getHB().doubleCoords());
+			this.query = query;
 		}
 
 		public ArrayList<VOCell> getVOCells() {
@@ -448,7 +448,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 					if (query.contains(chTrees[i].getBoundary())) { // ans
 						ArrayList<Tuple> tuples = new ArrayList<Tuple>();
 						for(Entry entryL : tree.L.values()) {
-							if (chTrees[i].getBoundary().contains(entryL.getSPoint()))
+							if (chTrees[i].getBoundary().contains(entryL.getShape()))
 								tuples.add(entryL.getTuple());
 						}
 						voCells.add(new VOCell(tuples, (Entry) values.get(i))); 
@@ -461,7 +461,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 			} else {
 				if (Constants.G_MODE == MODE.LAZY) tree.updateU(); // 
 				for (Entry entry : tree.L.values()) {
-					if (query.contains(entry.getSPoint())) {
+					if (query.contains(entry.getShape())) {
 						voCells.add(new VOCell(entry.getTuple(), entry));
 					} else {
 						voCells.add(new VOCell(new ArrayList<Tuple>(), entry));

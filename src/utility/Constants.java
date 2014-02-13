@@ -4,6 +4,7 @@
 package utility;
 
 import index.MemQTree;
+import index.MemRTree;
 
 import java.math.BigInteger;
 
@@ -28,10 +29,11 @@ public class Constants {
 	public static int			RANGE		= 100;
 	public static Region 		G_BOUND		= new Region(new double[] {0, 0}, new double[] {BOUND, BOUND});
 	public static MemQTree		G_QTREE		= new MemQTree(4, G_BOUND, 0, 0);
+	public static MemRTree		G_RTREE		= MemRTree.createTree();
 	public static boolean		RT_VERBOSE	= false;
 	public static int			PRINT_LIM	= 1000;
 	public static int 			BUFFER_SIZE	= 50;
-	public static MODE			G_MODE		= MODE.UPDATE;
+	public static MODE			G_MODE		= MODE.REBUILD;
 			
 	/**
 	 * 

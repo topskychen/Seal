@@ -3,14 +3,17 @@
  */
 package utility;
 
-import index.Point;
 import index.SearchIndex.INDEX_TYPE;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
 
+import org.hamcrest.core.IsInstanceOf;
 
+import spatialindex.IShape;
+import spatialindex.Point;
+import spatialindex.Region;
 import io.IO;
 import io.RW;
 
@@ -21,13 +24,13 @@ import io.RW;
 public class Tuple implements RW{
 
 	private int		id 		= -1;
-	private Point	point 	= null;
+	private IShape	shape  	= null;
 	private int 	tiStp	= -1;
 	private int[] 	comPre	= null;
 	
-	public Tuple(int id, Point point, int tiStp, int[] comPre) {
+	public Tuple(int id, IShape shape, int tiStp, int[] comPre) {
 		this.id 	= id;
-		this.point 	= point;
+		this.shape 	= shape;
 		this.tiStp 	= tiStp;
 		this.comPre = comPre;
 	}
@@ -69,16 +72,16 @@ public class Tuple implements RW{
 	 * @param v
 	 * @param t
 	 */
-	public Tuple(int id, Point p, int t, int[] comPre, INDEX_TYPE type) {
+	public Tuple(int id, IShape p, int t, int[] comPre, INDEX_TYPE type) {
 		this.id = id;
-		this.point = p;
+		this.shape = p;
 		this.tiStp = t;
 //		this.point[0] = p;
 //		this.point[1] = this.point[0];
 //		this.tiStp[0] = t;
 //		this.tiStp[1] = t;
 		if (type == INDEX_TYPE.BTree) {
-			int value = p.getCoord(0);
+			int value = (int) ((Point) p).getCoord(0);
 			this.comPre = new int[Constants.L];
 			for (int i = 0; i < Constants.L; i ++) {
 				int v = (value >> (Constants.D * i));
@@ -87,7 +90,7 @@ public class Tuple implements RW{
 		} else if (type == INDEX_TYPE.RTree) {
 			this.comPre = comPre;
 		} else if (type == INDEX_TYPE.QTree) {
-			ArrayList<Integer> ids = Constants.G_QTREE.getPath(new spatialindex.Point(p.doubleCoords()));
+			ArrayList<Integer> ids = Constants.G_QTREE.getPath((Point) p);
 			this.comPre = new int[Constants.L];
 			for (int i = 0; i < Constants.L; i ++) {
 				this.comPre[i] = ids.get(i);
@@ -104,8 +107,8 @@ public class Tuple implements RW{
 		// TODO Auto-generated constructor stub
 	}
 
-	public Point getPoint() {
-		return point;
+	public IShape getShape() {
+		return shape;
 	}
 	
 	public int[] getComPre() {
@@ -128,9 +131,15 @@ public class Tuple implements RW{
 	public void read(DataInputStream ds) {
 		// TODO Auto-generated method stub
 		id = IO.readInt(ds);
-		if (IO.readBoolean(ds)) {
-			point = new Point();
-			point.read(ds);
+		int type = IO.readInt(ds);
+		if (type != 0) {
+			if (type == 1) {
+				shape = new Point();
+				((Point) shape).read(ds);
+			} else {
+				shape = new Region();
+				((Region) shape).read(ds);
+			}
 		}
 		tiStp = IO.readInt(ds);
 		comPre = IO.readIntArrays(ds);
@@ -140,11 +149,16 @@ public class Tuple implements RW{
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
 		IO.writeInt(ds, id);
-		if (point == null) {
-			IO.writeBoolean(ds, false);
+		if (shape == null) {
+			IO.writeInt(ds, 0);
 		} else {
-			IO.writeBoolean(ds, true);
-			point.write(ds);
+			if (shape instanceof Point) {
+				IO.writeInt(ds, 1);
+				((Point) shape).write(ds);
+			} else {
+				IO.writeInt(ds, 2);
+				((Region) shape).write(ds);
+			}
 		}
 		IO.writeInt(ds, tiStp);
 		IO.writeIntArrays(ds, comPre);
@@ -153,8 +167,8 @@ public class Tuple implements RW{
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("@" + id + "\n");
-		if (point != null) {
-			point.toString();
+		if (shape != null) {
+			shape.toString();
 		}
 		sb.append("\n[");
 		for (int i = 0; i < comPre.length; i ++) {
@@ -172,6 +186,6 @@ public class Tuple implements RW{
 	public Tuple clone() {
 		int[] newComPre	= new int[comPre.length];
 		System.arraycopy(comPre, 0, newComPre, 0, comPre.length);
-		return new Tuple(id, point.clone(), tiStp, newComPre);
+		return new Tuple(id, shape.clone(), tiStp, newComPre);
 	}
 }

@@ -6,9 +6,11 @@ package index;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import rtree.Node;
 import rtree.RTree;
+import rtree.Records;
 import spatialindex.IEntry;
 import spatialindex.IQueryStrategy;
 import spatialindex.IShape;
@@ -20,9 +22,9 @@ import storagemanager.MemoryStorageManager;
 import storagemanager.PropertySet;
 import storagemanager.RandomEvictionsBuffer;
 import utility.Constants;
-import utility.Query;
 import utility.Tuple;
 import utility.VOCell;
+import utility.Constants.MODE;
 
 /**
  * @author chenqian
@@ -60,21 +62,52 @@ public class MemRTree extends RTree implements SearchIndex {
 	}
 
 	@Override
-	public ArrayList<VOCell> rangeQuery(Query query) {
+	public ArrayList<VOCell> rangeQuery(IShape query) {
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
 		queryStrategy(getRootId(), rangeQueryStrategy);
 		return rangeQueryStrategy.getVOCells(); 
 	}
 
+	public void updateSeals(Records records) {
+		HashSet<Integer> visitedIds = records.getVisitedIds();
+		for (Integer id : visitedIds) {
+			IShape curRec = readNode(id).getShape();
+			IShape pastRec = innerEntries.get(id).getShape();
+		}
+	}
+	
+	/**
+	 * Insert a point, if exists then replace
+	 * @param entry
+	 */
+	public void replace(Entry entry) {
+		Records records = getRecords(); records.clear();
+		if (leafEntries.containsKey(entry.getId())) {
+			Entry oldEntry = leafEntries.get(entry.getId());
+			deleteData(oldEntry.getShape(), oldEntry.getId());
+		}
+		insertData(null, entry.getShape(), entry.getId());
+		updateSeals(records);
+	}	
+	
 	@Override
 	public void buildIndex(ArrayList<Entry> entries) {
-		// TODO Auto-generated method stub
-		for (int i = 0; i < entries.size(); i ++) {
-			Entry entry = entries.get(i);
-			insertData(null, new spatialindex.Point(entry.getPoint().doubleCoords()), entry.getTuple().getId());
-			leafEntries.put(entry.getTuple().getId(), entry);
+		if (Constants.G_MODE != MODE.REBUILD) {
+			if (Constants.G_MODE == MODE.UPDATE) {
+				for (Entry entry : entries) {
+					replace(entry);
+				}
+			} else {
+				throw new IllegalStateException("This mode is not supported");
+			}
+		} else {
+			for (int i = 0; i < entries.size(); i ++) {
+				Entry entry = entries.get(i);
+				insertData(null, entry.getShape(), entry.getTuple().getId());
+				leafEntries.put(entry.getTuple().getId(), entry);
+			}
+			buildIndex(getRootId());
 		}
-		buildIndex(getRootId());
 	}
 	
 	public void buildIndex(int id) {
@@ -94,7 +127,7 @@ public class MemRTree extends RTree implements SearchIndex {
 		return;
 	}
 	
-	public boolean getPath(int nodeId, Point p, int id, ArrayList<Integer> path) {
+	public boolean getPath(int nodeId, IShape p, int id, ArrayList<Integer> path) {
 		Node node = readNode(nodeId);
 		for (int i = 0; i < node.getChildrenCount(); i ++) {
 			if (node.getLevel() != 0) {
@@ -124,8 +157,8 @@ public class MemRTree extends RTree implements SearchIndex {
 		
 		
 		
-		public RangeQueryStrategy(Query query) {
-			this.query = new Region(query.getLB().doubleCoords(), query.getHB().doubleCoords()); 
+		public RangeQueryStrategy(IShape query) {
+			this.query = query; 
 		}
 		
 		public ArrayList<VOCell> getVOCells() {

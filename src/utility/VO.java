@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 import party.TrustedRegister;
+import spatialindex.IShape;
 import timer.Timer;
 
 /**
@@ -29,7 +30,7 @@ public class VO implements RW{
 	private int 		voSize 			= -1;
 	private int			ansNo			= -1;
 	ArrayList<VOCell> 	voCells 		= null;
-	Query				query 			= null;
+	IShape				query 			= null;
 	private int			runId 			= -1;
 	TreeSet<Integer>	ansIds			= null;
 	
@@ -47,14 +48,14 @@ public class VO implements RW{
 	/**
 	 * Prepare VO
 	 */
-	public void prepare(SearchIndex index, Query query) {
+	public void prepare(SearchIndex index, IShape query) {
 		timer.reset();
 		voCells = index.rangeQuery(query);
 		timer.stop();
 		prepareTime = timer.timeElapseinMs();
 	}
 	
-	public boolean verify(Query query) {
+	public boolean verify(IShape query) {
 		timer.reset();
 		boolean isVerify = true;
 		ansNo = 0;
