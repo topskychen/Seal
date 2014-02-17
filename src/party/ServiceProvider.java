@@ -36,7 +36,15 @@ public class ServiceProvider {
 	 */
 	public void collectDataOnce(ArrayList<DataOwner> dataOwners, INDEX_TYPE type, int runId) {
 		if (Constants.G_MODE != MODE.REBUILD) {
-			if (index == null) specifyIndex(type);			
+			if (index == null) {
+				if (type == INDEX_TYPE.BTree) {
+					index = new BinarySearchTree(Entry.class);
+				} else if (type == INDEX_TYPE.RTree) {
+					index = Constants.G_RTREE;
+				} else if (type == INDEX_TYPE.QTree) {
+					index = Constants.G_QTREE;
+				}			
+			}
 		} else {			
 			specifyIndex(type);
 		}
@@ -45,7 +53,7 @@ public class ServiceProvider {
 		for (int i = 0; i < dataOwners.size(); i ++) {
 			entries.add(dataOwners.get(i).getEntry(runId));
 		}
-		index.buildIndex(entries);
+		index.buildIndex(dataOwners, entries);
 		timer.stop();
 		System.out.println("Index prepared! consumes: " + timer.timeElapseinMs() + " ms");
 	}

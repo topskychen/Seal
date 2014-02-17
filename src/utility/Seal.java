@@ -88,7 +88,7 @@ public class Seal implements RW{
 		content = content.add(BigInteger.ONE);
 //		int value = tuple.getLowPoint().getCoord(0);
 		int[] comPre = tuple.getComPre();
-		for (int i = 0; i < utility.Constants.L; i ++) {
+		for (int i = 0; i < comPre.length; i ++) {
 			content = content.shiftLeft(24 + 160);
 //			int v = (value >> (4 * i));
 			byte[] hash = Hasher.hashBytes(new Integer(comPre[i]).toString().getBytes());

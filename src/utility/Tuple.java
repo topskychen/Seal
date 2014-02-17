@@ -9,8 +9,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.util.ArrayList;
 
-import org.hamcrest.core.IsInstanceOf;
-
 import spatialindex.IShape;
 import spatialindex.Point;
 import spatialindex.Region;
@@ -27,15 +25,7 @@ public class Tuple implements RW{
 	private IShape	shape  	= null;
 	private int 	tiStp	= -1;
 	private int[] 	comPre	= null;
-	
-	public Tuple(int id, IShape shape, int tiStp, int[] comPre) {
-		this.id 	= id;
-		this.shape 	= shape;
-		this.tiStp 	= tiStp;
-		this.comPre = comPre;
-	}
-	
-	
+		
 	/**
 	 * Construct a tuple based on two tuples.
 	 * The points tracks the bounds of two tuples.
@@ -184,8 +174,25 @@ public class Tuple implements RW{
 	}
 
 	public Tuple clone() {
-		int[] newComPre	= new int[comPre.length];
-		System.arraycopy(comPre, 0, newComPre, 0, comPre.length);
-		return new Tuple(id, shape.clone(), tiStp, newComPre);
+		Tuple tuple = new Tuple();
+		tuple.id = id;
+		tuple.shape = shape.clone();
+		tuple.comPre = new int[comPre.length];
+		System.arraycopy(comPre, 0, tuple.comPre, 0, comPre.length);
+		tuple.tiStp = tiStp;
+		return tuple;
+	}
+	
+	public void setShape(IShape shape) {
+		this.shape = shape;
+	}
+	
+	public void setTS(int tiStp) {
+		this.tiStp = tiStp;
+	}
+	
+	public void setComPre(int[] comPre) {
+		this.comPre = new int[comPre.length];
+		System.arraycopy(comPre, 0, this.comPre, 0, comPre.length);
 	}
 }

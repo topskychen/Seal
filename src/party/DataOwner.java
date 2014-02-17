@@ -18,6 +18,7 @@ import java.util.Scanner;
 import spatialindex.IShape;
 import spatialindex.Point;
 import utility.Constants;
+import utility.Constants.MODE;
 import utility.Seal;
 import utility.Tuple;
 
@@ -60,10 +61,14 @@ public class DataOwner {
 	 * @param type
 	 */
 	public void prepareEntry(int runId, int[] comPre, INDEX_TYPE type) {
-		Tuple tuple = new Tuple(getId(), getPoint(runId), runId, comPre, type);
-		Seal seal = new Seal(tuple, getSS(runId));
-		Entry entry = new Entry(tuple, seal);
-		entries.add(runId, entry);
+		if (type == INDEX_TYPE.RTree && Constants.G_MODE == MODE.UPDATE) {
+			entries.add(runId, new Entry(new Tuple(getId(), getPoint(runId), runId, null, type), null));
+		} else {
+			Tuple tuple = new Tuple(getId(), getPoint(runId), runId, comPre, type);
+			Seal seal = new Seal(tuple, getSS(runId));
+			Entry entry = new Entry(tuple, seal);
+			entries.add(runId, entry);
+		}
 	}
 	
 	public void clear() {
@@ -89,12 +94,12 @@ public class DataOwner {
 
 	}
 	
-	public int[] comPre(MemRTree rtree, int runId) {
+	public static int[] comPre(MemRTree rtree, IShape point, int id) {
 		ArrayList<Integer> path = new ArrayList<Integer>();
-		rtree.getPath(rtree.getRootId(), getPoint(runId), id, path);
+		rtree.getPath(rtree.getRootId(), point, id, path);
 		path.add(rtree.getRootId());
-		int[] comPre = new int[utility.Constants.L];
-		for (int j = 0; j < utility.Constants.L; j ++) comPre[j] = id;
+		int[] comPre = new int[Math.min(utility.Constants.L, path.size())];
+//		for (int j = 0; j < utility.Constants.L; j ++) comPre[j] = id;
 		for (int j = 0, k = path.size() - 1; j < utility.Constants.L && k >= 0 ; j ++, k --) {
 			comPre[j] = path.get(k);
 		}
@@ -104,18 +109,24 @@ public class DataOwner {
 	public static void prepare(ArrayList<DataOwner> dataOwners, INDEX_TYPE type, int runId) {
 		MemRTree rtree = null;
 		if (type == INDEX_TYPE.RTree) {
-			rtree = MemRTree.createTree();
-			for (DataOwner owner : dataOwners) {
-				rtree.insertData(null, owner.getPoint(runId), owner.getId());
+			if (Constants.G_MODE == MODE.REBUILD) {				
+				rtree = MemRTree.createTree();
+				for (DataOwner owner : dataOwners) {
+					rtree.insertData(null, owner.getPoint(runId), owner.getId());
+				}
+				if (Constants.RT_VERBOSE) System.out.println(rtree);
 			}
-			if (Constants.RT_VERBOSE) System.out.println(rtree);
 		} 
 		BigInteger totalSS = BigInteger.ZERO;
 		for (DataOwner owner : dataOwners) {
 			if (type == INDEX_TYPE.BTree || type == INDEX_TYPE.QTree) {
 				owner.prepareEntry(runId, null, type);
 			} else if (type == INDEX_TYPE.RTree) {
-				owner.prepareEntry(runId, owner.comPre(rtree, runId), type);
+				if (Constants.G_MODE == MODE.REBUILD) {
+					owner.prepareEntry(runId, DataOwner.comPre(rtree, owner.getPoint(runId), owner.getId()), type);
+				} else {
+					owner.prepareEntry(runId, null, type);
+				}
 			} else {
 				throw new IllegalStateException("No such index!");
 			}

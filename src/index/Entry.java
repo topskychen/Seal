@@ -211,4 +211,20 @@ public class Entry implements RW{
 	public Entry clone() {
 		return new Entry(tuple.clone(), seal.clone(), no);
 	} 
+	
+	public void setShape(IShape shape) {
+		tuple.setShape(shape);
+	}
+	
+	public void setTS(int ts) {
+		tuple.setTS(ts);;
+	}
+	
+	public int[] getComPre() {
+		return tuple.getComPre();
+	}
+	
+	public void setComPre(int[] comPre) {
+		tuple.setComPre(comPre);
+	}
 }

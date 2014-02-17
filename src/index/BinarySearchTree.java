@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
+import party.DataOwner;
 import spatialindex.IShape;
 import spatialindex.Point;
 import spatialindex.Region;
@@ -49,11 +50,9 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		return rangeQueryStrategy.getVOCells();
 	}
 
-	/* (non-Javadoc)
-	 * @see index.SearchIndex#buildIndex(index.Trajectory, crypto.PMAC)
-	 */
+	
 	@Override
-	public void buildIndex(ArrayList<Entry> entries) {
+	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries) {
 		// TODO Auto-generated method stub
 		
 		BinaryTree[] nodes = new BinaryTree[entries.size()]; int size = 0;

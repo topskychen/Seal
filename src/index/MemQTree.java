@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import party.DataOwner;
 import spatialindex.IShape;
 import spatialindex.Point;
 import spatialindex.Region;
@@ -72,7 +73,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 	}
 
 	@Override
-	public void buildIndex(ArrayList<Entry> entries) {
+	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries) {
 		// TODO Auto-generated method stub
 		if (Constants.G_MODE != MODE.REBUILD) {
 			for (Entry entry : entries) {				
