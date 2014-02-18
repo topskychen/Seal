@@ -98,8 +98,8 @@ public class DataOwner {
 		ArrayList<Integer> path = new ArrayList<Integer>();
 		rtree.getPath(rtree.getRootId(), point, id, path);
 		path.add(rtree.getRootId());
-		int[] comPre = new int[Math.min(utility.Constants.L, path.size())];
-//		for (int j = 0; j < utility.Constants.L; j ++) comPre[j] = id;
+		int[] comPre = new int[utility.Constants.L];
+		for (int j = 0; j < utility.Constants.L; j ++) comPre[j] = id;
 		for (int j = 0, k = path.size() - 1; j < utility.Constants.L && k >= 0 ; j ++, k --) {
 			comPre[j] = path.get(k);
 		}

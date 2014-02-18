@@ -20,7 +20,7 @@ import io.RW;
  */
 public class Seal implements RW{
 
-	BigInteger content 	= null;
+//	BigInteger content 	= null;
 	BigInteger cipher 	= null;
 	
 	public Seal(Seal seal) {
@@ -83,12 +83,15 @@ public class Seal implements RW{
 	 * @param secretShare
 	 */
 	public Seal(Tuple tuple, BigInteger secretShare) {
-		content = secretShare;
+		BigInteger content = secretShare;
 		content = content.shiftLeft(24);
 		content = content.add(BigInteger.ONE);
 //		int value = tuple.getLowPoint().getCoord(0);
 		int[] comPre = tuple.getComPre();
-		for (int i = 0; i < comPre.length; i ++) {
+//		for (int i = 0; i < utility.Constants.L - Math.min(comPre.length, utility.Constants.L); i ++) { // shift
+//			content = content.shiftLeft(24 + 160);
+//		}
+		for (int i = 0; i < utility.Constants.L; i ++) {
 			content = content.shiftLeft(24 + 160);
 //			int v = (value >> (4 * i));
 			byte[] hash = Hasher.hashBytes(new Integer(comPre[i]).toString().getBytes());
@@ -99,19 +102,22 @@ public class Seal implements RW{
 	}
 	
 	public BigInteger getSecretShare(BigInteger random) {
-		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
+//		if (content == null) 
+		BigInteger content = TrustedRegister.encFun.decrypt(cipher, random);
 		BigInteger ss = content.shiftRight((160 + 24) * utility.Constants.L + 24).and(utility.Constants.BITS152);
 		return ss;
 	}
 	
 	public BigInteger getCnt(BigInteger random) {
-		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
+//		if (content == null) 
+		BigInteger content = TrustedRegister.encFun.decrypt(cipher, random);
 		BigInteger cnt = content.shiftRight((160 + 24) * utility.Constants.L).and(utility.Constants.BITS24);
 		return cnt;
 	}
 	
 	public BigInteger getDig(BigInteger random, int p) {
-		if (content == null) content = TrustedRegister.encFun.decrypt(cipher, random);
+//		if (content == null) 
+		BigInteger content = TrustedRegister.encFun.decrypt(cipher, random);
 		BigInteger dig = content.shiftRight((160 + 24) * p).and(utility.Constants.BITS184);
 		return dig;
 	}
@@ -153,18 +159,10 @@ public class Seal implements RW{
 	
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("[" + getSecretShare(null) + ", " + getCnt(null)  + "]");
+//		sb.append("[" +  + ", " +   + "]");
 		return sb.toString();
 	}
 	
-	public BigInteger getContent() {
-		return content;
-	}
-
-	public void setContent(BigInteger content) {
-		// TODO Auto-generated method stub
-		this.content = content;
-	} 
 	
 	public Seal clone() {
 		return new Seal(cipher);

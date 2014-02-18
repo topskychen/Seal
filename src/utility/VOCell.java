@@ -43,7 +43,6 @@ public class VOCell implements RW{
 	 * @return
 	 */
 	public boolean verify(IShape query, int runId, TreeSet<Integer> ansIds) {
-		entry.getSeal().setContent(null);
 		BigInteger random = Constants.PRIME_P.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())
 			);

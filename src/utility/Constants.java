@@ -34,7 +34,7 @@ public class Constants {
 	public static boolean		RT_VERBOSE	= false;
 	public static int			PRINT_LIM	= 1000;
 	public static int 			BUFFER_SIZE	= 50;
-	public static MODE			G_MODE		= MODE.UPDATE;
+	public static MODE			G_MODE		= MODE.REBUILD;
 			
 	static {
 		G_RTREE.setRecordStatus(true);

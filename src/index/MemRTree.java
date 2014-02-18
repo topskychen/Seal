@@ -36,6 +36,7 @@ public class MemRTree extends RTree implements SearchIndex {
 
 	HashMap<Integer, Entry> innerEntries 	= null;
 	HashMap<Integer, Entry> leafEntries 	= null;
+	HashSet<Integer> 		rebuildIds		= null;
 	
 	public MemRTree(PropertySet ps, IStorageManager sm) {
 		super(ps, sm);
@@ -52,7 +53,7 @@ public class MemRTree extends RTree implements SearchIndex {
 		ps.setProperty("IndexCapacity", new Integer(Constants.F));
 		ps.setProperty("LeafCapacity", new Integer(Constants.F));
 		ps.setProperty("Dimension", new Integer(2));
-		return new MemRTree(ps, sm);
+		return new MemRTree(ps, buffer);
 	}
 
 	/**
@@ -69,161 +70,77 @@ public class MemRTree extends RTree implements SearchIndex {
 		queryStrategy(getRootId(), rangeQueryStrategy);
 		return rangeQueryStrategy.getVOCells(); 
 	}
-
-	/**
-	 * Get affected Ids, the corresponding nodes have modified shape.
-	 * @param visitedIds
-	 * @return
-	 */
-	public HashSet<Integer> getAffectedIds(HashSet<Integer> visitedIds) {
-		HashSet<Integer> affectedIds = new HashSet<Integer>();
-		for (Integer id : visitedIds) {
-			if (!isNodeAlive(id)) continue;
-			IShape curRec = readNode(id).getShape();
-			if (innerEntries.containsKey(id) == false) {
-				affectedIds.add(id);
-			} else {
-				IShape pastRec = innerEntries.get(id).getShape();
-				if (!curRec.equals(pastRec)) {
-					affectedIds.add(id);
-				}
-			}
-		}
-		return affectedIds;
-	}
-	
-	/**
-	 * Get the data ids that need re-calculation
-	 * @param dataIds
-	 * @param affectedIds
-	 * @param entry
-	 * @return
-	 */
-	public HashSet<Integer> getReCalcIds(ArrayList<Integer> dataIds, Records records) {
-		HashSet<Integer> affectedIds = getAffectedIds(records.getVisitedIds());
-		HashSet<Integer> reCalcIds = new HashSet<Integer>();
-		for (Integer id : dataIds) {
-			if (leafEntries.containsKey(id) == false) {
-				reCalcIds.add(id);
-			} else {
-				boolean found = false;
-				Entry entry = leafEntries.get(id);
-				int[] comPre = entry.getTuple().getComPre();
-				for (int com : comPre) {
-					if (affectedIds.contains(com)) {
-						reCalcIds.add(id);
-						found = true;
-						break;
-					}
-				} 
-				if (!found) {
-					int[] nComPre = DataOwner.comPre(this, entry.getShape(), entry.getId());
-					if (!Arrays.equals(comPre, nComPre)) {
-						reCalcIds.add(id);
-					}
-				}
-			}
-		}
-		return reCalcIds;
-	}
-	
-	/**
-	 * Update the entries, both the leaf&inner node
-	 * @param owners
-	 * @param entry
-	 * @param records
-	 */
-	public void updateEntries(ArrayList<DataOwner> owners, Entry entry, Records records) {
-		HashSet<Integer> reCalcIds = getReCalcIds(records.getDataIds(this), records);
-		Entry recEntry = null; 
-		if (leafEntries.containsKey(entry.getId())) {
-			recEntry = leafEntries.get(entry.getId());
-			recEntry.setShape(entry.getShape());
-			recEntry.setTS(entry.getTS());
-		}
-		else {
-			leafEntries.put(entry.getId(), entry);
-		}
-		
-		for (Integer reCalcId : reCalcIds) {
-			recEntry = leafEntries.get(reCalcId);
-			int[] comPre = recEntry.getComPre();
-			if (comPre != null) { // the leafEntries is not newly added
-				for (int innerId : comPre) {
-					if (!isNodeAlive(innerId)) {
-						innerEntries.remove(innerId);
-						continue;
-					}
-					Entry innderEntry = innerEntries.get(innerId);
-					innderEntry.update(recEntry, null);
-					innderEntry.setShape(readNode(innerId).getShape());
-				}
-			}
-		}
-		for (Integer reCalcId : reCalcIds) { 
-			recEntry = leafEntries.get(reCalcId);
-			int[] comPre = DataOwner.comPre(this, recEntry.getShape(), reCalcId);
-			recEntry.setTuple(new Tuple(reCalcId, recEntry.getShape(), recEntry.getTS(), comPre, INDEX_TYPE.RTree)); // update the leaf entry
-			recEntry.setSeal(new Seal(recEntry.getTuple(), owners.get(reCalcId).getSS(recEntry.getTS())));
-			for (int i = 0; i < comPre.length; i ++) { // update the inner entries
-				int innerId = comPre[i];
-				if (innerEntries.containsKey(innerId)) {					
-					Entry innerEntry = innerEntries.get(innerId);
-					innerEntry.update(null, recEntry);
-					innerEntry.setShape(readNode(innerId).getShape());
-					innerEntry.setComPre(Arrays.copyOf(comPre, i + 1));
-				} else {
-					Entry innerEntry = new Entry(recEntry.clone());
-					innerEntry.setShape(readNode(innerId).getShape());
-					innerEntry.setComPre(Arrays.copyOf(comPre, i + 1));
-					innerEntries.put(innerId, innerEntry);
-				}
-			}
-		}
-	}
-	
 	
 	/**
 	 * Insert a point, if exists then replace
 	 * @param entry
 	 */
 	public void replace(ArrayList<DataOwner> owners, Entry entry) {
-		Records records = getRecords(); records.clear();
+		
 		if (leafEntries.containsKey(entry.getId())) {
 			Entry oldEntry = leafEntries.get(entry.getId());
-			deleteData(oldEntry.getShape(), oldEntry.getId());
-		}
+			if (!deleteData(oldEntry.getShape(), oldEntry.getId())) {
+				System.out.println("fail delete");
+			}
+		} 
 		insertData(null, entry.getShape(), entry.getId());
-		updateEntries(owners, entry, records);
+		if (leafEntries.containsKey(entry.getId())) {
+			Entry recEntry = leafEntries.get(entry.getId());
+			recEntry.setShape(entry.getShape());
+			recEntry.setTS(entry.getTS());
+		}
+		else {
+			leafEntries.put(entry.getId(), entry);
+		}
 	}	
 	
 	@Override
 	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries) {
 		if (Constants.G_MODE != MODE.REBUILD) {
 			if (Constants.G_MODE == MODE.UPDATE) {
+				rebuildIds = new HashSet<Integer>();
+				Records records = getRecords(); records.clear();
 				for (Entry entry : entries) {
 					replace(owners, entry);
 				}
+				ArrayList<Integer> reCalcIds = records.getDataIds(this);
+				for (Integer reCalcId : reCalcIds) {
+					Entry entry = leafEntries.get(reCalcId);
+					int[] comPre = DataOwner.comPre(this, entry.getShape(), entry.getId());
+					entry.setTuple(new Tuple(entry.getId(), entry.getShape(), entry.getTS(), comPre, INDEX_TYPE.RTree)); // update the leaf entry
+					entry.setSeal(new Seal(entry.getTuple(), owners.get(entry.getId()).getSS(entry.getTS())));
+					ArrayList<Integer> path = new ArrayList<Integer>(); 
+					getPath(getRootId(), entry.getShape(), entry.getId(), path); 
+					rebuildIds.addAll(path);
+				}
+				rebuildIds.add(getRootId());
+				buildIndex(getRootId());
+				rebuildIds.clear(); 
+				rebuildIds = null;
 			} else {
 				throw new IllegalStateException("This mode is not supported");
 			}
 		} else {
 			for (int i = 0; i < entries.size(); i ++) {
 				Entry entry = entries.get(i);
-				insertData(null, entry.getShape(), entry.getTuple().getId());
-				leafEntries.put(entry.getTuple().getId(), entry);
+				insertData(null, entry.getShape(), entry.getId());
+				leafEntries.put(entry.getId(), entry);
 			}
 			buildIndex(getRootId());
 		}
 	}
 	
 	public void buildIndex(int id) {
+		if (rebuildIds != null) {
+			if (!rebuildIds.contains(id)) return;
+			rebuildIds.remove(id);
+		}
 		Node node = readNode(id);
 		Entry[] entries = new Entry[node.getChildrenCount()];
 		for (int i = 0; i < node.getChildrenCount(); i ++) {
 			//TODO
 			int cId = node.getChildIdentifier(i);
-			if (node.getLevel() != 0) {
+			if (!node.isLeaf()) {
 				buildIndex(cId);
 				entries[i] = innerEntries.get(cId);
 			} else {
@@ -298,15 +215,15 @@ public class MemRTree extends RTree implements SearchIndex {
 			Node node = (Node) e;
 			
 			for (int i = 0; i < node.getChildrenCount(); i ++) {
-				Region region = (Region) node.getChildShape(i);
+				Region shape = (Region) node.getChildShape(i);
 				Integer cId = node.getChildIdentifier(i);
-				if (query.contains(region)) {
+				if (query.contains(shape)) {
 					if (node.isLeaf()) {
 						leafEntryHM.put(cId, true);
 					} else {
 						innerEntryHM.put(cId, true);
 					}
-				} else if (!query.intersects(region)){
+				} else if (!query.intersects(shape)){
 					if (node.isLeaf()) {						
 						leafEntryHM.put(cId, false);
 					} else {

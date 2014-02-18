@@ -21,7 +21,7 @@ import utility.EncFun.ENC_TYPE;
 public class Sim extends Simulator {
 
 	String 				fileName 	= "./data/TD1000";
-	INDEX_TYPE 			type 		= INDEX_TYPE.RTree;
+	INDEX_TYPE 			type 		= INDEX_TYPE.QTree;
 	StatisticsUpdate 	statU		= new StatisticsUpdate();
 	StatisticsQuery 	statQ		= new StatisticsQuery();
 	
@@ -100,7 +100,7 @@ public class Sim extends Simulator {
 		}
 		sim.init();
 		System.out.println("Init fin!");
-		for (int i = 0; i < runTimes; i ++) {
+		for (int i = 2; i < runTimes; i ++) {
 			System.out.println("--------------------"+ i +"---------------------");
 			sim.run(i);			
 		}
