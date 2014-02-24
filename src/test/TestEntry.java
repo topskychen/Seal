@@ -36,8 +36,8 @@ public class TestEntry {
 		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, "./data/test");
 		TrustedRegister.sk = AES.getSampleKey();
 		int num = 32;
-		entries = new ArrayList<>();
-		tuples = new ArrayList<>();
+		entries = new ArrayList<Entry>();
+		tuples = new ArrayList<Tuple>();
 		for (int i = 0; i < num; i ++) {
 			tuples.add(new Tuple(i, new Point(new double[] {i}), 0, null, INDEX_TYPE.BTree));
 			entries.add(new Entry(tuples.get(i), null));

@@ -24,13 +24,7 @@ public class Sim extends Simulator {
 	String 				fileName 	= "./data/TDrive";
 	INDEX_TYPE 			type 		= INDEX_TYPE.QTree;
 
-	
-	/**
-	 * @param trustedRegister
-	 * @param dataOwners
-	 * @param serviceProvider
-	 * @param client
-	 */
+
 	public Sim() {
 		super();
 		// TODO Auto-generated constructor stub
@@ -54,15 +48,15 @@ public class Sim extends Simulator {
 	 */
 	@Override
 	public void init(int runTimes) {
-		// TODO Auto-generated method stub
-		dataOwners 			= new ArrayList<DataOwner>();
-		serviceProvider 	= new ServiceProvider(statU);
-		client 				= new Client(statQ);
-		TrustedRegister.sk 	= AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
-		DataOwner.initData(dataOwners, fileName, type, runTimes);
-	}
-	
+        // TODO Auto-generated method stub
+        dataOwners 			= new ArrayList<DataOwner>();
+        serviceProvider 	= new ServiceProvider(statU);
+        client 				= new Client(statQ);
+        TrustedRegister.sk 	= AES.getSampleKey();
+        TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
+        DataOwner.initData(dataOwners, fileName, type, runTimes);
+    }
+
 	
 
 	/* (non-Javadoc)
@@ -87,7 +81,7 @@ public class Sim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		Sim sim 		= null;
+		Sim sim;
 		int runTimes 	= 10;
 		if (args.length == 4) {
 			sim = new Sim(args[0], args[1]);

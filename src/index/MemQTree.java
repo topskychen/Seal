@@ -54,20 +54,17 @@ public class MemQTree extends QuadTree implements SearchIndex {
 			setValues(values);
 		}		
 		setId(id);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public ArrayList<VOCell> rangeQuery(IShape query) {
-		// TODO Auto-generated method stub
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
 		queryStrategy(this, rangeQueryStrategy);
 		return rangeQueryStrategy.getVOCells();
@@ -75,7 +72,6 @@ public class MemQTree extends QuadTree implements SearchIndex {
 
 	@Override
 	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries, StatisticsUpdate statU) {
-		// TODO Auto-generated method stub
 		if (Constants.G_MODE != MODE.REBUILD) {
 			for (Entry entry : entries) {
 				if (Constants.G_MODE == MODE.LAZY) {

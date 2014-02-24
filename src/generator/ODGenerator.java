@@ -36,7 +36,6 @@ public class ODGenerator {
 			}
 			pw.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Gen fin!");
@@ -46,14 +45,12 @@ public class ODGenerator {
 	 * 
 	 */
 	public ODGenerator() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		if (args.length == 2) {
 			new ODGenerator(Integer.parseInt(args[0]), args[1]);
 		} else if (args.length == 0) {
