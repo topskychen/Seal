@@ -28,7 +28,6 @@ public class ServiceProvider {
 	SearchIndex 		index = null;
 	Timer 				timer = null;
 	StatisticsUpdate 	statU = null;
-	StatisticsQuery		statQ = null;
 	
 	/**
 	 * Collect the data once, and build the index.
@@ -51,9 +50,14 @@ public class ServiceProvider {
 		timer.reset();
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i ++) {
-			entries.add(dataOwners.get(i).getEntry(runId));
+			Entry entry = dataOwners.get(i).getEntry(runId);
+			if (entry != null) 
+				entries.add(entry);
+			else {
+//				System.out.println("do: " + i);
+			}
 		}
-		index.buildIndex(dataOwners, entries);
+		index.buildIndex(dataOwners, entries, statU);
 		timer.stop();
 		System.out.println("Index prepared! consumes: " + timer.timeElapseinMs() + " ms");
 	}
@@ -78,11 +82,10 @@ public class ServiceProvider {
 	/**
 	 * 
 	 */
-	public ServiceProvider(StatisticsUpdate statU, StatisticsQuery statQ) {
+	public ServiceProvider(StatisticsUpdate statU) {
 		// TODO Auto-generated constructor stub
 		this.timer = new Timer();
 		this.statU = statU;
-		this.statQ = statQ;
 	}
 
 	/**

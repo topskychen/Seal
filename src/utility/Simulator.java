@@ -24,6 +24,8 @@ public abstract class Simulator {
 	double 					preparationTime 		= -1;
 	double 					verificationTime 		= -1;
 	long 					voSize					= -1;
+	StatisticsUpdate 		statU					= new StatisticsUpdate();
+	StatisticsQuery 		statQ					= new StatisticsQuery();
 	
 	
 	/**
@@ -37,7 +39,7 @@ public abstract class Simulator {
 	/**
 	 * For initializing the keys and indexes.
 	 */
-	public abstract void init();
+	public abstract void init(int runTimes);
 	
 	/**
 	 * Run multi times
@@ -95,6 +97,11 @@ public abstract class Simulator {
 		sb.append("Verify time : " + getVerificationTime() + " ms\n");
 		sb.append("VO size : " + getVOsize() + " B, " + getVOsize() / 1000.0 + " KB\n");
 		return sb.toString();
+	}
+	
+	public void printStat() {
+		System.out.println(statU);
+		System.out.println(statQ);
 	}
 	
 	/**

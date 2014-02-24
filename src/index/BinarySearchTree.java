@@ -12,6 +12,7 @@ import party.DataOwner;
 import spatialindex.IShape;
 import spatialindex.Point;
 import spatialindex.Region;
+import utility.StatisticsUpdate;
 import utility.Tuple;
 import utility.VOCell;
 import memoryindex.BinaryTree;
@@ -52,7 +53,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 
 	
 	@Override
-	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries) {
+	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries, StatisticsUpdate statU) {
 		// TODO Auto-generated method stub
 		
 		BinaryTree[] nodes = new BinaryTree[entries.size()]; int size = 0;

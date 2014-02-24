@@ -42,16 +42,16 @@ public class VOCell implements RW{
 	 * @param query
 	 * @return
 	 */
-	public boolean verify(IShape query, int runId, TreeSet<Integer> ansIds) {
+	public boolean verify(IShape query, TreeSet<Integer> ansIds) {
 		BigInteger random = Constants.PRIME_P.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())
 			);
 		if (ansNo != 0) {
 			ps = BigInteger.ZERO;
-			for (int i = 0; i < tuples.size(); i ++) {
-				BigInteger secretShare = TrustedRegister.genSecretShare(runId);
+			for (Tuple tuple : tuples) {
+				BigInteger secretShare = TrustedRegister.genSecretShare(tuple.getTS());
 				ps = ps.add(secretShare);
-				ansIds.add(tuples.get(i).getId());
+				ansIds.add(tuple.getId());
 			}
 			BigInteger rs = entry.getSeal().getSecretShare(random);
 			if (!ps.equals(rs)) { 

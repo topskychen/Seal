@@ -12,6 +12,7 @@ import party.Client;
 import party.DataOwner;
 import party.ServiceProvider;
 import party.TrustedRegister;
+import utility.Constants.MODE;
 import utility.EncFun.ENC_TYPE;
 
 /**
@@ -20,10 +21,9 @@ import utility.EncFun.ENC_TYPE;
  */
 public class Sim extends Simulator {
 
-	String 				fileName 	= "./data/TD1000";
+	String 				fileName 	= "./data/TDrive";
 	INDEX_TYPE 			type 		= INDEX_TYPE.QTree;
-	StatisticsUpdate 	statU		= new StatisticsUpdate();
-	StatisticsQuery 	statQ		= new StatisticsQuery();
+
 	
 	/**
 	 * @param trustedRegister
@@ -53,14 +53,14 @@ public class Sim extends Simulator {
 	 * @see utility.Simulator#init()
 	 */
 	@Override
-	public void init() {
+	public void init(int runTimes) {
 		// TODO Auto-generated method stub
 		dataOwners 			= new ArrayList<DataOwner>();
-		serviceProvider 	= new ServiceProvider(statU, statQ);
-		client 				= new Client(statU, statQ);
+		serviceProvider 	= new ServiceProvider(statU);
+		client 				= new Client(statQ);
 		TrustedRegister.sk 	= AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
-		DataOwner.initData(dataOwners, fileName, type);
+		DataOwner.initData(dataOwners, fileName, type, runTimes);
 	}
 	
 	
@@ -89,21 +89,30 @@ public class Sim extends Simulator {
 		// TODO Auto-generated method stub
 		Sim sim 		= null;
 		int runTimes 	= 10;
-		if (args.length == 3) {
+		if (args.length == 4) {
 			sim = new Sim(args[0], args[1]);
 			runTimes = Integer.parseInt(args[2]);
+			String mode = args[3];
+			if (mode.equalsIgnoreCase("rebuild")) Constants.G_MODE = MODE.REBUILD;
+			else if (mode.equalsIgnoreCase("update")) Constants.G_MODE = MODE.UPDATE;
+			else if (mode.equalsIgnoreCase("lazy")) Constants.G_MODE = MODE.LAZY;
+			else {
+				System.out.println("This mode is not supprted!");
+				return;
+			}
 		} else if (args.length == 0){
 			sim = new Sim();
 		} else {
-			System.out.println("The args should be [fileName treeType].");
+			System.out.println("The args should be [fileName treeType ruTimes mode].");
 			return;
 		}
-		sim.init();
+		sim.init(runTimes);
 		System.out.println("Init fin!");
-		for (int i = 2; i < runTimes; i ++) {
+		for (int i = 0; i < runTimes; i ++) {
 			System.out.println("--------------------"+ i +"---------------------");
 			sim.run(i);			
 		}
+		sim.printStat();
 	}
 
 }

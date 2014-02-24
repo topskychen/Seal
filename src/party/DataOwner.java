@@ -13,6 +13,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import spatialindex.IShape;
@@ -28,10 +29,10 @@ import utility.Tuple;
  */
 public class DataOwner {
 
-	private int						id				= -1;
-	private ArrayList<IShape>		points			= null;
-	private ArrayList<Entry> 		entries 		= null;
-	private ArrayList<BigInteger>	SSs			 	= null;
+	private int								id				= -1;
+	private HashMap<Integer, IShape>		points			= null;
+	private ArrayList<Entry> 				entries 		= null;
+	private HashMap<Integer, BigInteger>	SSs			 	= null;
 	
 	public int getId() {
 		return id;
@@ -42,6 +43,7 @@ public class DataOwner {
 	 * @return
 	 */
 	public Entry getEntry(int i) {
+		if (i >= entries.size()) return null;
 		return entries.get(i);
 	}
 	
@@ -51,6 +53,10 @@ public class DataOwner {
 	
 	public BigInteger getSS(int i) {
 		return SSs.get(i);
+	}
+	
+	public void putSS(int i, BigInteger ss) {
+		SSs.put(i, ss);
 	}
 	/**
 	 * Append a value to the data owner.
@@ -75,13 +81,13 @@ public class DataOwner {
 		entries.clear();
 	}
 	
-	public DataOwner(int id, ArrayList<IShape> points) {
+	public DataOwner(int id, HashMap<Integer, IShape> points) {
 		this.id 		= id;
 		this.points 	= points;
 		this.entries 	= new ArrayList<Entry>(points.size());
-		this.SSs		= new ArrayList<BigInteger>(points.size());
+		this.SSs		= new HashMap<Integer, BigInteger>();
 		for (int i = 0; i < points.size(); i ++) {
-			this.SSs.add(TrustedRegister.genSecretShare(i));
+			this.SSs.put(i, TrustedRegister.genSecretShare(i));
 			this.entries.add(null);
 		} 
 	}
@@ -112,6 +118,7 @@ public class DataOwner {
 			if (Constants.G_MODE == MODE.REBUILD) {				
 				rtree = MemRTree.createTree();
 				for (DataOwner owner : dataOwners) {
+					if (owner.getPoint(runId) == null) continue;
 					rtree.insertData(null, owner.getPoint(runId), owner.getId());
 				}
 				if (Constants.RT_VERBOSE) System.out.println(rtree);
@@ -119,23 +126,29 @@ public class DataOwner {
 		} 
 		BigInteger totalSS = BigInteger.ZERO;
 		for (DataOwner owner : dataOwners) {
-			if (type == INDEX_TYPE.BTree || type == INDEX_TYPE.QTree) {
-				owner.prepareEntry(runId, null, type);
-			} else if (type == INDEX_TYPE.RTree) {
-				if (Constants.G_MODE == MODE.REBUILD) {
-					owner.prepareEntry(runId, DataOwner.comPre(rtree, owner.getPoint(runId), owner.getId()), type);
-				} else {
-					owner.prepareEntry(runId, null, type);
-				}
+			if (owner.getPoint(runId) == null) {
+				owner.putSS(runId, owner.getSS(runId - 1));
+				if (Constants.G_MODE == MODE.REBUILD) continue;
 			} else {
-				throw new IllegalStateException("No such index!");
+				if (type == INDEX_TYPE.BTree || type == INDEX_TYPE.QTree) {
+					owner.prepareEntry(runId, null, type);
+				} else if (type == INDEX_TYPE.RTree) {
+					if (Constants.G_MODE == MODE.REBUILD) {
+						owner.prepareEntry(runId, DataOwner.comPre(rtree, owner.getPoint(runId), owner.getId()), type);
+					} else {
+						owner.prepareEntry(runId, null, type);
+					}
+				} else {
+					throw new IllegalStateException("No such index!");
+				}
 			}
 			totalSS = totalSS.add(owner.getSS(runId));
 		}
 		TrustedRegister.totalSS.put(runId, totalSS);
 	}
 	
-	public static void initData(ArrayList<DataOwner> dataOwners, String fileName, INDEX_TYPE type) {
+	public static void initData(ArrayList<DataOwner> dataOwners, 
+			String fileName, INDEX_TYPE type, int runTimes) {
 		File file = new File(fileName + ".pl");
 		if (file.exists()) {
 			try {
@@ -145,7 +158,7 @@ public class DataOwner {
 				Scanner in = new Scanner(new BufferedInputStream(new FileInputStream(file)));
 				while (in.hasNext()) {
 					int id = Integer.parseInt(in.nextLine());
-					ArrayList<IShape> points = parsePoints(in.nextLine());
+					HashMap<Integer, IShape> points = parsePoints(in.nextLine(), runTimes);
 					dataOwners.add(new DataOwner(id, points));
 				}
 				in.close();
@@ -159,6 +172,10 @@ public class DataOwner {
 	}
 	
 	public static IShape parsePoint(String line) {
+		if (line.equals("")) {
+			System.out.println("err!");
+			return null;
+		}
 		String[] tks = line.split(" ");
 		double[] coords = new double[tks.length];
 		for (int i = 0; i < coords.length; i ++) {
@@ -167,11 +184,13 @@ public class DataOwner {
 		return (IShape) new Point(coords);
 	}
 	
-	public static ArrayList<IShape> parsePoints(String points) {
+	public static HashMap<Integer, IShape> parsePoints(String points, int runTimes) {
 		String[] lines = points.split("\t");
-		ArrayList<IShape> data = new ArrayList<IShape>();
+		HashMap<Integer, IShape> data = new HashMap<Integer, IShape>();
+		int cnt = 0;
 		for (String line : lines) {
-			data.add(parsePoint(line));
+			data.put(cnt, parsePoint(line));
+			if (++cnt >= runTimes) break;
 		}
 		return data;
 	}

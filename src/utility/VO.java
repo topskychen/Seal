@@ -60,7 +60,7 @@ public class VO implements RW{
 		boolean isVerify = true;
 		ansNo = 0;
 		for (VOCell voCell : voCells) {
-			if (!voCell.verify(query, runId, ansIds)) {
+			if (!voCell.verify(query, ansIds)) {
 				isVerify = false;
 				System.out.print("x\n");
 				System.out.println(voCell);
@@ -126,10 +126,10 @@ public class VO implements RW{
 		sb.append("VOCells : " + voCells.size() + "\n");
 		sb.append("AnsNo : " + ansNo + " [");
 		Integer[] ids = ansIds.toArray(new Integer[0]);
-		for (int i = 0; i < ids.length && i < Constants.PRINT_LIM; i ++) {
-			if (i != 0) sb.append(" ");
-			sb.append(ids[i]);
-		}
+//		for (int i = 0; i < ids.length && i < Constants.PRINT_LIM; i ++) {
+//			if (i != 0) sb.append(" ");
+//			sb.append(ids[i]);
+//		}
 		sb.append("]\n");
 		sb.append("PrepareTime: " + prepareTime + " ms\n");
 		sb.append("VerifyTime: " + verifyTime + " ms\n");

@@ -18,14 +18,12 @@ import utility.VO;
  */
 public class Client {
 
-	StatisticsUpdate 	statU = null;
 	StatisticsQuery		statQ = null;
 	
 	/**
 	 * 
 	 */
-	public Client(StatisticsUpdate statU, StatisticsQuery statQ) {
-		this.statU	= statU;
+	public Client(StatisticsQuery statQ) {
 		this.statQ	= statQ;
 	}
 	
@@ -40,7 +38,7 @@ public class Client {
 					Region query = new Region(new double[] {Integer.parseInt(tks[0]), Integer.parseInt(tks[1])}, new double[] {Integer.parseInt(tks[2]), Integer.parseInt(tks[3])});
 					vo = serviceProvider.rangeQuery(query, runId);
 					if (!vo.verify(query)) {
-						System.out.println("Fail verify!");
+						System.err.println("Fail verify!");
 					} else {
 						System.out.println("Pass verify!");
 					}
@@ -49,7 +47,7 @@ public class Client {
 					Region query = new Region(new double[] {Integer.parseInt(tks[0])}, new double[] {Integer.parseInt(tks[1])});
 					vo = serviceProvider.rangeQuery(query, runId);
 					if (!vo.verify(query)) {
-						System.out.println("Fail verify!");
+						System.err.println("Fail verify!");
 					} else {
 						System.out.println("Pass verify!");
 					}

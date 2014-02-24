@@ -4,8 +4,9 @@
 package index;
 
 
+import io.IO;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -22,8 +23,10 @@ import storagemanager.IStorageManager;
 import storagemanager.MemoryStorageManager;
 import storagemanager.PropertySet;
 import storagemanager.RandomEvictionsBuffer;
+import timer.Timer;
 import utility.Constants;
 import utility.Seal;
+import utility.StatisticsUpdate;
 import utility.Tuple;
 import utility.VOCell;
 import utility.Constants.MODE;
@@ -37,11 +40,13 @@ public class MemRTree extends RTree implements SearchIndex {
 	HashMap<Integer, Entry> innerEntries 	= null;
 	HashMap<Integer, Entry> leafEntries 	= null;
 	HashSet<Integer> 		rebuildIds		= null;
+	Timer					timer 			= null;
 	
 	public MemRTree(PropertySet ps, IStorageManager sm) {
 		super(ps, sm);
-		innerEntries = new HashMap<Integer, Entry>();
-		leafEntries = new HashMap<Integer, Entry>();
+		innerEntries 	= new HashMap<Integer, Entry>();
+		leafEntries 	= new HashMap<Integer, Entry>();
+		timer			= new Timer();
 		// TODO Auto-generated constructor stub
 	}
 	
@@ -95,7 +100,7 @@ public class MemRTree extends RTree implements SearchIndex {
 	}	
 	
 	@Override
-	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries) {
+	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries, StatisticsUpdate statU) {
 		if (Constants.G_MODE != MODE.REBUILD) {
 			if (Constants.G_MODE == MODE.UPDATE) {
 				rebuildIds = new HashSet<Integer>();
@@ -104,11 +109,13 @@ public class MemRTree extends RTree implements SearchIndex {
 					replace(owners, entry);
 				}
 				ArrayList<Integer> reCalcIds = records.getDataIds(this);
+				timer.reset();
 				for (Integer reCalcId : reCalcIds) {
 					Entry entry = leafEntries.get(reCalcId);
 					int[] comPre = DataOwner.comPre(this, entry.getShape(), entry.getId());
 					entry.setTuple(new Tuple(entry.getId(), entry.getShape(), entry.getTS(), comPre, INDEX_TYPE.RTree)); // update the leaf entry
 					entry.setSeal(new Seal(entry.getTuple(), owners.get(entry.getId()).getSS(entry.getTS())));
+					statU.appendBandWidth(IO.toBytes(entry).length);
 					ArrayList<Integer> path = new ArrayList<Integer>(); 
 					getPath(getRootId(), entry.getShape(), entry.getId(), path); 
 					rebuildIds.addAll(path);
@@ -117,6 +124,9 @@ public class MemRTree extends RTree implements SearchIndex {
 				buildIndex(getRootId());
 				rebuildIds.clear(); 
 				rebuildIds = null;
+				timer.stop();
+				statU.appendBuildTime(timer.timeElapseinMs());
+				statU.appendNum(entries.size(), reCalcIds.size());
 			} else {
 				throw new IllegalStateException("This mode is not supported");
 			}

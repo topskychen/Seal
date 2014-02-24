@@ -58,10 +58,11 @@ public class StatisticsQuery {
 	}
 	
 	public String toString() {
-		StringBuffer sb = new StringBuffer();
+		StringBuffer sb = new StringBuffer("---------StatQ--------\n");
 		sb.append("prepareTime: " + getAvePrepareTime() + " ms\n");
 		sb.append("verifyTime: " + getAveVerifyTime() + " ms\n");
 		sb.append("VO Size: " + getAveVOSize() / 1024 + " KB\n");
+		sb.append("-------------------\n");
 		return sb.toString();
 	}
 	

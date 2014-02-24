@@ -16,6 +16,7 @@ import spatialindex.Region;
 import utility.Constants;
 import utility.Constants.MODE;
 import utility.Constants.OP;
+import utility.StatisticsUpdate;
 import utility.Tuple;
 import utility.VOCell;
 import memoryindex.IQueryStrategyQT;
@@ -73,10 +74,10 @@ public class MemQTree extends QuadTree implements SearchIndex {
 	}
 
 	@Override
-	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries) {
+	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries, StatisticsUpdate statU) {
 		// TODO Auto-generated method stub
 		if (Constants.G_MODE != MODE.REBUILD) {
-			for (Entry entry : entries) {				
+			for (Entry entry : entries) {
 				if (Constants.G_MODE == MODE.LAZY) {
 					putU(entry.getId(), new UpdateEntry(OP.ADD, entry));
 				} else {
@@ -318,7 +319,8 @@ public class MemQTree extends QuadTree implements SearchIndex {
 					else return false;
 				}
 			}
-			setCnt(L.size());
+//			setCnt(L.size());
+			System.out.println("never to reach here [add]");
 			return false;
 		}
 	}
@@ -341,7 +343,7 @@ public class MemQTree extends QuadTree implements SearchIndex {
 					if (chTrees[i].delete(entry)) return true;
 					else return false;
 				}
-			}
+			}System.out.println("never to reach here [delete]");
 			return false;
 		}
 	}
@@ -448,9 +450,21 @@ public class MemQTree extends QuadTree implements SearchIndex {
 					if (values.get(i) == null) continue;
 					if (query.contains(chTrees[i].getBoundary())) { // ans
 						ArrayList<Tuple> tuples = new ArrayList<Tuple>();
+						//tuples.addAll(((MemQTree) chTrees[i]).L.values());
+//						HashSet<Integer> check = new HashSet<>();
+//						for(Entry entryL : ((MemQTree) chTrees[i]).L.values()) {
+//							tuples.add(entryL.getTuple());
+//							check.add(entryL.getId());
+//						}
 						for(Entry entryL : tree.L.values()) {
-							if (chTrees[i].getBoundary().contains(entryL.getShape()))
+							if (chTrees[i].getBoundary().contains(entryL.getShape())) {
 								tuples.add(entryL.getTuple());
+//								int id = entryL.getTuple().getId();
+//								if (check.contains(id) == false) {
+//									System.out.println(entryL.getShape());
+//									System.out.println(chTrees[i].getBoundary());
+//								}
+							}
 						}
 						voCells.add(new VOCell(tuples, (Entry) values.get(i))); 
 					} else if (chTrees[i].getBoundary().intersects(query)) { // explore more
