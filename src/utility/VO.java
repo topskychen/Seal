@@ -66,8 +66,10 @@ public class VO implements RW{
 				System.out.println(voCell);
 				break;
 			} else {
-				System.out.print(".");
-			}
+                if (!Global.BATCH_QUERY) {
+				    System.out.print(".");
+			    }
+            }
 			ansNo += voCell.getAnsNo();
 		}
 		if (!verifyComplete()) {
@@ -125,7 +127,7 @@ public class VO implements RW{
 		StringBuffer sb = new StringBuffer("");
 		sb.append("VOCells : " + voCells.size() + "\n");
 		sb.append("AnsNo : " + ansNo + " [");
-		Integer[] ids = ansIds.toArray(new Integer[0]);
+//		Integer[] ids = ansIds.toArray(new Integer[0]);
 //		for (int i = 0; i < ids.length && i < Constants.PRINT_LIM; i ++) {
 //			if (i != 0) sb.append(" ");
 //			sb.append(ids[i]);

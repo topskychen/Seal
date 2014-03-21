@@ -22,7 +22,8 @@ class Data {
 	public String toStringInt() {
 		StringBuffer sb = new StringBuffer();
 		sb.append((int) point.getCoord(0) + " ");
-		sb.append((int) point.getCoord(1));
+		sb.append((int) point.getCoord(1) + " ");
+        sb.append((int) tiStp);
 		return sb.toString();
 	}
 
@@ -34,4 +35,13 @@ class Data {
 		Data data = new Data(point, Double.parseDouble(tks[2]));
 		return data;
 	}
+
+    public static Data parseDataInt(String inStr) {
+        String[] tks = inStr.split(" ");
+//		System.out.println("line:" + inStr + ".") ;
+        Point point = new Point(new double[] {Double.parseDouble(tks[0]),
+                Double.parseDouble(tks[1])});
+        Data data = new Data(point, Double.parseDouble(tks[2]));
+        return data;
+    }
 }

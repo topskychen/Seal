@@ -15,7 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import spatialindex.Point;
-import utility.Constants;
+import utility.Global;
 
 /**
  * @author chenqian
@@ -33,7 +33,7 @@ public class TestMemQTree {
 
 	@Test
 	public void testGetPath() {
-		MemQTree qtree = Constants.G_QTREE;
+		MemQTree qtree = Global.G_QTREE;
 		ArrayList<Integer> ids = qtree.getPath(new Point(new double[]{120, 232}));
 		P.Print(ids);
 		ids = qtree.getPath(new Point(new double[]{1234, 8323}));

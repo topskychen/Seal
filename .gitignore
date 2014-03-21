@@ -2,5 +2,5 @@
 .classpath
 .project
 bin
-data/
+drawCollection/
 .DS_Store

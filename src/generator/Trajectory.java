@@ -35,4 +35,13 @@ class Trajectory {
 		}
 		return tra;
 	}
+
+    public static Trajectory parseTraInt(String inStr) {
+        String[] tks = inStr.split("\t");
+        Trajectory tra = new Trajectory();
+        for (String tk : tks) {
+            tra.add(Data.parseDataInt(tk));
+        }
+        return tra;
+    }
 }

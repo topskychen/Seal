@@ -10,7 +10,7 @@ import java.util.HashMap;
 import io.IO;
 import io.RW;
 import crypto.AES;
-import utility.Constants;
+import utility.Global;
 import utility.EncFun;
 import utility.EncFun.ENC_TYPE;
 import utility.Utility;
@@ -35,11 +35,11 @@ public class TrustedRegister {
 	 * @return
 	 */
 	public static BigInteger genSecretShare(RW value) {
-		return Utility.getBI(AES.encrypt(sk, IO.toBytes(value))).and(Constants.BITS128);
+		return Utility.getBI(AES.encrypt(sk, IO.toBytes(value))).and(Global.BITS128);
 	}
 	
 	public static BigInteger genSecretShare(int runId) {
-		return Utility.getBI(AES.encrypt(sk, new Integer(runId).toString().getBytes())).and(Constants.BITS128);
+		return Utility.getBI(AES.encrypt(sk, new Integer(runId).toString().getBytes())).and(Global.BITS128);
 	}
 	
 	public static void specifyEncFun(ENC_TYPE type, String fileName) {

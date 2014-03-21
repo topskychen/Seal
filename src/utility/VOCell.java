@@ -64,7 +64,7 @@ public class VOCell implements RW{
 		int[] comPre = entry.getTuple().getComPre();
 //		Utility.pi22(comPre[0]);
 		BigInteger cnt = entry.getSeal().getCnt(random);
-		BigInteger dig = entry.getSeal().getDig(random, utility.Constants.L - comPre.length);
+		BigInteger dig = entry.getSeal().getDig(random, utility.Global.L - comPre.length);
 		if (!Utility.getBI(Hasher.hashBytes(new Integer(comPre[comPre.length - 1]).toString().getBytes())).multiply(cnt).equals(dig)) {
 			return false;
 		}

@@ -3,10 +3,13 @@
  */
 package index;
 
-
 import io.IO;
+import io.RW;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -24,39 +27,44 @@ import storagemanager.MemoryStorageManager;
 import storagemanager.PropertySet;
 import storagemanager.RandomEvictionsBuffer;
 import timer.Timer;
-import utility.Constants;
+import utility.Global;
+import utility.Global.MODE;
 import utility.Seal;
 import utility.StatisticsUpdate;
 import utility.Tuple;
 import utility.VOCell;
-import utility.Constants.MODE;
 
 /**
  * @author chenqian
- *
+ * 
  */
-public class MemRTree extends RTree implements SearchIndex {
+public class MemRTree extends RTree implements SearchIndex, RW {
 
-	HashMap<Integer, Entry> innerEntries 	= null;
-	HashMap<Integer, Entry> leafEntries 	= null;
-	HashSet<Integer> 		rebuildIds		= null;
-	Timer					timer 			= null;
-	
+	HashMap<Integer, Entry>	innerEntries	= null;
+	HashMap<Integer, Entry>	leafEntries		= null;
+	HashSet<Integer>		rebuildIds		= null;
+	Timer					timer			= null;
+
 	public MemRTree(PropertySet ps, IStorageManager sm) {
 		super(ps, sm);
-		innerEntries 	= new HashMap<Integer, Entry>();
-		leafEntries 	= new HashMap<Integer, Entry>();
-		timer			= new Timer();
+		innerEntries = new HashMap<Integer, Entry>(13000);
+		leafEntries = new HashMap<Integer, Entry>(13000);
+		timer = new Timer();
 		// TODO Auto-generated constructor stub
 	}
-	
+
 	public static MemRTree createTree() {
 		IStorageManager sm = new MemoryStorageManager();
-		IBuffer buffer = new RandomEvictionsBuffer(sm, 10, false); // no buffer due to no page reuse
+		IBuffer buffer = new RandomEvictionsBuffer(sm, 143000, false); // no
+																		// buffer
+																		// due
+																		// to no
+																		// page
+																		// reuse
 		PropertySet ps = new PropertySet();
 		ps.setProperty("FillFactor", new Double(0.7));
-		ps.setProperty("IndexCapacity", new Integer(Constants.F));
-		ps.setProperty("LeafCapacity", new Integer(Constants.F));
+		ps.setProperty("IndexCapacity", new Integer(Global.F));
+		ps.setProperty("LeafCapacity", new Integer(Global.F));
 		ps.setProperty("Dimension", new Integer(2));
 		return new MemRTree(ps, buffer);
 	}
@@ -73,65 +81,87 @@ public class MemRTree extends RTree implements SearchIndex {
 	public ArrayList<VOCell> rangeQuery(IShape query) {
 		RangeQueryStrategy rangeQueryStrategy = new RangeQueryStrategy(query);
 		queryStrategy(getRootId(), rangeQueryStrategy);
-		return rangeQueryStrategy.getVOCells(); 
+		return rangeQueryStrategy.getVOCells();
 	}
-	
+
 	/**
 	 * Insert a point, if exists then replace
+	 * 
 	 * @param entry
 	 */
-	public void replace(ArrayList<DataOwner> owners, Entry entry) {
-		
+	public void replace(Entry entry) {
+
 		if (leafEntries.containsKey(entry.getId())) {
 			Entry oldEntry = leafEntries.get(entry.getId());
 			if (!deleteData(oldEntry.getShape(), oldEntry.getId())) {
 				System.out.println("fail delete");
 			}
-		} 
+		}
 		insertData(null, entry.getShape(), entry.getId());
 		if (leafEntries.containsKey(entry.getId())) {
 			Entry recEntry = leafEntries.get(entry.getId());
 			recEntry.setShape(entry.getShape());
 			recEntry.setTS(entry.getTS());
-		}
-		else {
+		} else {
 			leafEntries.put(entry.getId(), entry);
 		}
-	}	
-	
+	}
+
 	@Override
-	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries, StatisticsUpdate statU) {
-		if (Constants.G_MODE != MODE.REBUILD) {
-			if (Constants.G_MODE == MODE.UPDATE) {
+	public void buildIndex(ArrayList<DataOwner> owners,
+			ArrayList<Entry> entries, StatisticsUpdate statU) {
+		if (Global.G_MODE != MODE.REBUILD) {
+			if (Global.G_MODE == MODE.UPDATE) {
 				rebuildIds = new HashSet<Integer>();
-				Records records = getRecords(); records.clear();
+				HashSet<Integer> reCalcIds = new HashSet<Integer>();
+				Records records = getRecords();
+				records.clear();
 				for (Entry entry : entries) {
-					replace(owners, entry);
+					replace(entry);
+					reCalcIds.add(entry.getId());
 				}
-				ArrayList<Integer> reCalcIds = records.getDataIds(this);
+				for (Integer id : records.getVisitedIds()) {
+					rebuildIds.add(id);
+				}
+				// ArrayList<Integer> reCalcIds = records.getDataIds(this);
+				for (Entry entry : leafEntries.values()) {
+					int[] comPre = DataOwner.comPre(this, entry.getShape(),
+							entry.getId());
+					if (!Arrays.equals(comPre, entry.getComPre())
+							|| entry.getComPre() == null) {
+						reCalcIds.add(entry.getId());
+					}
+				}
 				timer.reset();
+				int bandWidth = 0;
 				for (Integer reCalcId : reCalcIds) {
 					Entry entry = leafEntries.get(reCalcId);
-					int[] comPre = DataOwner.comPre(this, entry.getShape(), entry.getId());
-					entry.setTuple(new Tuple(entry.getId(), entry.getShape(), entry.getTS(), comPre, INDEX_TYPE.RTree)); // update the leaf entry
-					entry.setSeal(new Seal(entry.getTuple(), owners.get(entry.getId()).getSS(entry.getTS())));
-					statU.appendBandWidth(IO.toBytes(entry).length);
-					ArrayList<Integer> path = new ArrayList<Integer>(); 
-					getPath(getRootId(), entry.getShape(), entry.getId(), path); 
+					int[] comPre = DataOwner.comPre(this, entry.getShape(),
+							entry.getId());
+					entry.setComPre(comPre);
+					// entry.setTuple(new Tuple(entry.getId(), entry.getShape(),
+					// entry.getTS(), comPre, INDEX_TYPE.RTree));
+					entry.setSeal(new Seal(entry.getTuple(), owners.get(
+							entry.getId()).getSS(entry.getTS())));
+					bandWidth += IO.toBytes(entry).length;
+					ArrayList<Integer> path = new ArrayList<Integer>();
+					getPath(getRootId(), entry.getShape(), entry.getId(), path);
 					rebuildIds.addAll(path);
 				}
 				rebuildIds.add(getRootId());
 				buildIndex(getRootId());
-				rebuildIds.clear(); 
+				rebuildIds.clear();
 				rebuildIds = null;
 				timer.stop();
-				statU.appendBuildTime(timer.timeElapseinMs());
-				statU.appendNum(entries.size(), reCalcIds.size());
+				if (entries.size() != Global.TOTN) {
+					statU.append(timer.timeElapseinMs(), bandWidth);
+					statU.appendNum(entries.size(), reCalcIds.size());
+				}
 			} else {
 				throw new IllegalStateException("This mode is not supported");
 			}
 		} else {
-			for (int i = 0; i < entries.size(); i ++) {
+			for (int i = 0; i < entries.size(); i++) {
 				Entry entry = entries.get(i);
 				insertData(null, entry.getShape(), entry.getId());
 				leafEntries.put(entry.getId(), entry);
@@ -139,16 +169,17 @@ public class MemRTree extends RTree implements SearchIndex {
 			buildIndex(getRootId());
 		}
 	}
-	
+
 	public void buildIndex(int id) {
 		if (rebuildIds != null) {
-			if (!rebuildIds.contains(id)) return;
+			if (!rebuildIds.contains(id))
+				return;
 			rebuildIds.remove(id);
 		}
 		Node node = readNode(id);
 		Entry[] entries = new Entry[node.getChildrenCount()];
-		for (int i = 0; i < node.getChildrenCount(); i ++) {
-			//TODO
+		for (int i = 0; i < node.getChildrenCount(); i++) {
+			// TODO
 			int cId = node.getChildIdentifier(i);
 			if (!node.isLeaf()) {
 				buildIndex(cId);
@@ -162,10 +193,10 @@ public class MemRTree extends RTree implements SearchIndex {
 		innerEntries.put(id, entry);
 		return;
 	}
-	
+
 	public boolean getPath(int nodeId, IShape p, int id, ArrayList<Integer> path) {
 		Node node = readNode(nodeId);
-		for (int i = 0; i < node.getChildrenCount(); i ++) {
+		for (int i = 0; i < node.getChildrenCount(); i++) {
 			if (node.getLevel() != 0) {
 				if (node.getChildShape(i).contains(p)) {
 					if (getPath(node.getChildIdentifier(i), p, id, path)) {
@@ -175,75 +206,59 @@ public class MemRTree extends RTree implements SearchIndex {
 				}
 			} else {
 				if (node.getChildIdentifier(i) == id) {
-//					path.add(id);
+					// path.add(id);
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	
+
 	class RangeQueryStrategy implements IQueryStrategy {
 
-		private ArrayList<Integer> 			toVisit 		= new ArrayList<Integer>();
-		private HashMap<Integer, Boolean> 	innerEntryHM 	= new HashMap<Integer, Boolean>();
-		private HashMap<Integer, Boolean> 	leafEntryHM 	= new HashMap<Integer, Boolean>();
-		private IShape 						query			= null;
-		
-		
-		
-		
+		private ArrayList<Integer>	toVisit	= new ArrayList<Integer>();
+		private ArrayList<VOCell>	voCells	= new ArrayList<VOCell>();
+		private IShape				query	= null;
+
 		public RangeQueryStrategy(IShape query) {
-			this.query = query; 
+			this.query = query;
 		}
-		
+
 		public ArrayList<VOCell> getVOCells() {
-			ArrayList<VOCell> voCells = new ArrayList<VOCell>();
-			for (java.util.Map.Entry<Integer, Boolean> entry : innerEntryHM.entrySet()) {
-				if (entry.getValue()) {
-					RetrieveStrategy rs = new RetrieveStrategy();
-					queryStrategy(entry.getKey(), rs);
-					voCells.add(new VOCell(rs.getTuples(), innerEntries.get(entry.getKey())));
-				} else {
-					voCells.add(new VOCell(new ArrayList<Tuple>(), innerEntries.get(entry.getKey())));
-				}
-			}
-			for (java.util.Map.Entry<Integer, Boolean> entry : leafEntryHM.entrySet()) {
-				Entry e = leafEntries.get(entry.getKey());
-				ArrayList<Tuple> tuples = new ArrayList<Tuple>();
-				if (entry.getValue()) {
-					tuples.add(e.getTuple());
-				}
-				voCells.add(new VOCell(tuples, e));
-			}
 			return voCells;
 		}
 
 		@Override
 		public void getNextEntry(IEntry e, int[] nextEntry, boolean[] hasNext) {
-			
+
 			Node node = (Node) e;
-			
-			for (int i = 0; i < node.getChildrenCount(); i ++) {
+
+			for (int i = 0; i < node.getChildrenCount(); i++) {
 				Region shape = (Region) node.getChildShape(i);
 				Integer cId = node.getChildIdentifier(i);
 				if (query.contains(shape)) {
 					if (node.isLeaf()) {
-						leafEntryHM.put(cId, true);
+						Entry entry = leafEntries.get(cId);
+						voCells.add(new VOCell(entry.getTuple(), entry));
 					} else {
-						innerEntryHM.put(cId, true);
+						Entry entry = innerEntries.get(cId);
+						RetrieveStrategy rs = new RetrieveStrategy();
+						queryStrategy(cId, rs);
+						voCells.add(new VOCell(rs.getTuples(), entry));
 					}
-				} else if (!query.intersects(shape)){
-					if (node.isLeaf()) {						
-						leafEntryHM.put(cId, false);
+				} else if (!query.intersects(shape)) {
+					if (node.isLeaf()) {
+						voCells.add(new VOCell(new ArrayList<Tuple>(),
+								leafEntries.get(cId)));
 					} else {
-						innerEntryHM.put(cId, false);
+						voCells.add(new VOCell(new ArrayList<Tuple>(),
+								innerEntries.get(cId)));
 					}
 				} else {
 					toVisit.add(cId);
 				}
 			}
-			
+
 			if (!toVisit.isEmpty()) {
 				nextEntry[0] = toVisit.remove(0);
 				hasNext[0] = true;
@@ -252,16 +267,16 @@ public class MemRTree extends RTree implements SearchIndex {
 			}
 		}
 	}
-	
+
 	class RetrieveStrategy implements IQueryStrategy {
 
-		private ArrayList<Integer> 	toVisit = new ArrayList<Integer>();
-		ArrayList<Tuple> 			tuples	= null;
-		
+		private ArrayList<Integer>	toVisit	= new ArrayList<Integer>();
+		ArrayList<Tuple>			tuples	= null;
+
 		public ArrayList<Tuple> getTuples() {
 			return tuples;
 		}
-		
+
 		/**
 		 * 
 		 */
@@ -270,15 +285,18 @@ public class MemRTree extends RTree implements SearchIndex {
 			tuples = new ArrayList<Tuple>();
 		}
 
-		/* (non-Javadoc)
-		 * @see memoryindex.IQueryStrategy#getNextEntry(memoryindex.BinaryTree, memoryindex.BinaryTree[], boolean[])
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see memoryindex.IQueryStrategy#getNextEntry(memoryindex.BinaryTree,
+		 * memoryindex.BinaryTree[], boolean[])
 		 */
 		@Override
-		public void getNextEntry(IEntry e, int [] next, boolean[] hasNext) {
+		public void getNextEntry(IEntry e, int[] next, boolean[] hasNext) {
 			// TODO Auto-generated method stub
 			Node node = (Node) e;
-			
-			for (int i = 0; i < node.getChildrenCount(); i ++) {
+
+			for (int i = 0; i < node.getChildrenCount(); i++) {
 				int cId = node.getChildIdentifier(i);
 				if (node.isLeaf()) {
 					tuples.add(leafEntries.get(cId).getTuple());
@@ -300,5 +318,41 @@ public class MemRTree extends RTree implements SearchIndex {
 	public INDEX_TYPE getType() {
 		// TODO Auto-generated method stub
 		return INDEX_TYPE.RTree;
+	}
+
+	@Override
+	public void read(DataInputStream ds) {
+		innerEntries = new HashMap<Integer, Entry>();
+		leafEntries = new HashMap<Integer, Entry>();
+		int num = IO.readInt(ds);
+		for (int i = 0; i < num; i++) {
+			int id = IO.readInt(ds);
+			Entry entry = new Entry();
+			entry.read(ds);
+			innerEntries.put(id, entry);
+		}
+		num = IO.readInt(ds);
+		for (int i = 0; i < num; i++) {
+			int id = IO.readInt(ds);
+			Entry entry = new Entry();
+			entry.read(ds);
+			leafEntries.put(id, entry);
+		}
+	}
+
+	@Override
+	public void write(DataOutputStream ds) {
+		// TODO Auto-generated method stub
+		IO.writeInt(ds, innerEntries.size());
+		for (java.util.Map.Entry<Integer, Entry> entry : innerEntries
+				.entrySet()) {
+			IO.writeInt(ds, entry.getKey());
+			entry.getValue().write(ds);
+		}
+		IO.writeInt(ds, leafEntries.size());
+		for (java.util.Map.Entry<Integer, Entry> entry : leafEntries.entrySet()) {
+			IO.writeInt(ds, entry.getKey());
+			entry.getValue().write(ds);
+		}
 	}
 }

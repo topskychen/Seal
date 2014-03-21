@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 import spatialindex.Point;
-import utility.Constants;
+import utility.Global;
 
 /**
  * 
@@ -23,27 +23,32 @@ import utility.Constants;
  */
 public class TDGenerator {
 
-	Random random 		= new Random();
+	static Random random 		= new Random();
 	Point[][] data		= null;
-	
+
+    public static Point genPoint() {
+        return new Point(new double[] {random.nextInt((int)Global.BOUND),
+                random.nextInt((int)Global.BOUND)});
+    }
+
 	public int nextPos(int x) {
-		return (x + random.nextInt(Constants.RANGE) - Constants.RANGE / 2 + Constants.BOUND) % Constants.BOUND;
+		return (int) ((x + random.nextInt((int)(Global.RANGE - Global.RANGE / 2 + Global.BOUND))) % Global.BOUND);
 	}
 	
 	public Point[] generate(Point[] lastPoints, int no) {
 		HashSet<Point> hashSet = new HashSet<Point>();
 		Point[] points = new Point[no];
 		for (int i = 0; i < no; i ++) {
-			Point p = null;
+			Point p;
 			if (lastPoints == null) {
-				p = new Point(new double[] {random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND)});
+				p = genPoint();
 			} else {
 				p = new Point(new double[] {nextPos((int) lastPoints[i].getCoord(0)), 
 						nextPos((int) lastPoints[i].getCoord(1))});
 			}
 			while(hashSet.contains(p)) {
 				if (lastPoints == null) {
-					p = new Point(new double[] {random.nextInt(Constants.BOUND), random.nextInt(Constants.BOUND)});
+					p = genPoint();
 				} else {
 					p = new Point(new double[] {nextPos((int) lastPoints[i].getCoord(0)), 
 							nextPos((int) lastPoints[i].getCoord(1))});
@@ -95,7 +100,6 @@ public class TDGenerator {
 			pw.flush();
 			pw.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			file.delete();
 			e.printStackTrace();
 		}

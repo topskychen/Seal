@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 import spatialindex.Point;
+import utility.Global;
 
 /**
  * @author chenqian
@@ -27,7 +28,7 @@ public class TDriveParser {
 
 	String 					traFileDirName	= null;
 	String 					destFileDirName	= null;
-	static int				limit 			= 1000;
+	static int				limit 			= -1;
 	/**
 	 * 
 	 */
@@ -52,9 +53,15 @@ public class TDriveParser {
 		try {
 			Scanner in = new Scanner(new BufferedInputStream(new FileInputStream(dataFile)));
 			Trajectory tra = new Trajectory();
+//            int lineNo = 0;
 			while(in.hasNext()) {
-				String[] tks = in.nextLine().split(",");
+//                ++ lineNo;
+                String line = in.nextLine();
+				String[] tks = line.split(",");
 				Point point = new Point(new double[]{Double.parseDouble(tks[2]), Double.parseDouble(tks[3])});
+//                if (!TDriveFormater.bounds.contains(point)) {
+//                    System.out.println(lineNo + ":" + line);
+//                }
 				Data data = new Data(point, parseTime(tks[1]));
 				tra.add(data);
 			}
@@ -85,14 +92,13 @@ public class TDriveParser {
 				if (tra.tra.size() == 0) continue;
 				id ++;
 				pw.println(tra);
-				tra = null;
 				if (limit != -1 && id >= limit) break;
 			}
 			System.out.println(".");
 			if (limit != -1 && id >= limit) break;
 		}
 		pw.close();
-		System.out.println("loadFin!");
+		System.out.println("loadFin! " + id);
 	}
 
 
@@ -104,8 +110,8 @@ public class TDriveParser {
 		String traFileDir = null;
 		String destFile = null;
 		if (args.length == 0) {
-			traFileDir = "./data/trajectory";
-			destFile = "./data/TDrive" + (limit == -1 ? "" : limit) + ".txt";
+			traFileDir = Global.TEST_FILE_DIR + "/trajectory";
+			destFile = Global.TEST_FILE_DIR + "/TDrive" + (limit == -1 ? "" : limit) + ".txt";
 		} else {
 			traFileDir = args[0];
 			destFile = args[1];

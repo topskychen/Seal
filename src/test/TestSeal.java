@@ -18,7 +18,7 @@ import party.TrustedRegister;
 import spatialindex.Point;
 import timer.Timer;
 import utility.EncFun.ENC_TYPE;
-import utility.Constants;
+import utility.Global;
 import utility.Seal;
 import utility.Tuple;
 import utility.Utility;
@@ -40,7 +40,6 @@ public class TestSeal {
 		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, "./data/test");
 		seal1 = new Seal(tuple1, TrustedRegister.genSecretShare(tuple1));
 		seal2 = new Seal(tuple2, TrustedRegister.genSecretShare(tuple2));
-	
 	}
 	
 	@Test
@@ -64,7 +63,7 @@ public class TestSeal {
 		Seal seal3 = new Seal(seal1, seal2, false);
 		int[] comPre = tuple3.getComPre();
 		BigInteger dig = Utility.getBI(Hasher.hashBytes(new Integer(comPre[comPre.length - 1]).toString().getBytes())).multiply(new BigInteger("2"));
-		assertEquals(dig, seal3.getDig(null, Constants.L - comPre.length));
+		assertEquals(dig, seal3.getDig(null, Global.L - comPre.length));
 	}
 	
 	@Test

@@ -10,84 +10,87 @@ import party.DataOwner;
 import party.ServiceProvider;
 import party.TrustedRegister;
 
-
 /**
  * @author chenqian
- *
+ * 
  */
 public abstract class Simulator {
 
-	TrustedRegister 		trustedRegister 		= null;
-	ArrayList<DataOwner> 	dataOwners 				= null;
-	ServiceProvider 		serviceProvider 		= null;
-	Client 					client 					= null;
-	double 					preparationTime 		= -1;
-	double 					verificationTime 		= -1;
-	long 					voSize					= -1;
-	StatisticsUpdate 		statU					= new StatisticsUpdate();
-	StatisticsQuery 		statQ					= new StatisticsQuery();
-	
-	
+	TrustedRegister			trustedRegister		= null;
+	ArrayList<DataOwner>	dataOwners			= null;
+	ServiceProvider			serviceProvider		= null;
+	Client					client				= null;
+	double					preparationTime		= -1;
+	double					verificationTime	= -1;
+	long					voSize				= -1;
+	StatisticsUpdate		statU				= new StatisticsUpdate();
+	StatisticsQuery			statQ				= new StatisticsQuery();
+
 	/**
 	 * 
 	 */
 	public Simulator() {
 		super();
 	}
-	
 
 	/**
 	 * For initializing the keys and indexes.
 	 */
-	public abstract void init(int runTimes);
-	
+	public abstract void init(int runTimes, int startTime);
+
 	/**
 	 * Run multi times
 	 */
-	public abstract void run(int runId);
-	
-	
+	public abstract void run(int runId, double ratio);
+
 	/**
 	 * Get the total time of simulation
+	 * 
 	 * @return
 	 */
 	public double getTotalSimulationTime() {
 		return getPreparationTime() + getVerificationTime();
 	}
-	
+
 	/**
 	 * Get time of preparation
+	 * 
 	 * @return
 	 */
 	public double getPreparationTime() {
 		if (preparationTime < 0) {
-			throw new IllegalStateException("The preparationTime is not set, maybe u need to call run function first");
+			throw new IllegalStateException(
+					"The preparationTime is not set, maybe u need to call run function first");
 		}
 		return preparationTime;
 	}
-	
+
 	/**
 	 * Get time of verification
+	 * 
 	 * @return
 	 */
 	public double getVerificationTime() {
 		if (verificationTime < 0) {
-			throw new IllegalStateException("The verificationTime time is not set, maybe u need to call run function first");
+			throw new IllegalStateException(
+					"The verificationTime time is not set, maybe u need to call run function first");
 		}
 		return verificationTime;
 	}
-	
+
 	/**
 	 * Get size of VO
+	 * 
 	 * @return
 	 */
 	public long getVOsize() {
 		if (voSize < 0) {
-			throw new IllegalStateException("The voSize is not set, maybe u need to call run function first");
+			throw new IllegalStateException(
+					"The voSize is not set, maybe u need to call run function first");
 		}
 		return voSize;
 	}
-	
+
 	/**
 	 * Get the infomation.
 	 */
@@ -95,15 +98,16 @@ public abstract class Simulator {
 		StringBuffer sb = new StringBuffer("");
 		sb.append("Prepare time : " + getPreparationTime() + " ms\n");
 		sb.append("Verify time : " + getVerificationTime() + " ms\n");
-		sb.append("VO size : " + getVOsize() + " B, " + getVOsize() / 1000.0 + " KB\n");
+		sb.append("VO size : " + getVOsize() + " B, " + getVOsize() / 1000.0
+				+ " KB\n");
 		return sb.toString();
 	}
-	
+
 	public void printStat() {
 		System.out.println(statU);
 		System.out.println(statQ);
 	}
-	
+
 	/**
 	 * @param args
 	 */
@@ -112,4 +116,12 @@ public abstract class Simulator {
 
 	}
 
+	public void clearStat() {
+		if (statQ != null) {
+			statQ.reSet();
+		}
+		if (statU != null) {
+			statU.reSet();
+		}
+	}
 }

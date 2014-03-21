@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Class-Path: algs4-package.jar junit-4.10.jar spring-test-3.2.4.RELEASE
+ .jar
+Main-Class: 
+
