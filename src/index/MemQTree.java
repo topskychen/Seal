@@ -88,14 +88,16 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 				replace(entry);
 			}
 		}
-		Global.G_TIMER.stop();
+
 		if (entries.size() != Global.TOTN) {
+			if (Global.G_MODE == MODE.LAZY)
+				pushU(Global.BUFFER_SIZE);
+			Global.G_TIMER.stop();
 			statU.append(Global.G_TIMER.timeElapseinMs(), 0);
 		} else {
 			pushU(0);
 		}
-		if (Global.G_MODE == MODE.LAZY)
-			pushU(Global.BUFFER_SIZE);
+
 		// if (Constants.G_MODE != MODE.REBUILD) {
 		// } else{
 		// for (Entry entry : entries) {

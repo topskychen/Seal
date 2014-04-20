@@ -56,7 +56,7 @@ public class StatisticsUpdate {
 		sb.append("bandWidth: " + getAveBandWidth() / 1000 + " KB\n");
 		sb.append("buildTime: " + getAveBuildTime() + " ms\n");
 		if (rounds == 0 || planNum == 0)
-			sb.append("real : " + realNum + ", plan: " + planNum);
+			sb.append("real : " + realNum + ", plan: " + planNum + "\n");
 		else
 			sb.append("real / plan: " + "(" + realNum / rounds + "/" + planNum
 					/ rounds + ") = " + 100.0 * realNum / planNum + " %\n");

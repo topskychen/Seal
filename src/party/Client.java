@@ -84,7 +84,7 @@ public class Client {
 				}
 			}
 			in.close();
-			System.out.println();
+			// System.out.println();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

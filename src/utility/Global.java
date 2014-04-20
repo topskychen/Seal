@@ -50,7 +50,7 @@ public class Global {
 																				// 0);
 	public static MemRTree			G_RTREE			= null;					// MemRTree.createTree();
 	public static boolean			RT_VERBOSE		= false;
-	public static int				PRINT_LIM		= 50;
+	public static int				PRINT_LIM		= 1000;
 	public static int				BUFFER_SIZE		= 10;
 	public static MODE				G_MODE			= MODE.LAZY;
 	public static String			TEST_FILE_DIR	= "./data";

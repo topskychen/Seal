@@ -113,7 +113,7 @@ public class Sim extends Simulator {
 	public static void main(String[] args) {
 		Sim sim;
 		int startTime = 0, runTimes = 100;
-		if (args.length == 6 || args.length == 7) {
+		if (args.length >= 6) {
 			sim = new Sim(args[0], args[1]);
 			startTime = Integer.parseInt(args[2]);
 			runTimes = Integer.parseInt(args[3]);
@@ -124,9 +124,11 @@ public class Sim extends Simulator {
 			else if (mode.equalsIgnoreCase("update")) {
 				Global.G_MODE = MODE.UPDATE;
 				Global.UPDATE_RT = Double.parseDouble(args[6]);
-			} else if (mode.equalsIgnoreCase("lazy"))
+			} else if (mode.equalsIgnoreCase("lazy")) {
 				Global.G_MODE = MODE.LAZY;
-			else {
+				Global.UPDATE_RT = Double.parseDouble(args[6]);
+				Global.BUFFER_SIZE = Integer.parseInt(args[7]);
+			} else {
 				System.out.println("This mode is not supprted!");
 				return;
 			}
