@@ -24,7 +24,7 @@ public class Global {
 	;
 
 	public static enum MODE {
-		LAZY, UPDATE, REBUILD
+		LAZY, UPDATE, REBUILD, LOOSE
 	}
 
 	;
@@ -51,8 +51,8 @@ public class Global {
 	public static MemRTree			G_RTREE			= null;					// MemRTree.createTree();
 	public static boolean			RT_VERBOSE		= false;
 	public static int				PRINT_LIM		= 1000;
-	public static int				BUFFER_SIZE		= 10;
-	public static MODE				G_MODE			= MODE.LAZY;
+	public static int				BUFFER_SIZE		= 150;
+	public static MODE				G_MODE			= MODE.LOOSE;
 	public static String			TEST_FILE_DIR	= "./data";
 	public static int				TRA_LEN			= 2;
 	// public static double[] RATIOS = {0.64};
@@ -62,14 +62,15 @@ public class Global {
 													// , 0.04, 0.08, 0.16, 0.32,
 													// 0.64
 													};
-	public static double[]			UPDATE_RTS		= { 0.001
+	public static double[]			UPDATE_RTS		= { 0.1
 													// , 0.2, 0.3, 0.4, 0.5
 													};
-	public static double			UPDATE_RT		= 0.001;
+	public static double			UPDATE_RT		= 0.3;
 	public static Region			BOUNDS			= new Region(new double[] {
 			116.282676, 39.827522					}, new double[] {
 			116.477350, 39.994745					});
-	public static int				QUERY_LIM		= 100;
+	public static int				QUERY_LIM		= 50;
+	public static double			REGION_L		= 0;
 	public static boolean			BATCH_QUERY		= true;
 	public static boolean			DO_COST			= true;
 	public static StatisticsDO		STAT_DO			= new StatisticsDO();

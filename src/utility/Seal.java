@@ -3,15 +3,21 @@
  */
 package utility;
 
+import index.Entry;
+import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
 
 import party.TrustedRegister;
+import spatialindex.Point;
+import timer.Timer;
 import utility.EncFun.ENC_TYPE;
+import crypto.AES;
 import crypto.Constants;
 import crypto.Hasher;
 
@@ -136,11 +142,83 @@ public class Seal implements RW {
 		return dig;
 	}
 
+	public static Entry getSample(int id) {
+		Tuple tuple = new Tuple(id, new Point(new double[] { id, id }), id,
+				new int[] { 1, 2, 3, 4, 5, 6 }, INDEX_TYPE.RTree);
+		Seal seal = new Seal(tuple, TrustedRegister.genSecretShare(tuple));
+		return new Entry(tuple, seal);
+	}
+
+	/**
+	 * 39.7 us
+	 * 
+	 * @return
+	 */
+	public ArrayList<Entry> testGenTime() {
+		TrustedRegister.sk = AES.getSampleKey();
+		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, Sim.fileName);
+		Timer timer = new Timer();
+		timer.reset();
+		int times = 1000;
+		ArrayList<Entry> entries = new ArrayList<Entry>();
+		Seal[] seals = new Seal[times];
+		for (int i = 0; i < times; i++) {
+			Tuple tuple = new Tuple(i, new Point(new double[] { i, i }), i,
+					new int[] { 1, 2, 3, 4, 5, 6 }, INDEX_TYPE.RTree);
+			Seal seal = new Seal(tuple, TrustedRegister.genSecretShare(tuple));
+			seals[i] = seal;
+			entries.add(new Entry(tuple, seal));
+		}
+		timer.stop();
+		System.out.println("Time consumes @ gen: " + timer.timeElapseinUs()
+				/ times + " us");
+
+		return entries;
+	}
+
+	public void testFolding() {
+		TrustedRegister.sk = AES.getSampleKey();
+		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
+		Timer timer = new Timer();
+		int times = 100000;
+		Seal[] seals = new Seal[times];
+		Tuple tuple = new Tuple(0, new Point(new double[] { 0, 0 }), 0,
+				new int[] { 1, 2, 3, 4, 5, 6 }, INDEX_TYPE.RTree);
+		Seal seal = new Seal(tuple, TrustedRegister.genSecretShare(tuple));
+		timer.reset();
+		for (int i = 0; i < times; i++) {
+			seals[i] = seal;
+		}
+		Seal fseal = new Seal(seals);
+		timer.stop();
+		System.out.println(fseal.hashCode());
+		System.out.println("Time consumes @ fold: " + timer.timeElapseinUs()
+				/ times + " us");
+	}
+
+	/**
+	 * 28.6 us
+	 * 
+	 */
+	public void testVrfTime(ArrayList<Entry> entries) {
+		TrustedRegister.sk = AES.getSampleKey();
+		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, Sim.fileName);
+		Timer timer = new Timer();
+		timer.reset();
+		int times = 1000;
+		for (int i = 0; i < times; i++) {
+			Entry entry = entries.get(i);
+			entry.verify();
+		}
+		timer.stop();
+		System.out.println("Time consumes @ vrf: " + timer.timeElapseinUs()
+				/ times + " us");
+	}
+
 	/**
 	 * 
 	 */
 	public Seal() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public Seal(BigInteger cipher) {
@@ -151,7 +229,10 @@ public class Seal implements RW {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
+		Seal seal = new Seal();
+		seal.testFolding();
+		// ArrayList<Entry> entries = seal.testGenTime();
+		// seal.testVrfTime(entries);
 	}
 
 	@Override

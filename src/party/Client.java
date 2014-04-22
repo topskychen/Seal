@@ -5,6 +5,7 @@ package party;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import spatialindex.Region;
@@ -95,6 +96,27 @@ public class Client {
 	 *            sth
 	 */
 	public static void main(String[] args) {
+	}
+
+	public static ArrayList<Region> initQuery(String fileName) {
+		ArrayList<Region> res = new ArrayList<Region>();
+		Scanner in;
+		try {
+			in = new Scanner(new File(fileName + ".qr"));
+			while (in.hasNext()) {
+				String[] tks = in.nextLine().split(" ");
+				Region query = new Region(new double[] {
+						Integer.parseInt(tks[0]), Integer.parseInt(tks[1]) },
+						new double[] { Integer.parseInt(tks[2]),
+								Integer.parseInt(tks[3]) });
+				res.add(query);
+			}
+			in.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return res;
 	}
 
 }

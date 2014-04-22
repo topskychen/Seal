@@ -14,6 +14,8 @@ public class StatisticsUpdate {
 	int		planNum		= 0;
 	int		realNum		= 0;
 	int		rounds		= 0;
+	double	doCPU		= 0;
+	int		doNum		= 0;
 
 	public double getAveBandWidth() {
 		return bandWidth / rounds;
@@ -21,6 +23,15 @@ public class StatisticsUpdate {
 
 	public double getAveBuildTime() {
 		return buildTime / rounds;
+	}
+
+	public void appendDOCPU(double doCPU) {
+		doCPU += doCPU;
+		doNum++;
+	}
+
+	public double getAveDOCPU() {
+		return doCPU / doNum;
 	}
 
 	public void appendNum(int planNum, int realNum) {
@@ -34,6 +45,8 @@ public class StatisticsUpdate {
 		planNum = 0;
 		realNum = 0;
 		rounds = 0;
+		doCPU = 0;
+		doNum = 0;
 	}
 
 	/**
@@ -53,6 +66,7 @@ public class StatisticsUpdate {
 
 	public String toString() {
 		StringBuffer sb = new StringBuffer("----------StatU--------\n");
+		sb.append("DO CPU cost: " + getAveDOCPU() + " ms\n");
 		sb.append("bandWidth: " + getAveBandWidth() / 1000 + " KB\n");
 		sb.append("buildTime: " + getAveBuildTime() + " ms\n");
 		if (rounds == 0 || planNum == 0)

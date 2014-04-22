@@ -20,6 +20,7 @@ import rtree.Records;
 import spatialindex.IEntry;
 import spatialindex.IQueryStrategy;
 import spatialindex.IShape;
+import spatialindex.Point;
 import spatialindex.Region;
 import storagemanager.IBuffer;
 import storagemanager.IStorageManager;
@@ -111,14 +112,51 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 	public void buildIndex(ArrayList<DataOwner> owners,
 			ArrayList<Entry> entries, StatisticsUpdate statU) {
 		if (Global.G_MODE != MODE.REBUILD) {
-			if (Global.G_MODE == MODE.UPDATE) {
+			if (Global.G_MODE == MODE.UPDATE || Global.G_MODE == MODE.LOOSE) {
 				rebuildIds = new HashSet<Integer>();
 				HashSet<Integer> reCalcIds = new HashSet<Integer>();
 				Records records = getRecords();
 				records.clear();
+				int outOfBound = 0;
 				for (Entry entry : entries) {
+					if (Global.G_MODE == MODE.LOOSE) {
+						if (!leafEntries.containsKey(entry.getId())) {
+							Point p = (Point) entry.getShape();
+							Region region = new Region(new double[] {
+									p.getCoord(0) - Global.REGION_L,
+									p.getCoord(1) - Global.REGION_L },
+									new double[] {
+											p.getCoord(0) + Global.REGION_L,
+											p.getCoord(1) + Global.REGION_L });
+							entry.setShape(region);
+						} else {
+							Entry oldEntry = leafEntries.get(entry.getId());
+							if (!oldEntry.getShape().contains(entry.getShape())) { // out
+								Point p = (Point) entry.getShape();
+								Region region = new Region(
+										new double[] {
+												p.getCoord(0) - Global.REGION_L,
+												p.getCoord(1) - Global.REGION_L },
+										new double[] {
+												p.getCoord(0) + Global.REGION_L,
+												p.getCoord(1) + Global.REGION_L });
+								entry.setShape(region);
+								outOfBound++;
+							} else {
+								entry.setShape(oldEntry.getShape());
+							}
+						}
+					}
 					replace(entry);
 					reCalcIds.add(entry.getId());
+				}
+				timer.reset();
+				for (int i = 0; i < outOfBound; i++) {
+					Seal.getSample(i);
+				}
+				timer.stop();
+				if (entries.size() != Global.TOTN) {
+					statU.appendDOCPU(timer.timeElapseinMs());
 				}
 				for (Integer id : records.getVisitedIds()) {
 					rebuildIds.add(id);

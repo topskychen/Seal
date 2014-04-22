@@ -23,8 +23,8 @@ import crypto.AES;
  */
 public class Sim extends Simulator {
 
-	String		fileName	= Global.TEST_FILE_DIR + "/TDrive";
-	INDEX_TYPE	type		= INDEX_TYPE.QTree;
+	static String	fileName	= Global.TEST_FILE_DIR + "/TDrive";
+	INDEX_TYPE		type		= INDEX_TYPE.RTree;
 
 	public Sim() {
 		super();
@@ -112,7 +112,7 @@ public class Sim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		Sim sim;
-		int startTime = 0, runTimes = 100;
+		int startTime = 0, runTimes = 250;
 		if (args.length >= 6) {
 			sim = new Sim(args[0], args[1]);
 			startTime = Integer.parseInt(args[2]);
@@ -128,6 +128,10 @@ public class Sim extends Simulator {
 				Global.G_MODE = MODE.LAZY;
 				Global.UPDATE_RT = Double.parseDouble(args[6]);
 				Global.BUFFER_SIZE = Integer.parseInt(args[7]);
+			} else if (mode.equalsIgnoreCase("loose")) {
+				Global.G_MODE = MODE.LOOSE;
+				Global.UPDATE_RT = Double.parseDouble(args[6]);
+				Global.REGION_L = Double.parseDouble(args[7]);
 			} else {
 				System.out.println("This mode is not supprted!");
 				return;

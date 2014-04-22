@@ -13,6 +13,9 @@ import java.math.BigInteger;
 import spatialindex.IShape;
 import utility.Seal;
 import utility.Tuple;
+import utility.Utility;
+import crypto.Constants;
+import crypto.Hasher;
 
 /**
  * @author chenqian
@@ -234,5 +237,21 @@ public class Entry implements RW {
 
 	public void setComPre(int[] comPre) {
 		tuple.setComPre(comPre);
+	}
+
+	public boolean verify() {
+		BigInteger random = Constants.PRIME_P.multiply(new BigInteger(
+				new Integer(getNO()).toString()));
+		int[] comPre = getTuple().getComPre();
+		// Utility.pi22(comPre[0]);
+		BigInteger cnt = getSeal().getCnt(random);
+		BigInteger dig = getSeal().getDig(random,
+				utility.Global.L - comPre.length);
+		if (!Utility
+				.getBI(Hasher.hashBytes(new Integer(comPre[comPre.length - 1])
+						.toString().getBytes())).multiply(cnt).equals(dig)) {
+			return false;
+		}
+		return true;
 	}
 }

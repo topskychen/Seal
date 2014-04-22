@@ -72,7 +72,8 @@ public class DataOwner {
 	 * @param type
 	 */
 	public void prepareEntry(int runId, int[] comPre, INDEX_TYPE type) {
-		if (type == INDEX_TYPE.RTree && Global.G_MODE == MODE.UPDATE) {
+		if (type == INDEX_TYPE.RTree
+				&& (Global.G_MODE == MODE.UPDATE || Global.G_MODE == MODE.LOOSE)) {
 			entries.put(runId, new Entry(new Tuple(getId(), getPoint(runId),
 					runId, null, type), null));
 		} else {
