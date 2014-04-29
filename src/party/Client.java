@@ -33,10 +33,12 @@ public class Client {
 			int runId) {
 		Scanner in;
 		try {
+			String[] tks = fileName.split("_");
+			fileName = tks[0] + "_" + tks[tks.length - 1];
 			in = new Scanner(new File(fileName + ".qr"));
 			int lineNo = 0;
 			while (in.hasNext()) {
-				String[] tks = in.nextLine().split(" ");
+				tks = in.nextLine().split(" ");
 				lineNo++;
 				if (lineNo > Global.QUERY_LIM)
 					break;
@@ -85,7 +87,7 @@ public class Client {
 				}
 			}
 			in.close();
-			// System.out.println();
+			System.out.println();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

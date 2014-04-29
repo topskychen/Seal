@@ -20,19 +20,27 @@ public class Global {
 	public static enum OP {
 		ADD, DEL
 	}
-
 	;
 
 	public static enum MODE {
 		LAZY, UPDATE, REBUILD, LOOSE
 	}
-
 	;
 
-	public static int				TOTN			= 10132;
+	
+	/**
+	 * TOTN differs from 10132, 30000, 100000, 300000, 1000000.
+	 */
+//	public static int				TOTN			= 10132;
+	public static int				TOTN			= 10000;
+//	public static int				TOTN			= 30000;
+//	public static int				TOTN			= 100000;
+//	public static int				TOTN			= 300000;
+//	public static int				TOTN			= 1000000;
+	
 	public static int				D				= 4;
-	public static int				L				= 6;
-	public static int				THREAD_NUM		= 4;
+	public static int				L				= (int) (Math.log(TOTN) / Math.log(4)); // log_4(TOTN)
+	public static int				THREAD_NUM		= 2;
 	public static BigInteger		BITS24			= Utility.getBits1(24);
 	public static BigInteger		BITS128			= Utility.getBits1(128);
 	public static BigInteger		BITS152			= Utility.getBits1(152);
@@ -50,7 +58,8 @@ public class Global {
 																				// 0);
 	public static MemRTree			G_RTREE			= null;					// MemRTree.createTree();
 	public static boolean			RT_VERBOSE		= false;
-	public static int				PRINT_LIM		= 1000;
+	public static int				PRINT_LIM		= 10;
+	public static boolean 			IS_MULTI_THREAD = true;
 	public static int				BUFFER_SIZE		= 150;
 	public static MODE				G_MODE			= MODE.LOOSE;
 	public static String			TEST_FILE_DIR	= "./data";
@@ -78,9 +87,13 @@ public class Global {
 	public static StatisticsIndex	STAT_INDEX		= new StatisticsIndex();
 	public static Timer				G_TIMER			= null;
 
+	
 	static {
 		if (DO_COST || INDEX_COST)
 			G_TIMER = new Timer();
+		if (!System.getProperty("os.name").equals("Mac OS X")) {
+			THREAD_NUM = 16;
+		}
 	}
 
 	/**

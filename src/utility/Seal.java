@@ -150,13 +150,13 @@ public class Seal implements RW {
 	}
 
 	/**
-	 * 39.7 us
-	 * 
+	 * one-time pad 39.7 us
+	 * Paillier 104004 us
 	 * @return
 	 */
 	public ArrayList<Entry> testGenTime() {
 		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, Sim.fileName);
+		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
 		Timer timer = new Timer();
 		timer.reset();
 		int times = 1000;
@@ -176,11 +176,15 @@ public class Seal implements RW {
 		return entries;
 	}
 
+	/**
+	 * one-time pad: 0.922 us
+	 * 
+	 */
 	public void testFolding() {
 		TrustedRegister.sk = AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
 		Timer timer = new Timer();
-		int times = 100000;
+		int times = 1000000;
 		Seal[] seals = new Seal[times];
 		Tuple tuple = new Tuple(0, new Point(new double[] { 0, 0 }), 0,
 				new int[] { 1, 2, 3, 4, 5, 6 }, INDEX_TYPE.RTree);
@@ -193,16 +197,16 @@ public class Seal implements RW {
 		timer.stop();
 		System.out.println(fseal.hashCode());
 		System.out.println("Time consumes @ fold: " + timer.timeElapseinUs()
-				/ times + " us");
+				 + " us");
 	}
 
 	/**
-	 * 28.6 us
-	 * 
+	 * one-time pad 28.6 us
+	 * Paillier 118641.34
 	 */
 	public void testVrfTime(ArrayList<Entry> entries) {
 		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.Paillier, Sim.fileName);
+		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
 		Timer timer = new Timer();
 		timer.reset();
 		int times = 1000;
@@ -231,8 +235,8 @@ public class Seal implements RW {
 	public static void main(String[] args) {
 		Seal seal = new Seal();
 		seal.testFolding();
-		// ArrayList<Entry> entries = seal.testGenTime();
-		// seal.testVrfTime(entries);
+		ArrayList<Entry> entries = seal.testGenTime();
+		seal.testVrfTime(entries);
 	}
 
 	@Override

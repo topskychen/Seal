@@ -3,17 +3,18 @@
  */
 package party;
 
+import io.IO;
+import io.RW;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.util.HashMap;
 
-import io.IO;
-import io.RW;
-import crypto.AES;
-import utility.Global;
 import utility.EncFun;
 import utility.EncFun.ENC_TYPE;
+import utility.Global;
 import utility.Utility;
+import crypto.AES;
 
 /**
  * @author chenqian
@@ -27,7 +28,7 @@ public class TrustedRegister {
 	public static BigInteger mod = BigInteger.ONE.shiftLeft(184 * 8 + 24 + 128 + 24);
 //	public static HashMap<Integer, BigInteger> secretShares = new HashMap<Integer, BigInteger>();
 	public static HashMap<Integer, BigInteger> totalSS =  new HashMap<Integer, BigInteger>();
-	
+
 	/**
 	 * Generate Secret Share
 	 * @param id

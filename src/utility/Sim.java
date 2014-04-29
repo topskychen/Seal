@@ -33,6 +33,11 @@ public class Sim extends Simulator {
 
 	public Sim(String fileName, String type) {
 		this.fileName = fileName;
+		if (Global.TOTN == 10132) {
+			//
+		} else {
+			this.fileName += "_" + Global.TOTN;
+		}
 		if (type.equalsIgnoreCase("btree")) {
 			this.type = INDEX_TYPE.BTree;
 		} else if (type.equalsIgnoreCase("rtree")) {
@@ -106,7 +111,7 @@ public class Sim extends Simulator {
 		}
 		sim.printStat();
 	}
-
+	
 	/**
 	 * @param args
 	 */
@@ -114,14 +119,15 @@ public class Sim extends Simulator {
 		Sim sim;
 		int startTime = 0, runTimes = 250;
 		if (args.length >= 6) {
-			sim = new Sim(args[0], args[1]);
 			startTime = Integer.parseInt(args[2]);
 			runTimes = Integer.parseInt(args[3]);
 			Global.QUERY_LIM = Integer.parseInt(args[4]);
 			String mode = args[5];
-			if (mode.equalsIgnoreCase("rebuild"))
+			if (mode.equalsIgnoreCase("rebuild")) {
 				Global.G_MODE = MODE.REBUILD;
-			else if (mode.equalsIgnoreCase("update")) {
+				Global.TOTN = Integer.parseInt(args[6]);
+				Global.L = Math.max(6, (int) (Math.log(Global.TOTN) / Math.log(4)) - 1);
+			} else if (mode.equalsIgnoreCase("update")) {
 				Global.G_MODE = MODE.UPDATE;
 				Global.UPDATE_RT = Double.parseDouble(args[6]);
 			} else if (mode.equalsIgnoreCase("lazy")) {
@@ -136,7 +142,8 @@ public class Sim extends Simulator {
 				System.out.println("This mode is not supprted!");
 				return;
 			}
-			System.out.println("Init fin!");
+			sim = new Sim(args[0], args[1]);
+			System.out.println("parse fin!");
 		} else if (args.length == 0) {
 			sim = new Sim();
 		} else {

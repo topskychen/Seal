@@ -26,6 +26,7 @@ public class LooseR {
 	String					fileName	= Sim.fileName;
 	int						start		= 0;
 	int						len			= 250;
+	int 					qlen 		= 50;
 	ArrayList<DataOwner>	dataOwners;
 	ArrayList<Region>		queries;
 
@@ -49,22 +50,20 @@ public class LooseR {
 					0 });
 			for (int i = start; i < start + len; i++) {
 				Point point = (Point) owner.getPoint(i);
-				Region query = queries.get(i);
-				if (point == null) {
+				if (point != null) {
+					if (!region.contains(point)) {
+						outOfBounds++;
+						region = new Region(new double[] { point.getCoord(0) - L,
+								point.getCoord(1) - L }, new double[] {
+								point.getCoord(0) + L, point.getCoord(1) + L });
+					}
+				}
+				tot++;
+				for (int q = 0; q < qlen; q++) {
+					Region query = queries.get(q);
 					if (query.intersects(region)) {
 						interQueries++;
 					}
-					continue;
-				}
-				tot++;
-				if (!region.contains(point)) {
-					outOfBounds++;
-					region = new Region(new double[] { point.getCoord(0) - L,
-							point.getCoord(1) - L }, new double[] {
-							point.getCoord(0) + L, point.getCoord(1) + L });
-				}
-				if (query.intersects(region)) {
-					interQueries++;
 				}
 			}
 		}
@@ -76,11 +75,11 @@ public class LooseR {
 			entries.add(Seal.getSample(i));
 		}
 		timer.stop();
-		double doCPU = timer.timeElapseinMs() / len;
+		double doCPU = timer.timeElapseinMs() / len * 5;
 		System.out.println(doCPU + " ms");
 		timer.reset();
 		for (int i = 0; i < interQueries; i++) {
-			entries.get(i).verify();
+			entries.get(0).verify();
 		}
 		timer.stop();
 		double vrfCPU = timer.timeElapseinMs() / len;
@@ -94,7 +93,7 @@ public class LooseR {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		double L = 50, tmp = L;
+		double L = 100, tmp = L;
 		LooseR looseR = new LooseR();
 		looseR.run(L);
 		for (int i = 0; i < 4; i++) {

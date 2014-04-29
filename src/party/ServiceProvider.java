@@ -38,7 +38,6 @@ public class ServiceProvider {
 	 */
 	public void collectDataOnce(ArrayList<DataOwner> dataOwners,
 			INDEX_TYPE type, int runId) {
-		timer.reset();
 		if (Global.G_MODE != MODE.REBUILD) {
 			if (index == null) {
 				if (type == INDEX_TYPE.BTree) {
@@ -52,6 +51,7 @@ public class ServiceProvider {
 		} else {
 			specifyIndex(type);
 		}
+		timer.reset();
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		for (int i = 0; i < dataOwners.size(); i++) {
 			DataOwner owner = dataOwners.get(i);

@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 
+import multithread.MultiThread;
 import spatialindex.IShape;
 import spatialindex.Point;
 import utility.Global;
@@ -30,13 +31,14 @@ import utility.Tuple;
  * @author chenqian
  * 
  */
-public class DataOwner {
+public class DataOwner implements Runnable{
 
-	private int								id		= -1;
-	private HashMap<Integer, IShape>		points	= null;
-	private HashMap<Integer, Entry>			entries	= null;
-	private HashMap<Integer, BigInteger>	SSs		= null;
-
+	private int								id				= -1;
+	private HashMap<Integer, IShape>		points			= null;
+	private HashMap<Integer, Entry>			entries			= null;
+	private HashMap<Integer, BigInteger>	SSs				= null;
+	private boolean							isMultiThread	= false;
+	
 	public int getId() {
 		return id;
 	}
@@ -89,9 +91,16 @@ public class DataOwner {
 		entries.clear();
 	}
 
-	public DataOwner(int id, HashMap<Integer, IShape> points) {
+	public DataOwner(int id, HashMap<Integer, IShape> points, boolean isMultiThread) {
 		this.id = id;
 		this.points = points;
+		this.isMultiThread = isMultiThread;
+		if (!isMultiThread) {
+			prepareEntries();
+		} // else in run();
+	}
+	
+	public void prepareEntries() {
 		this.entries = new HashMap<Integer, Entry>();
 		this.SSs = new HashMap<Integer, BigInteger>();
 		for (Map.Entry<Integer, IShape> point : points.entrySet()) {
@@ -186,13 +195,15 @@ public class DataOwner {
 					int id = Integer.parseInt(in.nextLine());
 					HashMap<Integer, IShape> points = parsePoints(id,
 							in.nextLine(), startTime, runTimes, updateIds);
-					dataOwners.add(new DataOwner(id, points));
+					dataOwners.add(new DataOwner(id, points, Global.IS_MULTI_THREAD));
 				}
 				in.close();
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			new MultiThread(dataOwners.toArray(new Runnable[0]), Global.THREAD_NUM).run();
+			System.out.println("[" + dataOwners.size() + "]");
 		} else {
 			System.out.println("File " + file + ".pl is not existed!");
 		}
@@ -269,4 +280,10 @@ public class DataOwner {
 		in.close();
 		return updateIds;
 	}
+
+	@Override
+	public void run() {
+		prepareEntries();
+	}
+	
 }

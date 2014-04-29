@@ -43,13 +43,15 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 
 	HashMap<Integer, Entry>	innerEntries	= null;
 	HashMap<Integer, Entry>	leafEntries		= null;
+//	Entry[]					leafEntries		= null;
 	HashSet<Integer>		rebuildIds		= null;
 	Timer					timer			= null;
 
 	public MemRTree(PropertySet ps, IStorageManager sm) {
 		super(ps, sm);
-		innerEntries = new HashMap<Integer, Entry>(13000);
-		leafEntries = new HashMap<Integer, Entry>(13000);
+		innerEntries = new HashMap<Integer, Entry>(Global.TOTN);
+		leafEntries = new HashMap<Integer, Entry>((int)(Global.TOTN * 1.2));
+//		leafEntries = new Entry[Global];
 		timer = new Timer();
 		// TODO Auto-generated constructor stub
 	}
@@ -199,12 +201,19 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 				throw new IllegalStateException("This mode is not supported");
 			}
 		} else {
+			timer.reset();
+//			timer.pause();
 			for (int i = 0; i < entries.size(); i++) {
 				Entry entry = entries.get(i);
 				insertData(null, entry.getShape(), entry.getId());
+//				timer.resume();
 				leafEntries.put(entry.getId(), entry);
+//				timer.pause();
 			}
+//			timer.resume();
 			buildIndex(getRootId());
+			timer.stop();
+			System.out.println("R building index : " + timer.timeElapseinMs() + "ms");
 		}
 	}
 
