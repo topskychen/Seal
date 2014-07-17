@@ -8,15 +8,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 
-import party.DataOwner;
-import spatialindex.IShape;
-import spatialindex.Point;
-import spatialindex.Region;
-import utility.StatisticsUpdate;
-import utility.Tuple;
-import utility.VOCell;
 import memoryindex.BinaryTree;
 import memoryindex.IQueryStrategyBT;
+import party.DataOwner;
+import spatialindex.IShape;
+import utility.StatisticsUpdate;
+import utility.Tuple;
 
 /**
  * @author chenqian
@@ -232,7 +229,12 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 
 	@Override
 	public INDEX_TYPE getType() {
-		// TODO Auto-generated method stub
 		return INDEX_TYPE.BTree;
+	}
+
+	@Override
+	public ArrayList<VOCell> kNN(IShape query) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

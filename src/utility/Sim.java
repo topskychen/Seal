@@ -28,15 +28,16 @@ public class Sim extends Simulator {
 
 	public Sim() {
 		super();
+		Global.TOTN = 10132;
 		// TODO Auto-generated constructor stub
 	}
 
 	public Sim(String fileName, String type) {
-		this.fileName = fileName;
+		Sim.fileName = fileName;
 		if (Global.TOTN == 10132) {
 			//
 		} else {
-			this.fileName += "_" + Global.TOTN;
+			Sim.fileName += "_" + Global.TOTN;
 		}
 		if (type.equalsIgnoreCase("btree")) {
 			this.type = INDEX_TYPE.BTree;
@@ -65,8 +66,8 @@ public class Sim extends Simulator {
 		serviceProvider = new ServiceProvider(statU);
 		client = new Client(statQ);
 		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
-		DataOwner.initData(dataOwners, fileName, type, startTime, runTimes);
+		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
+		DataOwner.initData(dataOwners, Sim.fileName, type, startTime, runTimes);
 		System.out.println("init done.");
 	}
 
@@ -117,7 +118,7 @@ public class Sim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		Sim sim;
-		int startTime = 0, runTimes = 250;
+		int startTime = 0, runTimes = 20;
 		if (args.length >= 6) {
 			startTime = Integer.parseInt(args[2]);
 			runTimes = Integer.parseInt(args[3]);

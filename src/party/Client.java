@@ -3,6 +3,8 @@
  */
 package party;
 
+import index.VO;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -12,7 +14,6 @@ import spatialindex.Region;
 import utility.Global;
 import utility.Global.MODE;
 import utility.StatisticsQuery;
-import utility.VO;
 
 /**
  * @author chenqian

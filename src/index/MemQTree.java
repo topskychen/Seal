@@ -23,7 +23,6 @@ import utility.Global.MODE;
 import utility.Global.OP;
 import utility.StatisticsUpdate;
 import utility.Tuple;
-import utility.VOCell;
 
 /**
  * 
@@ -633,22 +632,28 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 
 	@Override
 	public void write(DataOutputStream ds) {
-//		IO.writeInt(ds, L.size());
-//		for (java.util.Map.Entry<Integer, Entry> entry : L.entrySet()) {
-//			IO.writeInt(ds, entry.getKey());
-//			entry.getValue().write(ds);
-//		}
-//		if (!isLeaf()) {
-//			IO.writeBoolean(ds, false);
-//			MemQTree[] chTrees = (MemQTree[]) getChTrees();
-//			if (chTrees != null && getCnt() > 0) {
-//				for (int i = 0; i < chTrees.length; i++) {
-//					chTrees[i].write(ds);
-//				}
-//			}
-//		} else {
-//			IO.writeBoolean(ds, true);
-//		}
+		IO.writeInt(ds, L.size());
+		for (java.util.Map.Entry<Integer, Entry> entry : L.entrySet()) {
+			IO.writeInt(ds, entry.getKey());
+			entry.getValue().write(ds);
+		}
+		if (!isLeaf()) {
+			IO.writeBoolean(ds, false);
+			MemQTree[] chTrees = (MemQTree[]) getChTrees();
+			if (chTrees != null && getCnt() > 0) {
+				for (int i = 0; i < chTrees.length; i++) {
+					chTrees[i].write(ds);
+				}
+			}
+		} else {
+			IO.writeBoolean(ds, true);
+		}
+	}
+
+	@Override
+	public ArrayList<VOCell> kNN(IShape query) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

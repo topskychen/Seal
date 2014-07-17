@@ -1,9 +1,8 @@
 /**
  * 
  */
-package utility;
+package index;
 
-import index.SearchIndex;
 import io.IO;
 import io.RW;
 
@@ -16,6 +15,7 @@ import java.util.TreeSet;
 import party.TrustedRegister;
 import spatialindex.IShape;
 import timer.Timer;
+import utility.Global;
 
 /**
  * @author chenqian
@@ -30,7 +30,7 @@ public class VO implements RW{
 	private int 		voSize 			= -1;
 	private int			ansNo			= -1;
 	ArrayList<VOCell> 	voCells 		= null;
-	IShape				query 			= null;
+//	Query				query 			= null;
 	private int			runId 			= -1;
 	TreeSet<Integer>	ansIds			= null;
 	

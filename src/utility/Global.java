@@ -61,7 +61,7 @@ public class Global {
 	public static int				PRINT_LIM		= 10;
 	public static boolean 			IS_MULTI_THREAD = true;
 	public static int				BUFFER_SIZE		= 150;
-	public static MODE				G_MODE			= MODE.LOOSE;
+	public static MODE				G_MODE			= MODE.REBUILD;
 	public static String			TEST_FILE_DIR	= "./data";
 	public static int				TRA_LEN			= 2;
 	// public static double[] RATIOS = {0.64};

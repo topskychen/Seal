@@ -1,7 +1,7 @@
 /**
  * 
  */
-package utility;
+package index;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -13,7 +13,9 @@ import crypto.Constants;
 import crypto.Hasher;
 import party.TrustedRegister;
 import spatialindex.IShape;
-import index.Entry;
+import utility.Global;
+import utility.Tuple;
+import utility.Utility;
 import io.IO;
 import io.RW;
 

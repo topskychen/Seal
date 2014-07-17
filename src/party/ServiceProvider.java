@@ -9,6 +9,7 @@ import index.MemQTree;
 import index.MemRTree;
 import index.SearchIndex;
 import index.SearchIndex.INDEX_TYPE;
+import index.VO;
 import io.IO;
 import io.RW;
 
@@ -19,7 +20,7 @@ import timer.Timer;
 import utility.Global;
 import utility.Global.MODE;
 import utility.StatisticsUpdate;
-import utility.VO;
+
 
 /**
  * @author chenqian

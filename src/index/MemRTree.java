@@ -33,7 +33,6 @@ import utility.Global.MODE;
 import utility.Seal;
 import utility.StatisticsUpdate;
 import utility.Tuple;
-import utility.VOCell;
 
 /**
  * @author chenqian
@@ -212,7 +211,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 			}
 			buildIndex(getRootId());
 //			timer.stop();
-			System.out.println("R building index : " + timer.timeElapseinMs() + "ms");
+//			System.out.println("R building index : " + timer.timeElapseinMs() + "ms");
 		}
 	}
 
@@ -389,17 +388,23 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
-//		IO.writeInt(ds, innerEntries.size());
-//		for (java.util.Map.Entry<Integer, Entry> entry : innerEntries
-//				.entrySet()) {
-//			IO.writeInt(ds, entry.getKey());
-//			entry.getValue().write(ds);
-//		}
-//		IO.writeInt(ds, leafEntries.length);
-//		for (int i = 0; i < leafEntries.length; i++) {
-//			if (leafEntries[i] == null) continue;
-//			IO.writeInt(ds, i);
-//			leafEntries[i].write(ds);
-//		}
+		IO.writeInt(ds, innerEntries.size());
+		for (java.util.Map.Entry<Integer, Entry> entry : innerEntries
+				.entrySet()) {
+			IO.writeInt(ds, entry.getKey());
+			entry.getValue().write(ds);
+		}
+		IO.writeInt(ds, leafEntries.length);
+		for (int i = 0; i < leafEntries.length; i++) {
+			if (leafEntries[i] == null) continue;
+			IO.writeInt(ds, i);
+			leafEntries[i].write(ds);
+		}
+	}
+
+	@Override
+	public ArrayList<VOCell> kNN(IShape query) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
