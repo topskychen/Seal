@@ -5,6 +5,7 @@ package utility;
 
 import index.MemQTree;
 import index.MemRTree;
+import index.Query.QUERY_TYPE;
 
 import java.math.BigInteger;
 
@@ -86,6 +87,8 @@ public class Global {
 	public static boolean			INDEX_COST		= true;
 	public static StatisticsIndex	STAT_INDEX		= new StatisticsIndex();
 	public static Timer				G_TIMER			= null;
+	public static QUERY_TYPE 		G_QUERY_TYPE	= QUERY_TYPE.range_query;
+	public static int				G_K				= 1;
 
 	
 	static {

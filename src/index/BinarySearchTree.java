@@ -233,8 +233,8 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	}
 
 	@Override
-	public ArrayList<VOCell> kNN(IShape query) {
-		// TODO Auto-generated method stub
+	public ArrayList<IShape> kNN(IShape query, int k) {
+		System.out.println("warning: this query is not supported by binary tree");
 		return null;
 	}
 }

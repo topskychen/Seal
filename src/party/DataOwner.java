@@ -23,9 +23,9 @@ import multithread.MultiThread;
 import spatialindex.IShape;
 import spatialindex.Point;
 import utility.Global;
-import utility.Global.MODE;
 import utility.Seal;
 import utility.Tuple;
+import utility.Global.MODE;
 
 /**
  * @author chenqian

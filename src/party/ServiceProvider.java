@@ -80,6 +80,10 @@ public class ServiceProvider {
 		vo.prepare(index, query);
 		return vo;
 	}
+	
+	public ArrayList<IShape> kNN(IShape query, int k) {
+		return index.kNN(query, k);
+	}
 
 	public void specifyIndex(INDEX_TYPE type) {
 		if (type == INDEX_TYPE.BTree) {

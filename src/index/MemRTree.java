@@ -17,9 +17,12 @@ import party.DataOwner;
 import rtree.Node;
 import rtree.RTree;
 import rtree.Records;
+import spatialindex.IData;
 import spatialindex.IEntry;
+import spatialindex.INode;
 import spatialindex.IQueryStrategy;
 import spatialindex.IShape;
+import spatialindex.IVisitor;
 import spatialindex.Point;
 import spatialindex.Region;
 import storagemanager.IBuffer;
@@ -29,10 +32,10 @@ import storagemanager.PropertySet;
 import storagemanager.RandomEvictionsBuffer;
 import timer.Timer;
 import utility.Global;
-import utility.Global.MODE;
 import utility.Seal;
-import utility.StatisticsUpdate;
 import utility.Tuple;
+import utility.Global.MODE;
+import utility.StatisticsUpdate;
 
 /**
  * @author chenqian
@@ -93,19 +96,19 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 	 */
 	public void replace(Entry entry) {
 
-		if (leafEntries[entry.getId()] != null) {
-			Entry oldEntry = leafEntries[entry.getId()];
-			if (!deleteData(oldEntry.getShape(), oldEntry.getId())) {
+		if (leafEntries[ entry.getId()] != null) {
+			Entry oldEntry = leafEntries[ entry.getId()];
+			if (!deleteData(oldEntry.getShape(),  oldEntry.getId())) {
 				System.out.println("fail delete");
 			}
 		}
-		insertData(null, entry.getShape(), entry.getId());
-		if (leafEntries[entry.getId()] != null) {
-			Entry recEntry = leafEntries[entry.getId()];
+		insertData(null, entry.getShape(),  entry.getId());
+		if (leafEntries[ entry.getId()] != null) {
+			Entry recEntry = leafEntries[ entry.getId()];
 			recEntry.setShape(entry.getShape());
 			recEntry.setTS(entry.getTS());
 		} else {
-			leafEntries[entry.getId()] = entry;
+			leafEntries[ entry.getId()] = entry;
 		}
 	}
 
@@ -121,7 +124,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 				int outOfBound = 0;
 				for (Entry entry : entries) {
 					if (Global.G_MODE == MODE.LOOSE) {
-						if (leafEntries[entry.getId()] != null) {
+						if (leafEntries[ entry.getId()] != null) {
 							Point p = (Point) entry.getShape();
 							Region region = new Region(new double[] {
 									p.getCoord(0) - Global.REGION_L,
@@ -131,7 +134,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 											p.getCoord(1) + Global.REGION_L });
 							entry.setShape(region);
 						} else {
-							Entry oldEntry = leafEntries[entry.getId()];
+							Entry oldEntry = leafEntries[ entry.getId()];
 							if (!oldEntry.getShape().contains(entry.getShape())) { // out
 								Point p = (Point) entry.getShape();
 								Region region = new Region(
@@ -149,7 +152,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 						}
 					}
 					replace(entry);
-					reCalcIds.add(entry.getId());
+					reCalcIds.add( entry.getId());
 				}
 				timer.reset();
 				for (int i = 0; i < outOfBound; i++) {
@@ -166,10 +169,10 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 				for (Entry entry : leafEntries) {
 					if (entry == null) continue;
 					int[] comPre = DataOwner.comPre(this, entry.getShape(),
-							entry.getId());
+							 entry.getId());
 					if (!Arrays.equals(comPre, entry.getComPre())
 							|| entry.getComPre() == null) {
-						reCalcIds.add(entry.getId());
+						reCalcIds.add( entry.getId());
 					}
 				}
 				timer.reset();
@@ -177,15 +180,15 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 				for (Integer reCalcId : reCalcIds) {
 					Entry entry = leafEntries[reCalcId];
 					int[] comPre = DataOwner.comPre(this, entry.getShape(),
-							entry.getId());
+							 entry.getId());
 					entry.setComPre(comPre);
 					// entry.setTuple(new Tuple(entry.getId(), entry.getShape(),
 					// entry.getTS(), comPre, INDEX_TYPE.RTree));
 					entry.setSeal(new Seal(entry.getTuple(), owners.get(
-							entry.getId()).getSS(entry.getTS())));
+							 entry.getId()).getSS(entry.getTS())));
 					bandWidth += IO.toBytes(entry).length;
 					ArrayList<Integer> path = new ArrayList<Integer>();
-					getPath(getRootId(), entry.getShape(), entry.getId(), path);
+					getPath(getRootId(), entry.getShape(),  entry.getId(), path);
 					rebuildIds.addAll(path);
 				}
 				rebuildIds.add(getRootId());
@@ -205,9 +208,9 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 			for (int i = 0; i < entries.size(); i++) {
 				Entry entry = entries.get(i);
 //				timer.resume();
-				insertData(null, entry.getShape(), entry.getId());
+				insertData(null, entry.getShape(),  entry.getId());
 //				timer.pause();
-				leafEntries[entry.getId()]= entry;
+				leafEntries[ entry.getId()]= entry;
 			}
 			buildIndex(getRootId());
 //			timer.stop();
@@ -403,8 +406,29 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 	}
 
 	@Override
-	public ArrayList<VOCell> kNN(IShape query) {
+	public ArrayList<IShape> kNN(IShape query, int k) {
 		// TODO Auto-generated method stub
-		return null;
+		KNNVisitor visitor = new KNNVisitor();
+		nearestNeighborQuery(k, query, visitor);
+		return visitor.getPoints();
+	}
+	
+	class KNNVisitor implements IVisitor {
+
+		ArrayList<IShape> points = new ArrayList<IShape>();
+		
+		@Override
+		public void visitNode(INode n) {
+			// TODO Auto-generated method stub
+		}
+
+		@Override
+		public void visitData(IData d) {
+			points.add(d.getShape());
+		}
+		
+		public ArrayList<IShape> getPoints() {
+			return points;
+		}
 	}
 }

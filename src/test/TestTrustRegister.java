@@ -13,8 +13,8 @@ import org.junit.Test;
 import crypto.AES;
 import party.TrustedRegister;
 import spatialindex.Point;
-import utility.EncFun.ENC_TYPE;
 import utility.Tuple;
+import utility.EncFun.ENC_TYPE;
 
 /**
  * @author chenqian

@@ -16,6 +16,7 @@ public class Query {
 	
 	private QUERY_TYPE	type;
 	private IShape		shape;
+	private int			k;
 	
 	/**
 	 * 
@@ -23,7 +24,12 @@ public class Query {
 	public Query(QUERY_TYPE _type, IShape _shape) {
 		type = _type;
 		shape = _shape;
-		
+	}
+	
+	public Query(QUERY_TYPE _type, IShape _shape, int _k) {
+		type = _type;
+		shape = _shape;
+		k = _k;
 	}
 	
 	public QUERY_TYPE getType() {
@@ -32,6 +38,14 @@ public class Query {
 	
 	public IShape getShape() {
 		return shape;
+	}
+	
+	public void setK(int _k) {
+		k = _k;
+	}
+	
+	public int getK() {
+		return k;
 	}
 
 }

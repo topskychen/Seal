@@ -5,6 +5,7 @@ package utility;
 
 import index.MemQTree;
 import index.MemRTree;
+import index.Query.QUERY_TYPE;
 import index.SearchIndex.INDEX_TYPE;
 
 import java.util.ArrayList;
@@ -87,9 +88,17 @@ public class Sim extends Simulator {
 		// Client Make queries
 		// client
 		if (ratio != -1) {
-			client.rangeQuery(serviceProvider, fileName + "_" + ratio, runId);
+			if (Global.G_QUERY_TYPE == QUERY_TYPE.range_query) {
+				client.rangeQuery(serviceProvider, fileName + "_" + ratio, runId);
+			} else if (Global.G_QUERY_TYPE == QUERY_TYPE.knn) {
+				client.knn(serviceProvider, fileName + "_" + ratio, runId, Global.G_K);
+			}
 		} else {
-			client.rangeQuery(serviceProvider, fileName, runId);
+			if (Global.G_QUERY_TYPE == QUERY_TYPE.range_query) {
+				client.rangeQuery(serviceProvider, fileName, runId);
+			} else if (Global.G_QUERY_TYPE == QUERY_TYPE.knn) {
+				client.knn(serviceProvider, fileName, runId, Global.G_K);
+			}
 		}
 	}
 
@@ -147,6 +156,7 @@ public class Sim extends Simulator {
 			System.out.println("parse fin!");
 		} else if (args.length == 0) {
 			sim = new Sim();
+//			Global.G_QUERY_TYPE = QUERY_TYPE.knn;
 		} else {
 			System.out
 					.println("The args should be [fileName treeType startTime runTimes queryLen mode [update_ratio]].");

@@ -10,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 
+import memoryindex.QuadEntry;
 import spatialindex.IShape;
 import utility.Seal;
 import utility.Tuple;
@@ -21,7 +22,7 @@ import crypto.Hasher;
  * @author chenqian
  * 
  */
-public class Entry implements RW {
+public class Entry extends QuadEntry implements RW {
 
 	private Tuple	tuple	= null;
 	private Seal	seal	= null;
@@ -171,6 +172,7 @@ public class Entry implements RW {
 		no = IO.readInt(ds);
 	}
 
+	@Override
 	public IShape getShape() {
 		return tuple.getShape();
 	}
@@ -211,6 +213,7 @@ public class Entry implements RW {
 		return sb.toString();
 	}
 
+	@Override
 	public int getId() {
 		return tuple.getId();
 	}

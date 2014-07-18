@@ -10,6 +10,8 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import spatialindex.IShape;
+import spatialindex.Point;
 import spatialindex.Region;
 import utility.Global;
 import utility.Global.MODE;
@@ -45,11 +47,15 @@ public class Client {
 					break;
 				VO vo = null;
 				if (tks.length == 4) {
-					Region query = new Region(
-							new double[] { Integer.parseInt(tks[0]),
-									Integer.parseInt(tks[1]) }, new double[] {
-									Integer.parseInt(tks[2]),
-									Integer.parseInt(tks[3]) });
+					double[] lb = new double[tks.length / 2];
+					for (int i = 0; i < lb.length; ++i) {
+						lb[i] = Integer.parseInt(tks[i]);
+					}
+					double[] ub = new double[tks.length / 2];
+					for (int i = 0; i < ub.length; ++i) {
+						ub[i] = Integer.parseInt(tks[lb.length + i]);
+					}
+					Region query = new Region(lb, ub);
 					vo = serviceProvider.rangeQuery(query, runId);
 					if (!vo.verify(query)) {
 						if (!Global.BATCH_QUERY) {
@@ -65,17 +71,6 @@ public class Client {
 					}
 					if (!Global.BATCH_QUERY)
 						System.out.println(vo.toString());
-				} else if (tks.length == 2) {
-					Region query = new Region(
-							new double[] { Integer.parseInt(tks[0]) },
-							new double[] { Integer.parseInt(tks[1]) });
-					vo = serviceProvider.rangeQuery(query, runId);
-					if (!vo.verify(query)) {
-						System.err.println("Fail verify!");
-					} else {
-						System.out.println("Pass verify!");
-					}
-					System.out.println(vo.toString());
 				}
 				if (vo != null) {
 					if (Global.G_MODE != MODE.LAZY || lineNo != 1) {
@@ -89,6 +84,64 @@ public class Client {
 			}
 			in.close();
 			System.out.println();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private Region prepareQueryFromKNN(ArrayList<IShape> points) {
+		Region query = new Region(points.get(0).getMBR());
+		for (IShape p : points) {
+			query.combinedRegion(p.getMBR());
+		}
+		return query;
+	} 
+	
+	public void knn(ServiceProvider sp, String fileName, int runId, int k) {
+		Scanner in;
+		try {
+			String[] tks = fileName.split("_");
+			fileName = tks[0] + "_" + tks[tks.length - 1];
+			in = new Scanner(new File(fileName + ".qr"));
+			int lineNo = 0;
+			while (in.hasNext()) {
+				tks = in.nextLine().split(" ");
+				lineNo++;
+				if (lineNo > Global.QUERY_LIM)
+					break;
+				VO vo = null;
+				double[] coords = new double[tks.length / 2];
+				for (int i = 0; i < coords.length; ++i) {
+					coords[i] = Integer.parseInt(tks[i]);
+				}
+				Point point = new Point(coords);
+				Region query = prepareQueryFromKNN(sp.kNN(point, k));
+				vo = sp.rangeQuery(query, runId);
+				if (!vo.verify(query)) {
+					if (!Global.BATCH_QUERY) {
+						System.err.print("Fail verify!");
+					} else {
+						System.err.println("x");
+					}
+				} else {
+					if (!Global.BATCH_QUERY) {
+						System.out.println("Pass verify!");
+					} else {
+					}
+				}
+				if (!Global.BATCH_QUERY)
+					System.out.println(vo.toString());
+				if (vo != null) {
+					if (Global.G_MODE != MODE.LAZY || lineNo != 1) {
+						statQ.append(vo.getPrepareTime(), vo.getVerifyTime(),
+								vo.getVOSize());
+					}
+				}
+				if (lineNo % Global.PRINT_LIM == 0) {
+					System.out.print(".");
+				}
+			}
+			in.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
