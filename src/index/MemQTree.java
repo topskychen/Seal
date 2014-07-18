@@ -39,7 +39,6 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 	private int								lev				= 0;
 	public HashMap<Integer, Entry>			L				= null;
 	public HashMap<Integer, UpdateEntry>	U				= null;
-																								// rebuild
 
 	/**
 	 * It is used for checking the counting is right or not.
@@ -123,8 +122,28 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 		} else {
 			pushU(0);
 		}
+		if (Global.G_MODE == MODE.REBUILD) { // push L to entries
+			pushLtoEntries();
+		}
 //		System.out.println(checkCount() + "," + getCnt());
 //		System.out.println(checkTree() + "," + getCnt());
+	}
+	
+	void pushLtoEntries() {
+		if (isLeaf()) {
+			ArrayList<QuadEntry> entries = new ArrayList<QuadEntry>();
+			for (Entry entry : L.values()) {
+				if (entry == null) {
+					System.out.println("wanring!");
+				}
+				entries.add(entry);
+			}
+			setEntries(entries);
+		} else if (getCnt() != 0) {
+			for (int i = 0; i < getDim(); ++i) {
+				((MemQTree) getChTree(i)).pushLtoEntries();
+			}
+		}
 	}
 
 	public void putU(int id, UpdateEntry entry) {

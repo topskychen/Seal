@@ -88,7 +88,7 @@ public class Global {
 	public static StatisticsIndex	STAT_INDEX		= new StatisticsIndex();
 	public static Timer				G_TIMER			= null;
 	public static QUERY_TYPE 		G_QUERY_TYPE	= QUERY_TYPE.range_query;
-	public static int				G_K				= 1;
+	public static int				G_K				= 128;
 
 	
 	static {

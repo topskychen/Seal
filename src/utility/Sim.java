@@ -25,7 +25,7 @@ import crypto.AES;
 public class Sim extends Simulator {
 
 	static String	fileName	= Global.TEST_FILE_DIR + "/TDrive";
-	INDEX_TYPE		type		= INDEX_TYPE.RTree;
+	INDEX_TYPE		type		= INDEX_TYPE.QTree;
 
 	public Sim() {
 		super();
@@ -156,7 +156,7 @@ public class Sim extends Simulator {
 			System.out.println("parse fin!");
 		} else if (args.length == 0) {
 			sim = new Sim();
-//			Global.G_QUERY_TYPE = QUERY_TYPE.knn;
+			Global.G_QUERY_TYPE = QUERY_TYPE.knn;
 		} else {
 			System.out
 					.println("The args should be [fileName treeType startTime runTimes queryLen mode [update_ratio]].");

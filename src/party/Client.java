@@ -116,6 +116,7 @@ public class Client {
 				}
 				Point point = new Point(coords);
 				Region query = prepareQueryFromKNN(sp.kNN(point, k));
+//				System.out.println(query);
 				vo = sp.rangeQuery(query, runId);
 				if (!vo.verify(query)) {
 					if (!Global.BATCH_QUERY) {
@@ -142,6 +143,7 @@ public class Client {
 				}
 			}
 			in.close();
+			System.out.println();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
