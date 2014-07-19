@@ -76,6 +76,7 @@ public class VO implements RW{
 			isVerify = false;
 		}
 		timer.stop();
+//		System.out.println(ansNo);
 		verifyTime = timer.timeElapseinMs();
 		voSize = IO.toBytes(this).length;
 		return isVerify;
@@ -83,10 +84,8 @@ public class VO implements RW{
 	
 	public boolean verifyComplete() {
 		BigInteger ss = BigInteger.ZERO;
-		int cnt = 0;
 		for (VOCell voCell : voCells) {
 			ss = ss.add(voCell.getPartialSS());
-			cnt += voCell.entry.getNO();
 		}
 		return ss.equals(TrustedRegister.totalSS.get(runId));
 	}

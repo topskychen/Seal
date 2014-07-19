@@ -92,7 +92,7 @@ public class Client {
 	private Region prepareQueryFromKNN(ArrayList<IShape> points) {
 		Region query = new Region(points.get(0).getMBR());
 		for (IShape p : points) {
-			query.combinedRegion(p.getMBR());
+			query = query.combinedRegion(p.getMBR());
 		}
 		return query;
 	} 
