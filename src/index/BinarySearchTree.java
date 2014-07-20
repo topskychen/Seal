@@ -237,4 +237,10 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 		System.out.println("warning: this query is not supported by binary tree");
 		return null;
 	}
+
+	@Override
+	public ArrayList<IShape> skyline() {
+		System.out.println("warning: this query is not supported by binary tree");
+		return null;
+	}
 }

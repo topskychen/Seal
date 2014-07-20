@@ -84,6 +84,10 @@ public class ServiceProvider {
 	public ArrayList<IShape> kNN(IShape query, int k) {
 		return index.kNN(query, k);
 	}
+	
+	public ArrayList<IShape> skyline() {
+		return index.skyline();
+	}
 
 	public void specifyIndex(INDEX_TYPE type) {
 		if (type == INDEX_TYPE.BTree) {

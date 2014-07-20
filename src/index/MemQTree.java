@@ -11,6 +11,7 @@ import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 
 import memoryindex.IQueryStrategyQT;
 import memoryindex.IVisitorQT;
@@ -668,5 +669,83 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 			return points;
 		}
 	}
+
+	boolean dominate(IShape a, IShape b) {
+		double[] l1 = a.getMBR().m_pLow;
+		double[] l2 = b.getMBR().m_pLow;
+		for (int i = 0; i < l1.length; ++i) {
+			if (l2[i] < l1[i]) return false;
+		}
+		return true;
+	}
 	
+	boolean dominate(ArrayList<IShape> points, IShape candidate) {
+		for (IShape point : points) {
+			if (dominate(point, candidate)) return true;
+		}
+		return false;
+	}
+	
+	@Override
+	public ArrayList<IShape> skyline() {
+		PriorityQueue<SLEntry> queue = new PriorityQueue<SLEntry>();
+		queue.add(new SLEntry(this));
+		
+		ArrayList<IShape> res = new ArrayList<IShape>();
+		
+		while (!queue.isEmpty()) {
+			SLEntry first = queue.poll();
+			
+			if (first.tree != null) {
+				QuadTree tree = first.tree;
+				if (tree.getChTrees() == null) {
+					for (int i = 0; i < tree.getCnt(); ++i) {
+						if (!dominate(res, tree.getEntry(i).getShape())) queue.add(new SLEntry(tree.getEntry(i)));
+					}
+				} else {
+					for (int i = 0; i < tree.getChTrees().length; ++i) {
+						if (tree.getChTree(i) != null) {
+							if (!dominate(res, tree.getChTree(i).getBoundary())) queue.add(new SLEntry(tree.getChTree(i)));
+						}
+					}
+				}
+			} else {
+				if (!dominate(res, first.entry.getShape())) {
+					res.add(first.entry.getShape());
+				}
+			}
+		}
+		return res;
+	}
+	
+	class SLEntry implements Comparable<SLEntry> {
+		QuadTree tree = null;
+		QuadEntry entry = null;
+		double minDist = 0;
+		
+		public SLEntry(QuadTree _tree) {
+			tree = _tree;
+			minDist = 0;
+			double[] low = tree.getBoundary().m_pLow;
+			for (int i = 0; i < low.length; ++i) {
+				minDist += low[i];
+			}
+		}
+		
+		public SLEntry(QuadEntry _entry) {
+			entry = _entry;
+			minDist = 0;
+			double[] low = _entry.getShape().getMBR().m_pLow;
+			for (int i = 0; i < low.length; ++i) {
+				minDist += low[i];
+			}
+		}
+
+		@Override
+		public int compareTo(SLEntry o) {
+			if (minDist < o.minDist) return -1;
+			else if (minDist > o.minDist) return 1;
+			else return 0;
+		}
+	}
 }

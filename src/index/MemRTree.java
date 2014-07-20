@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 
 import party.DataOwner;
 import rtree.Node;
@@ -32,10 +33,10 @@ import storagemanager.PropertySet;
 import storagemanager.RandomEvictionsBuffer;
 import timer.Timer;
 import utility.Global;
-import utility.Seal;
-import utility.Tuple;
 import utility.Global.MODE;
+import utility.Seal;
 import utility.StatisticsUpdate;
+import utility.Tuple;
 
 /**
  * @author chenqian
@@ -430,5 +431,80 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 		public ArrayList<IShape> getPoints() {
 			return points;
 		}
+	}
+	
+	boolean dominate(IShape a, IShape b) {
+		double[] l1 = a.getMBR().m_pLow;
+		double[] l2 = b.getMBR().m_pLow;
+		for (int i = 0; i < l1.length; ++i) {
+			if (l2[i] < l1[i]) return false;
+		}
+		return true;
+	}
+	
+	boolean dominate(ArrayList<IShape> points, IShape candidate) {
+		for (IShape point : points) {
+			if (dominate(point, candidate)) return true;
+		}
+		return false;
+	}
+
+	@Override
+	public ArrayList<IShape> skyline() {
+		PriorityQueue<SLEntry> queue = new PriorityQueue<SLEntry>();
+		queue.add(new SLEntry(getRoot()));
+		ArrayList<IShape> res = new ArrayList<IShape>();
+		
+		while (!queue.isEmpty()) {
+			SLEntry first = queue.poll();
+			if (first.entry instanceof Node) {
+				Node n = (Node) first.entry;
+				for (int c = 0; c < n.getChildrenCount(); ++c) {
+					IEntry e = null;
+					if (n.getLevel() == 0) { // leaf node
+						if (!dominate(res, n.getChildShape(c))) e = new LeafEntry(n.getChildShape(c), n.getChildIdentifier(c));
+					} else {
+						if (!dominate(res, n.getChildShape(c))) e = readNode(n.getChildIdentifier(c));
+					}
+					if (e != null) queue.add(new SLEntry(e));
+				}
+			} else {
+				if (!dominate(res, first.entry.getShape())) {
+					res.add(first.entry.getShape());
+				}
+			}
+		}
+		return res;
+	}
+	
+	class SLEntry implements Comparable<SLEntry> {
+
+		IEntry entry = null;
+		double minDist = 0;
+		
+		public SLEntry(IEntry _entry) {
+			entry = _entry;
+			double[] low = entry.getShape().getMBR().m_pLow;
+			for (int i = 0; i < low.length; ++i) {
+				minDist += low[i];
+			}
+		}
+		
+		@Override
+		public int compareTo(SLEntry o) {
+			// TODO Auto-generated method stub
+			if (minDist < o.minDist) return -1;
+			else if (minDist > o.minDist) return 1;
+			return 0;
+		}
+	}
+	
+	class LeafEntry implements IEntry {
+		int id;
+		IShape shape;
+
+		LeafEntry(IShape _shape, int _id) { id = _id; shape = _shape; }
+		public int getIdentifier() { return id; }
+		public IShape getShape() { return shape; }
 	}
 }
