@@ -88,10 +88,19 @@ public class Global {
 	public static StatisticsIndex	STAT_INDEX		= new StatisticsIndex();
 	public static Timer				G_TIMER			= null;
 	public static QUERY_TYPE 		G_QUERY_TYPE	= QUERY_TYPE.range_query;
-	public static int				G_K				= 128;
+	public static int				G_K				= 256;
+	public static int				G_Dim			= 2;
 
 	
 	static {
+		double[] low = new double [Global.G_Dim];
+		double[] high = new double [Global.G_Dim];
+		for (int i = 0; i < Global.G_Dim; ++i) {
+			low[i] = -1;
+			high[i] = BOUND+1;
+		}
+		G_BOUND = new Region(low, high);
+		L = (int) (Math.log(TOTN) / Math.log(1 << Global.G_Dim)); // log_4(TOTN)
 		if (DO_COST || INDEX_COST)
 			G_TIMER = new Timer();
 		if (!System.getProperty("os.name").equals("Mac OS X")) {

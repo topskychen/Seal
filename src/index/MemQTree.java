@@ -61,7 +61,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 			return false;
 		}
 		if (!isLeaf()) {
-			for (int i = 0; i < getDim(); ++i) {
+			for (int i = 0; i < getDivision(); ++i) {
 				return ((MemQTree) getChTree(i)).checkTree();
 			}
 		}
@@ -73,15 +73,15 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 	 * @param capacity
 	 * @param boundary
 	 */
-	public MemQTree(int capacity, Region boundary, int lev, long id) {
-		super(capacity, boundary);
+	public MemQTree(int dim, int capacity, Region boundary, int lev, long id) {
+		super(dim, capacity, boundary);
 		this.lev = lev;
 		L = new HashMap<Integer, Entry>();
 		U = new HashMap<Integer, UpdateEntry>();
 		// if (Constants.G_MODE != MODE.REBUILD && !isLeaf()) {
 		if (!isLeaf()) {
 			ArrayList<QuadEntry> entries = new ArrayList<QuadEntry>();
-			for (int i = 0; i < getDim(); i++) {
+			for (int i = 0; i < getDivision(); i++) {
 				entries.add(null);
 			}
 			setEntries(entries);
@@ -141,7 +141,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 			}
 			setEntries(entries);
 		} else if (getCnt() != 0) {
-			for (int i = 0; i < getDim(); ++i) {
+			for (int i = 0; i < getDivision(); ++i) {
 				((MemQTree) getChTree(i)).pushLtoEntries();
 			}
 		}
@@ -167,7 +167,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 	public int locate(MemQTree[] chTrees, Entry entry) {
 		if (entry == null)
 			return -1;
-		for (int i = 0; i < getDim(); i++) {
+		for (int i = 0; i < getDivision(); i++) {
 			if (chTrees[i].contains(entry)) {
 				return i;
 			}
@@ -268,7 +268,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 		} else {
 			updateChTree((MemQTree[]) getChTrees(), bufferSize, toRemove);
 			int cnt = 0;
-			for (int i = 0; i < getDim(); i++) {
+			for (int i = 0; i < getDivision(); i++) {
 				Entry entry = (Entry) getEntry(i);
 				if (entry != null) {
 					cnt += entry.getNO();
@@ -289,7 +289,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 			if (U.size() > bufferSize) {
 				updateU(bufferSize);
 				MemQTree[] chTrees = (MemQTree[]) getChTrees();
-				for (int i = 0; i < getDim(); i++) {
+				for (int i = 0; i < getDivision(); i++) {
 					chTrees[i].pushU(bufferSize);
 				}
 			}
@@ -299,11 +299,11 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 	}
 
 	public void createChTrees() {
-		MemQTree[] chTrees = new MemQTree[getDim()];
+		MemQTree[] chTrees = new MemQTree[getDivision()];
 		Region[] regions = subDivide(getBoundary());
-		for (int i = 0; i < getDim(); i++) {
-			chTrees[i] = new MemQTree(getCapacity(), regions[i], lev + 1,
-					(((getId() + 1) << (int) (Math.log(getDim()))) + i - 1));
+		for (int i = 0; i < getDivision(); i++) {
+			chTrees[i] = new MemQTree(getDim(), getCapacity(), regions[i], lev + 1,
+					(((getId() + 1) << (int) (getDim())) + i - 1));
 		}
 		setChTrees(chTrees);
 	}
@@ -319,7 +319,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 			QuadTree[] chTree = tree.getChTrees();
 			ArrayList<QuadEntry> entries = new ArrayList<QuadEntry>();
 			ArrayList<QuadEntry> tmp = new ArrayList<QuadEntry>();
-			for (int i = 0; i < getDim(); i++) {
+			for (int i = 0; i < getDivision(); i++) {
 				Entry entry = null;
 				if (modified == null
 						|| modified.contains(chTree[i].getId()) == true) {
@@ -358,9 +358,9 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 		path.add(id - 1);
 		Region[] regions = subDivide(boundary);
 		boolean found = false;
-		for (int i = 0; i < getDim(); i++) {
+		for (int i = 0; i < getDivision(); i++) {
 			if (regions[i].contains(p)) {
-				getPath(path, p, regions[i], level + 1, (id << (int)Math.log(getDim())) + i);
+				getPath(path, p, regions[i], level + 1, (id << (int)getDim()) + i);
 				found = true;
 				break;
 			}
@@ -377,7 +377,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 	 */
 	public void replace(Entry entry) {
 		if (L.containsKey( entry.getId())) {
-			Entry oldEntry = L.get( entry.getId());
+			Entry oldEntry = L.get(entry.getId());
 			if (delete(oldEntry) == false) {
 				throw new IllegalStateException("An entry is not deleted.");
 			}
@@ -400,7 +400,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 				createChTrees();
 			}
 			MemQTree[] chTrees = (MemQTree[]) getChTrees();
-			for (int i = 0; i < getDim(); i++) {
+			for (int i = 0; i < getDivision(); i++) {
 				if (chTrees[i].contains(entry)) {
 					addEntry(chTrees,  entry.getId(), i, new UpdateEntry(null,
 							entry));
@@ -429,7 +429,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 				throw new IllegalStateException("The chTrees cannot be null.");
 			}
 			MemQTree[] chTrees = (MemQTree[]) getChTrees();
-			for (int i = 0; i < getDim(); i++) {
+			for (int i = 0; i < getDivision(); i++) {
 				if (chTrees[i].contains(entry)) {
 					delEntry(chTrees,  entry.getId(), i, entry);
 					setCnt(L.size());
@@ -488,7 +488,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 					return;
 				QuadTree[] chTrees = n.getChTrees();
 				ArrayList<QuadEntry> entries = n.getEntries();
-				for (int i = 0; i < n.getDim(); i++) {
+				for (int i = 0; i < n.getDivision(); i++) {
 					if (entries.get(i) == null)
 						continue;
 					if (query.contains(chTrees[i].getBoundary())) { // ans
@@ -562,7 +562,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 				}
 			} else if (n.getCnt() != 0) {
 				QuadTree[] chTrees = n.getChTrees();
-				for (int i = 0; i < n.getDim(); i++) {
+				for (int i = 0; i < n.getDivision(); i++) {
 					toVisit.add(chTrees[i]);
 				}
 			}

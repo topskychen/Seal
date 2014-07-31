@@ -48,32 +48,32 @@ public class Client {
 				if (lineNo > Global.QUERY_LIM)
 					break;
 				VO vo = null;
-				if (tks.length == 4) {
-					double[] lb = new double[tks.length / 2];
-					for (int i = 0; i < lb.length; ++i) {
-						lb[i] = Integer.parseInt(tks[i]);
-					}
-					double[] ub = new double[tks.length / 2];
-					for (int i = 0; i < ub.length; ++i) {
-						ub[i] = Integer.parseInt(tks[lb.length + i]);
-					}
-					Region query = new Region(lb, ub);
-					vo = serviceProvider.rangeQuery(query, runId);
-					if (!vo.verify(query)) {
-						if (!Global.BATCH_QUERY) {
-							System.err.print("Fail verify!");
-						} else {
-							System.err.println("x");
-						}
-					} else {
-						if (!Global.BATCH_QUERY) {
-							System.out.println("Pass verify!");
-						} else {
-						}
-					}
-					if (!Global.BATCH_QUERY)
-						System.out.println(vo.toString());
+				double[] lb = new double[tks.length / 2];
+				for (int i = 0; i < lb.length; ++i) {
+					lb[i] = Integer.parseInt(tks[i]);
 				}
+				double[] ub = new double[tks.length / 2];
+				for (int i = 0; i < ub.length; ++i) {
+					ub[i] = Integer.parseInt(tks[lb.length + i]);
+				}
+				Region query = new Region(lb, ub);
+				vo = serviceProvider.rangeQuery(query, runId);
+				if (!vo.verify(query)) {
+					if (!Global.BATCH_QUERY) {
+						System.err.print("Fail verify!");
+					} else {
+						System.err.println("x");
+					}
+				} else {
+					if (!Global.BATCH_QUERY) {
+						System.out.println("Pass verify!");
+					} else {
+					}
+				}
+				if (!Global.BATCH_QUERY)
+					System.out.println(vo.toString());
+//				if (tks.length == 4) {
+//				}
 				if (vo != null) {
 					if (Global.G_MODE != MODE.LAZY || lineNo != 1) {
 						statQ.append(vo.getPrepareTime(), vo.getVerifyTime(),

@@ -59,7 +59,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 		// TODO Auto-generated constructor stub
 	}
 
-	public static MemRTree createTree() {
+	public static MemRTree createTree(int dim) {
 		IStorageManager sm = new MemoryStorageManager();
 		IBuffer buffer = new RandomEvictionsBuffer(sm, 143000, false); // no
 																		// buffer
@@ -71,7 +71,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 		ps.setProperty("FillFactor", new Double(0.7));
 		ps.setProperty("IndexCapacity", new Integer(Global.F));
 		ps.setProperty("LeafCapacity", new Integer(Global.F));
-		ps.setProperty("Dimension", new Integer(2));
+		ps.setProperty("Dimension", new Integer(dim));
 		return new MemRTree(ps, buffer);
 	}
 

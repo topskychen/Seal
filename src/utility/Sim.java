@@ -24,8 +24,8 @@ import crypto.AES;
  */
 public class Sim extends Simulator {
 
-	static String	fileName	= Global.TEST_FILE_DIR + "/TDrive";
-	INDEX_TYPE		type		= INDEX_TYPE.RTree;
+	static String	fileName	= Global.TEST_FILE_DIR + "/TDrive" + Global.G_Dim;
+	INDEX_TYPE		type		= INDEX_TYPE.QTree;
 
 	public Sim() {
 		super();
@@ -60,8 +60,8 @@ public class Sim extends Simulator {
 	public void init(int startTime, int runTimes) {
 		// TODO Auto-generated method stub;
 		clearStat();
-		Global.G_QTREE = new MemQTree(4, Global.G_BOUND, 0, 0);
-		Global.G_RTREE = MemRTree.createTree();
+		Global.G_QTREE = new MemQTree(Global.G_Dim, 1 << Global.G_Dim, Global.G_BOUND, 0, 0);
+		Global.G_RTREE = MemRTree.createTree(Global.G_Dim);
 		Global.G_RTREE.setRecordStatus(true);
 		dataOwners = new ArrayList<DataOwner>();
 		serviceProvider = new ServiceProvider(statU);
@@ -131,7 +131,7 @@ public class Sim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		Sim sim;
-		int startTime = 0, runTimes = 20;
+		int startTime = 0, runTimes = 10;
 		if (args.length >= 6) {
 			startTime = Integer.parseInt(args[2]);
 			runTimes = Integer.parseInt(args[3]);
@@ -160,7 +160,7 @@ public class Sim extends Simulator {
 			System.out.println("parse fin!");
 		} else if (args.length == 0) {
 			sim = new Sim();
-			Global.G_QUERY_TYPE = QUERY_TYPE.skyline;
+			Global.G_QUERY_TYPE = QUERY_TYPE.range_query;
 		} else {
 			System.out
 					.println("The args should be [fileName treeType startTime runTimes queryLen mode [update_ratio]].");

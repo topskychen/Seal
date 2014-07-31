@@ -93,9 +93,9 @@ public class ServiceProvider {
 		if (type == INDEX_TYPE.BTree) {
 			index = new BinarySearchTree(Entry.class);
 		} else if (type == INDEX_TYPE.RTree) {
-			index = MemRTree.createTree();
+			index = MemRTree.createTree(Global.G_Dim);
 		} else if (type == INDEX_TYPE.QTree) {
-			index = new MemQTree(4, Global.G_BOUND, 0, 0);
+			index = new MemQTree(Global.G_Dim, 1 << Global.G_Dim, Global.G_BOUND, 0, 0);
 		}
 	}
 

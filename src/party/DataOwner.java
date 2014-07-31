@@ -23,9 +23,9 @@ import multithread.MultiThread;
 import spatialindex.IShape;
 import spatialindex.Point;
 import utility.Global;
+import utility.Global.MODE;
 import utility.Seal;
 import utility.Tuple;
-import utility.Global.MODE;
 
 /**
  * @author chenqian
@@ -135,7 +135,7 @@ public class DataOwner implements Runnable{
 		MemRTree rtree = null;
 		if (type == INDEX_TYPE.RTree) {
 			if (Global.G_MODE == MODE.REBUILD) {
-				rtree = MemRTree.createTree();
+				rtree = MemRTree.createTree(Global.G_Dim);
 				for (DataOwner owner : dataOwners) {
 					if (owner.getPoint(runId) == null)
 						continue;
@@ -205,7 +205,7 @@ public class DataOwner implements Runnable{
 			new MultiThread(dataOwners.toArray(new Runnable[0]), Global.THREAD_NUM).run();
 			System.out.println("[" + dataOwners.size() + "]");
 		} else {
-			System.out.println("File " + file + ".pl is not existed!");
+			System.out.println("File " + file + " is not existed!");
 		}
 	}
 
