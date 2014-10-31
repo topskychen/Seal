@@ -74,7 +74,7 @@ public class TestSeal {
 
 	@Test
 	public void testLargeFolding() {
-		int num = 20;
+		int num = 200;
 		Seal[] seals = new Seal[num];
 		BigInteger ps = BigInteger.ZERO;
 		for (int i = 0; i < num; i++) {
@@ -91,8 +91,8 @@ public class TestSeal {
 			sealA = new Seal(sealA, seals[i], false);
 		}
 		timer.stop();
-		// System.out.println("Time consumes: " + timer.timeElapseinMs() +
-		// " ms");
+		System.out.println("Time consumes: " + timer.timeElapseinMs() +
+		 " ms");
 		assertEquals(new BigInteger(new Integer(num).toString()),
 				sealA.getCnt(null));
 		assertEquals(ps, sealA.getSecretShare(null));
@@ -100,7 +100,7 @@ public class TestSeal {
 
 	@Test
 	public void testBinaryTree() {
-		int num = 20;
+		int num = 200;
 		Seal[] seals = new Seal[num];
 		BigInteger ps = BigInteger.ZERO;
 		for (int i = 0; i < num; i++) {
@@ -126,8 +126,7 @@ public class TestSeal {
 			num = newNum;
 		}
 		timer.stop();
-		// System.out.println("Time consumes: " + timer.timeElapseinMs() +
-		// " ms");
+		System.out.println("Time consumes: " + timer.timeElapseinMs() + " ms");
 		// System.out.println(seals[0]);
 		assertEquals(ps, seals[0].getSecretShare(null));
 	}

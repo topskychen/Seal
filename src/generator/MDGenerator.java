@@ -36,8 +36,8 @@ public class MDGenerator {
 	 */
 	public MDGenerator(int dim) {
 		
-		int start = 0, end = 50;
-		String fileName = Global.TEST_FILE_DIR + "/TDrive";
+		int start = 0, end = 20;
+		String fileName = Global.TEST_FILE_DIR + "/GO";
 		TrustedRegister.sk = AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
 		ArrayList<DataOwner> owners = new ArrayList<DataOwner>();
@@ -61,7 +61,7 @@ public class MDGenerator {
 						sb.append((int) shape.getMBR().m_pLow[j] + " ");
 					}
 					for (int j = 0; j < dim - shape.getDimension(); j++) {
-						sb.append(random.nextInt(300) + " ");
+						sb.append(random.nextInt(1000) + " ");
 					}
 					sb.append(i + "\t");
 				}
@@ -78,8 +78,8 @@ public class MDGenerator {
 		 * query
 		 */
 		try {
-			PrintWriter pw = new PrintWriter(new File(fileName + dim + "_0.02.qr"));
-			double ratio = Math.pow(0.02, 1.0/dim);
+			PrintWriter pw = new PrintWriter(new File(fileName + dim + "_0.001.qr"));
+			double ratio = Math.pow(0.001, 1.0/dim);
 			for (int i = 0; i < 1000; ++i) {
 				int[] low = new int[dim];
 				int[] high = new int[dim];
@@ -90,7 +90,7 @@ public class MDGenerator {
 				low[1] = range[0];
 				high[1] = range[1];
 				for (int j = 0; j < dim-2; ++j) {
-					range = genRange(0, 300, ratio);
+					range = genRange(0, 1000, ratio);
 					low[2+j] = range[0];
 					high[2+j] = range[1];
 				}
@@ -118,7 +118,7 @@ public class MDGenerator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		MDGenerator gen = new MDGenerator(2);
+		MDGenerator gen = new MDGenerator(3);
 	}
 
 }

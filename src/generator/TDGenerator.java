@@ -92,7 +92,7 @@ public class TDGenerator {
 					if (j != 0) pw.print("\t");
 					for (int k = 0; k < data[j][i].getDimension(); k ++) {
 						if (k != 0) pw.print(" ");
-						pw.print(data[j][i].getCoord(k));
+						pw.print((int) data[j][i].getCoord(k));
 					}
 				}
 				pw.println();

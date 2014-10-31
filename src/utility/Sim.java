@@ -38,7 +38,7 @@ public class Sim extends Simulator {
 		if (Global.TOTN == 10132) {
 			//
 		} else {
-			Sim.fileName += "_" + Global.TOTN;
+			Sim.fileName += Global.G_Dim + "_" + Global.TOTN;
 		}
 		if (type.equalsIgnoreCase("btree")) {
 			this.type = INDEX_TYPE.BTree;
