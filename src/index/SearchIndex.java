@@ -5,7 +5,6 @@ package index;
 
 import java.util.ArrayList;
 
-import party.DataOwner;
 import spatialindex.IShape;
 import utility.StatisticsUpdate;
 
@@ -21,7 +20,8 @@ public interface SearchIndex {
 	public abstract ArrayList<IShape> kNN(IShape query, int k);
 	public abstract ArrayList<IShape> skyline();
 //	public abstract 
-	public abstract void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries, StatisticsUpdate statU);
+	public abstract void updateIndex(ArrayList<Entry> entries, StatisticsUpdate statU);
+	public abstract int[] getPrefix(IShape point);
 	public abstract INDEX_TYPE getType();
 
 }

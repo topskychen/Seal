@@ -10,7 +10,6 @@ import java.util.ArrayList;
 
 import memoryindex.BinaryTree;
 import memoryindex.IQueryStrategyBT;
-import party.DataOwner;
 import spatialindex.IShape;
 import utility.StatisticsUpdate;
 import utility.Tuple;
@@ -50,7 +49,7 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 
 	
 	@Override
-	public void buildIndex(ArrayList<DataOwner> owners, ArrayList<Entry> entries, StatisticsUpdate statU) {
+	public void updateIndex(ArrayList<Entry> entries, StatisticsUpdate statU) {
 		// TODO Auto-generated method stub
 		
 		BinaryTree[] nodes = new BinaryTree[entries.size()]; int size = 0;
@@ -241,6 +240,12 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 	@Override
 	public ArrayList<IShape> skyline() {
 		System.out.println("warning: this query is not supported by binary tree");
+		return null;
+	}
+
+	@Override
+	public int[] getPrefix(IShape point) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 }

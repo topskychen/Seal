@@ -3,21 +3,21 @@
  */
 package index;
 
+import io.IO;
+import io.RW;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-import crypto.Constants;
-import crypto.Hasher;
 import party.TrustedRegister;
 import spatialindex.IShape;
-import utility.Global;
 import utility.Tuple;
 import utility.Utility;
-import io.IO;
-import io.RW;
+import crypto.Constants;
+import crypto.Hasher;
 
 /**
  * @author chenqian
@@ -29,7 +29,7 @@ public class VOCell implements RW{
 	Entry 				entry		= null;
 	BigInteger 			ps 			= null;
 	int					ansNo		= 0;
-	
+	TrustedRegister 	tr 			= TrustedRegister.getInstance();
 	
 	/**
 	 * Get the partial secret share.
@@ -48,23 +48,22 @@ public class VOCell implements RW{
 		BigInteger random = Constants.PRIME_P.multiply(
 				new BigInteger(new Integer(entry.getNO()).toString())
 			);
+		entry = entry.clone();
 		if (ansNo != 0) {
 			ps = BigInteger.ZERO;
 			for (Tuple tuple : tuples) {
-				BigInteger secretShare = TrustedRegister.genSecretShare(tuple.getTS());
+				BigInteger secretShare = tr.genSecretShare(tuple.getTS());
 				ps = ps.add(secretShare);
 				ansIds.add(tuple.getId());
 			}
 			BigInteger rs = entry.getSeal().getSecretShare(random);
 			if (!ps.equals(rs)) { 
-//				System.out.println("x");
 				return false;
 			}
 		} else {
 			ps = entry.getSeal().getSecretShare(random);
 		}
 		int[] comPre = entry.getTuple().getComPre();
-//		Utility.pi22(comPre[0]);
 		BigInteger cnt = entry.getSeal().getCnt(random);
 		BigInteger dig = entry.getSeal().getDig(random, utility.Global.L - comPre.length);
 		if (!Utility.getBI(Hasher.hashBytes(new Integer(comPre[comPre.length - 1]).toString().getBytes())).multiply(cnt).equals(dig)) {

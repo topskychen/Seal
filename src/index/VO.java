@@ -15,7 +15,6 @@ import java.util.TreeSet;
 import party.TrustedRegister;
 import spatialindex.IShape;
 import timer.Timer;
-import utility.Global;
 
 /**
  * @author chenqian
@@ -33,7 +32,7 @@ public class VO implements RW{
 //	Query				query 			= null;
 	private int			runId 			= -1;
 	TreeSet<Integer>	ansIds			= null;
-	
+	TrustedRegister		tr				= TrustedRegister.getInstance();
 	
 	/**
 	 * 
@@ -59,6 +58,7 @@ public class VO implements RW{
 		timer.reset();
 		boolean isVerify = true;
 		ansNo = 0;
+		int cnt = 0;
 		for (VOCell voCell : voCells) {
 			if (!voCell.verify(query, ansIds)) {
 				isVerify = false;
@@ -66,12 +66,11 @@ public class VO implements RW{
 				System.out.println(voCell);
 				break;
 			} else {
-                if (!Global.BATCH_QUERY) {
-				    System.out.print(".");
-			    }
             }
+			cnt += voCell.entry.getNO();
 			ansNo += voCell.getAnsNo();
 		}
+		System.out.println(cnt);
 		if (!verifyComplete()) {
 			isVerify = false;
 		}
@@ -87,7 +86,7 @@ public class VO implements RW{
 		for (VOCell voCell : voCells) {
 			ss = ss.add(voCell.getPartialSS());
 		}
-		return ss.equals(TrustedRegister.totalSS.get(runId));
+		return ss.equals(tr.getTotalSS(runId));
 	}
 
 	/**

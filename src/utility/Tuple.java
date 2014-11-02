@@ -3,13 +3,11 @@
  */
 package utility;
 
-import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.util.ArrayList;
 
 import spatialindex.IShape;
 import spatialindex.Point;
@@ -64,39 +62,17 @@ public class Tuple implements RW {
 	 * @param v
 	 * @param t
 	 */
-	public Tuple(int id, IShape p, int t, int[] comPre, INDEX_TYPE type) {
+	public Tuple(int id, IShape p, int t, int[] comPre) {
 		this.id = id;
 		this.shape = p;
 		this.tiStp = t;
-		// this.point[0] = p;
-		// this.point[1] = this.point[0];
-		// this.tiStp[0] = t;
-		// this.tiStp[1] = t;
-		if (type == INDEX_TYPE.BTree) {
-			int value = (int) ((Point) p).getCoord(0);
-			this.comPre = new int[Global.L];
-			for (int i = 0; i < Global.L; i++) {
-				int v = (value >> (Global.D * i));
-				this.comPre[Global.L - i - 1] = v;
-			}
-		} else if (type == INDEX_TYPE.RTree) {
-			this.comPre = comPre;
-		} else if (type == INDEX_TYPE.QTree) {
-			ArrayList<Integer> ids = Global.G_QTREE.getPath((Point) p);
-			this.comPre = new int[Global.L];
-			for (int i = 0; i < Global.L; i++) {
-				this.comPre[i] = ids.get(i);
-			}
-		} else {
-			throw new IllegalStateException("No such index!");
-		}
+		this.comPre = comPre;
 	}
 
 	/**
 	 * 
 	 */
 	public Tuple() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public IShape getShape() {
@@ -115,13 +91,10 @@ public class Tuple implements RW {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void read(DataInputStream ds) {
-		// TODO Auto-generated method stub
 		id = IO.readInt(ds);
 		int type = IO.readInt(ds);
 		if (type != 0) {
@@ -134,12 +107,11 @@ public class Tuple implements RW {
 			}
 		}
 		tiStp = IO.readInt(ds);
-		comPre = IO.readIntArrays(ds);
+		comPre = IO.readIntArray(ds);
 	}
 
 	@Override
 	public void write(DataOutputStream ds) {
-		// TODO Auto-generated method stub
 		IO.writeInt(ds, id);
 		if (shape == null) {
 			IO.writeInt(ds, 0);
@@ -153,8 +125,8 @@ public class Tuple implements RW {
 			}
 		}
 		IO.writeInt(ds, tiStp);
-		if (comPre != null)
-			IO.writeIntArrays(ds, comPre);
+//		if (comPre != null)
+		IO.writeIntArray(ds, comPre);
 	}
 
 	public String toString() {
@@ -169,7 +141,7 @@ public class Tuple implements RW {
 				sb.append(", ");
 			sb.append(comPre[i]);
 		}
-		sb.append("]");
+		sb.append("]\n");
 		return sb.toString();
 	}
 
@@ -180,7 +152,7 @@ public class Tuple implements RW {
 	public Tuple clone() {
 		Tuple tuple = new Tuple();
 		tuple.id = id;
-		tuple.shape = shape.clone();
+		if (shape != null) tuple.shape = shape.clone();
 		tuple.comPre = new int[comPre.length];
 		System.arraycopy(comPre, 0, tuple.comPre, 0, comPre.length);
 		tuple.tiStp = tiStp;

@@ -14,33 +14,33 @@ import utility.Global;
  * @author chenqian
  * 
  */
-public class TDriveUGen {
+public class UpdateIDGenerator {
 
 	String				fileDir		= null;
-	int					runTimes	= 0;
 	Random				random		= new Random();
 	HashSet<Integer>	dict		= null;
-
+	int 				totN		= 0;
+	
 	/**
 	 * 
 	 */
-	public TDriveUGen(String fileDir, int runTimes) {
+	public UpdateIDGenerator(String fileDir, int totN) {
 		this.fileDir = fileDir;
-		this.runTimes = runTimes;
+		this.totN = totN;
 	}
 
 	public void run() {
-		for (double ratio : Global.UPDATE_RTS) {
+		for (double ratio : Global.UPDATE_RATES) {
 			PrintWriter pw = null;
-			String filePath = fileDir + "_" + ratio + ".ur";
+			String filePath = fileDir + "_" + ratio + "_" + totN + ".up";
 			try {
 				pw = new PrintWriter(filePath);
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			for (int runTime = 0; runTime < runTimes; runTime++) {
-				genIds((int) (Global.TOTN * ratio));
+			for (int runTime = 1; runTime < Global.RUN_TIMES; runTime++) {
+				genIds((int) (totN * ratio));
 				for (int id : dict) {
 					pw.print(id + " ");
 				}
@@ -60,9 +60,9 @@ public class TDriveUGen {
 	}
 
 	private int nextId() {
-		int id = random.nextInt(Global.TOTN);
+		int id = random.nextInt(totN);
 		while (dict.contains(id)) {
-			id = random.nextInt(Global.TOTN);
+			id = random.nextInt(totN);
 		}
 		return id;
 	}
@@ -71,7 +71,7 @@ public class TDriveUGen {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		TDriveUGen gen = new TDriveUGen(Global.TEST_FILE_DIR + "/TDrive", 1002);
+		UpdateIDGenerator gen = new UpdateIDGenerator(Global.TEST_FILE_DIR + "/GO", 1000);
 		gen.run();
 	}
 

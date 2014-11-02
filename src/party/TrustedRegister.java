@@ -22,53 +22,82 @@ import crypto.AES;
  */
 public class TrustedRegister {
 
-	public static byte[] sk = null;
-	public static EncFun encFun = null;
-	public static ENC_TYPE type;
-	public static BigInteger mod = BigInteger.ONE.shiftLeft(184 * 8 + 24 + 128 + 24);
-//	public static HashMap<Integer, BigInteger> secretShares = new HashMap<Integer, BigInteger>();
-	public static HashMap<Integer, BigInteger> totalSS =  new HashMap<Integer, BigInteger>();
+	private byte[] sk = null;
+	private EncFun encFun = null;
+	private ENC_TYPE type;
+	private BigInteger mod = BigInteger.ONE.shiftLeft(184 * Global.L + 24 + 128 + 24); // seal content length
+	private HashMap<Integer, BigInteger> totalSecrets = new HashMap<Integer, BigInteger>();
 
+	static TrustedRegister instance = null;
+	
+	public void putTotalSecret(int id, BigInteger secret) {
+		totalSecrets.put(id, secret);
+	}
+
+	public BigInteger getTotalSS(int id) {
+		return totalSecrets.get(id);
+	}
+	
+	public BigInteger decrypt(BigInteger content, BigInteger random) {
+		return encFun.decrypt(content, random);
+	}
+	
+	public BigInteger encrypt(BigInteger content, BigInteger random) {
+		return encFun.encrypt(content, random);
+	}
+
+	
+	public ENC_TYPE getType() {
+		return type;
+	}
+	
+	public BigInteger getMod() {
+		return mod;
+	}
+	
+	public static TrustedRegister getInstance() {
+		if (instance == null) {
+			instance = new TrustedRegister(ENC_TYPE.Paillier, "./data/test");
+		}
+		return instance;
+	}
+	
+	public static TrustedRegister getInstance(ENC_TYPE type, String fileName) {
+		if (instance == null) {
+			instance = new TrustedRegister(type, fileName);
+		}
+		return instance;
+	}
+	
+	
 	/**
 	 * Generate Secret Share
 	 * @param id
 	 * @param value
 	 * @return
 	 */
-	public static BigInteger genSecretShare(RW value) {
+	public BigInteger genSecretShare(RW value) {
 		return Utility.getBI(AES.encrypt(sk, IO.toBytes(value))).and(Global.BITS128);
 	}
 	
-	public static BigInteger genSecretShare(int runId) {
+	public BigInteger genSecretShare(int runId) {
 		return Utility.getBI(AES.encrypt(sk, new Integer(runId).toString().getBytes())).and(Global.BITS128);
 	}
-	
-	public static void specifyEncFun(ENC_TYPE type, String fileName) {
-		TrustedRegister.type = type;
-		File file = new File(fileName + "." + type);
-		if (file.exists()) {
-			TrustedRegister.encFun = new EncFun(file);
-		} else {
-			TrustedRegister.encFun = new EncFun(type, mod);
-			IO.toFile(TrustedRegister.encFun, file);
-		}
-	}
-	
-//	public static void addSecretShare(int id, BigInteger secretShare) {
-//		secretShares.put(id, secretShare);
-//	}
-//	
-//	public static BigInteger getSecretShare(int id) {
-//		return secretShares.get(id);
-//	}
 	
 	/**
 	 * Construct a trustedRegister with the type.
 	 * @param type
 	 */
-	public TrustedRegister() {
-		// TODO Auto-generated constructor s
-		
+	TrustedRegister(ENC_TYPE type, String fileName) {
+		this.sk = AES.getSampleKey();
+		this.type = type;
+		File file = new File(fileName + "." + type);
+		if (file.exists()) {
+			encFun = new EncFun(file);
+		} else {
+			encFun = new EncFun(type, mod);
+			IO.toFile(encFun, file);
+		}
 	}
 
 	/**
@@ -79,4 +108,5 @@ public class TrustedRegister {
 
 	}
 
+	
 }

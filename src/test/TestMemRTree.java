@@ -3,22 +3,17 @@
  */
 package test;
 
-import static org.junit.Assert.*;
+import index.MemRTree;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rtree.RTree;
 import spatialindex.IData;
 import spatialindex.INode;
-import spatialindex.ISpatialIndex;
 import spatialindex.IVisitor;
+import spatialindex.Point;
 import spatialindex.Region;
-import storagemanager.IBuffer;
-import storagemanager.IStorageManager;
-import storagemanager.MemoryStorageManager;
-import storagemanager.PropertySet;
-import storagemanager.RandomEvictionsBuffer;
+import utility.Sim;
 
 /**
  * @author chenqian
@@ -26,38 +21,50 @@ import storagemanager.RandomEvictionsBuffer;
  */
 public class TestMemRTree {
 
-	static ISpatialIndex tree = null;
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		IStorageManager sm = new MemoryStorageManager();
-		IBuffer buffer = new RandomEvictionsBuffer(sm, 10, false);
-		PropertySet ps = new PropertySet();
-		ps.setProperty("FillFactor", new Double(0.7));
-		ps.setProperty("IndexCapacity", new Integer(100));
-		ps.setProperty("LeafCapacity", new Integer(100));
-		ps.setProperty("Dimension", new Integer(2));
-		tree = new RTree(ps, buffer);
+		
 	}
 
 	@Test
 	public void testInsert() {
-		double[] f1 = new double[]{1, 1};
-		double[] f2 = new double[]{4, 4};
-		Region r = new Region(f1, f2);
-		tree.insertData(null, r, 0);
+		Sim sim = new Sim();
+		MemRTree memRtree = MemRTree.createTree(sim);
+		double[] f1 = new double[]{1, 1, 1};
+		double[] f2 = new double[]{4, 4, 4};
+		Point p1 = new Point(f1);
+		Point p2 = new Point(f2);
+		memRtree.insertData(null, p1, 0);
+		memRtree.insertData(null, p2, 1);
 //		System.out.println(tree);
-		testRangeQuery();
+		testRangeQuery(memRtree);
 	}
 	
-	public void testRangeQuery() {
-		double[] f1 = new double[]{0, 0};
-		double[] f2 = new double[]{5, 5};
+	public void testRangeQuery(MemRTree memRTree) {
+		double[] f1 = new double[]{0, 0, 0};
+		double[] f2 = new double[]{5, 5, 5};
 		Region r = new Region(f1, f2);
 		MyVisitor vis = new MyVisitor();
-		tree.intersectionQuery(r, vis);
+		memRTree.intersectionQuery(r, vis);
+	}
+	
+	@Test
+	public void testGetPrefix() {
+		Sim sim = new Sim();
+		MemRTree memRtree = MemRTree.createTree(sim);
+		double[] f1 = new double[]{1, 1, 1};
+		double[] f2 = new double[]{4, 4, 4};
+		Point p1 = new Point(f1);
+		Point p2 = new Point(f2);
+		memRtree.insertData(null, p1, 0);
+		memRtree.insertData(null, p2, 1);
+		int[] prefix = memRtree.getPrefix(p1);
+		for (int p : prefix) System.out.print(p + " "); System.out.println();
+		prefix = memRtree.getPrefix(p2);
+		for (int p : prefix) System.out.print(p + " "); System.out.println(); 
 	}
 	
 	class MyVisitor implements IVisitor

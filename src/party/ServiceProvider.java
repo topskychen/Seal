@@ -10,15 +10,12 @@ import index.MemRTree;
 import index.SearchIndex;
 import index.SearchIndex.INDEX_TYPE;
 import index.VO;
-import io.IO;
-import io.RW;
 
 import java.util.ArrayList;
 
 import spatialindex.IShape;
 import timer.Timer;
-import utility.Global;
-import utility.Global.MODE;
+import utility.Simulator;
 import utility.StatisticsUpdate;
 
 
@@ -28,53 +25,11 @@ import utility.StatisticsUpdate;
  */
 public class ServiceProvider {
 
-	SearchIndex			index	= null;
-	Timer				timer	= null;
-	StatisticsUpdate	statU	= null;
-
-	/**
-	 * Collect the data once, and build the index.
-	 * 
-	 * @param dataOwners
-	 */
-	public void collectDataOnce(ArrayList<DataOwner> dataOwners,
-			INDEX_TYPE type, int runId) {
-		if (Global.G_MODE != MODE.REBUILD) {
-			if (index == null) {
-				if (type == INDEX_TYPE.BTree) {
-					index = new BinarySearchTree(Entry.class);
-				} else if (type == INDEX_TYPE.RTree) {
-					index = Global.G_RTREE;
-				} else if (type == INDEX_TYPE.QTree) {
-					index = Global.G_QTREE;
-				}
-			}
-		} else {
-			specifyIndex(type);
-		}
-		timer.reset();
-		ArrayList<Entry> entries = new ArrayList<Entry>();
-		for (int i = 0; i < dataOwners.size(); i++) {
-			DataOwner owner = dataOwners.get(i);
-			Entry entry = owner.getEntry(runId);
-			if (entry != null)
-				entries.add(entry);
-			else {
-				// System.out.println("do: " + i);
-			}
-		}
-		index.buildIndex(dataOwners, entries, statU);
-		timer.stop();
-		if (Global.INDEX_COST) {
-			Global.STAT_INDEX.append(timer.timeElapseinMs(),
-					IO.toBytes((RW) index).length);
-		}
-		if (!Global.BATCH_QUERY) {
-			System.out.println("Index prepared! consumes: "
-					+ timer.timeElapseinMs() + " ms");
-		}
-	}
-
+	SearchIndex			index		= null;
+	Timer				timer		= null;
+	StatisticsUpdate	statU		= null;
+	Simulator			simulator 	= null;
+	
 	public VO rangeQuery(IShape query, int runId) {
 		VO vo = new VO(runId);
 		vo.prepare(index, query);
@@ -89,23 +44,35 @@ public class ServiceProvider {
 		return index.skyline();
 	}
 
+	public void updateIndex(ArrayList<Entry> entries) {
+		index.updateIndex(entries, statU);
+	}
+	
+	//TODO 
+	public void init() {
+		
+	}
+	
+	
 	public void specifyIndex(INDEX_TYPE type) {
 		if (type == INDEX_TYPE.BTree) {
 			index = new BinarySearchTree(Entry.class);
 		} else if (type == INDEX_TYPE.RTree) {
-			index = MemRTree.createTree(Global.G_Dim);
+			index = MemRTree.createTree(simulator);
 		} else if (type == INDEX_TYPE.QTree) {
-			index = new MemQTree(Global.G_Dim, 1 << Global.G_Dim, Global.G_BOUND, 0, 0);
+			index = MemQTree.createTree(simulator);
 		}
 	}
 
 	/**
 	 * 
 	 */
-	public ServiceProvider(StatisticsUpdate statU) {
+	public ServiceProvider(StatisticsUpdate statU, Simulator sim) {
 		// TODO Auto-generated constructor stub
 		this.timer = new Timer();
 		this.statU = statU;
+		this.simulator = sim;
+		specifyIndex(sim.getIndexType());
 	}
 
 	/**

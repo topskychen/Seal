@@ -12,27 +12,27 @@ import spatialindex.IShape;
  */
 public class Query {
 
-	public static enum QUERY_TYPE {range_query, knn, skyline};
+	public static enum QueryType {range_query, knn, skyline};
 	
-	private QUERY_TYPE	type;
+	private QueryType	type;
 	private IShape		shape;
 	private int			k;
 	
 	/**
 	 * 
 	 */
-	public Query(QUERY_TYPE _type, IShape _shape) {
+	public Query(QueryType _type, IShape _shape) {
 		type = _type;
 		shape = _shape;
 	}
 	
-	public Query(QUERY_TYPE _type, IShape _shape, int _k) {
+	public Query(QueryType _type, IShape _shape, int _k) {
 		type = _type;
 		shape = _shape;
 		k = _k;
 	}
 	
-	public QUERY_TYPE getType() {
+	public QueryType getType() {
 		return type;
 	}
 	

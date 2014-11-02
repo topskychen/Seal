@@ -4,7 +4,6 @@
 package utility;
 
 import index.Entry;
-import index.SearchIndex.INDEX_TYPE;
 import io.IO;
 import io.RW;
 
@@ -17,7 +16,6 @@ import party.TrustedRegister;
 import spatialindex.Point;
 import timer.Timer;
 import utility.EncFun.ENC_TYPE;
-import crypto.AES;
 import crypto.Constants;
 import crypto.Hasher;
 
@@ -29,13 +27,14 @@ public class Seal implements RW {
 
 	// BigInteger content = null;
 	BigInteger	cipher	= null;
-
+	TrustedRegister tr = TrustedRegister.getInstance();
+	BigInteger content = null;
+	
 	public Seal(Seal seal) {
 		cipher = seal.cipher;
 	}
 
 	public Seal(Seal[] seals) {
-		// TODO
 		cipher = seals[0].cipher;
 		for (int i = 1; i < seals.length; i++) {
 			cipher = fold(cipher, seals[i].cipher);
@@ -61,12 +60,11 @@ public class Seal implements RW {
 	private BigInteger reverseFold(BigInteger cipher1, BigInteger cipher2) {
 		// TODO Auto-generated method stub
 		BigInteger ans = null;
-		if (TrustedRegister.type == ENC_TYPE.Paillier) {
+		if (tr.getType() == ENC_TYPE.Paillier) {
 			ans = cipher1.multiply(cipher2.modInverse(EncFun.paillier.nsquare))
 					.mod(EncFun.paillier.nsquare);
 		} else {
-			ans = cipher1.subtract(cipher2).add(TrustedRegister.mod)
-					.mod(TrustedRegister.mod);
+			ans = cipher1.subtract(cipher2).add(tr.getMod()).mod(tr.getMod());
 		}
 		return ans;
 	}
@@ -80,10 +78,10 @@ public class Seal implements RW {
 	 */
 	public BigInteger fold(BigInteger cipher1, BigInteger cipher2) {
 		BigInteger ans = null;
-		if (TrustedRegister.type == ENC_TYPE.Paillier) {
+		if (tr.getType() == ENC_TYPE.Paillier) {
 			ans = cipher1.multiply(cipher2).mod(EncFun.paillier.nsquare);
 		} else {
-			ans = cipher1.add(cipher2).mod(TrustedRegister.mod);
+			ans = cipher1.add(cipher2).mod(tr.getMod());
 		}
 		return ans;
 	}
@@ -112,83 +110,76 @@ public class Seal implements RW {
 			content = content.xor(Utility.getBI(hash));
 		}
 		// Encrypt with Paillier or one-time pad
-		cipher = TrustedRegister.encFun.encrypt(content, Constants.PRIME_P);
+		cipher = tr.encrypt(content, Constants.PRIME_P);
 		if (utility.Global.DO_COST) {
 
 		}
 	}
 
 	public BigInteger getSecretShare(BigInteger random) {
-		// if (content == null)
-		BigInteger content = TrustedRegister.encFun.decrypt(cipher, random);
+		if (content == null) content = tr.decrypt(cipher, random);
 		BigInteger ss = content.shiftRight((160 + 24) * utility.Global.L + 24)
 				.and(utility.Global.BITS152);
 		return ss;
 	}
 
 	public BigInteger getCnt(BigInteger random) {
-		// if (content == null)
-		BigInteger content = TrustedRegister.encFun.decrypt(cipher, random);
+		if (content == null) content = tr.decrypt(cipher, random);
 		BigInteger cnt = content.shiftRight((160 + 24) * utility.Global.L).and(
 				utility.Global.BITS24);
 		return cnt;
 	}
 
 	public BigInteger getDig(BigInteger random, int p) {
-		// if (content == null)
-		BigInteger content = TrustedRegister.encFun.decrypt(cipher, random);
+		if (content == null) content = tr.decrypt(cipher, random);
 		BigInteger dig = content.shiftRight((160 + 24) * p).and(
 				utility.Global.BITS184);
 		return dig;
 	}
 
-	public static Entry getSample(int id) {
+	public Entry getSample(int id) {
 		Tuple tuple = new Tuple(id, new Point(new double[] { id, id }), id,
-				new int[] { 1, 2, 3, 4, 5, 6 }, INDEX_TYPE.RTree);
-		Seal seal = new Seal(tuple, TrustedRegister.genSecretShare(tuple));
+				new int[] { 1, 2, 3, 4, 5, 6 });
+		Seal seal = new Seal(tuple, tr.genSecretShare(tuple));
 		return new Entry(tuple, seal);
 	}
 
 	/**
-	 * one-time pad 39.7 us
+	 * one-time pad 0.042 ms
 	 * Paillier 104004 us
 	 * @return
 	 */
 	public ArrayList<Entry> testGenTime() {
-		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
 		Timer timer = new Timer();
 		timer.reset();
-		int times = 1000;
+		int times = 5000;
 		ArrayList<Entry> entries = new ArrayList<Entry>();
 		Seal[] seals = new Seal[times];
 		for (int i = 0; i < times; i++) {
 			Tuple tuple = new Tuple(i, new Point(new double[] { i, i }), i,
-					new int[] { 1, 2, 3, 4, 5, 6 }, INDEX_TYPE.RTree);
-			Seal seal = new Seal(tuple, TrustedRegister.genSecretShare(tuple));
+					new int[] { 1, 2, 3, 4, 5, 6 });
+			Seal seal = new Seal(tuple, tr.genSecretShare(tuple));
 			seals[i] = seal;
 			entries.add(new Entry(tuple, seal));
 		}
 		timer.stop();
-		System.out.println("Time consumes @ gen: " + timer.timeElapseinUs()
-				/ times + " us");
+		System.out.println("Time consumes @ gen: " + timer.timeElapseinMs()
+				/ times + " ms");
 
 		return entries;
 	}
 
 	/**
-	 * one-time pad: 0.922 us
+	 * one-time pad: 3.618e-4 us
 	 * 
 	 */
 	public void testFolding() {
-		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
 		Timer timer = new Timer();
-		int times = 1000000;
+		int times = 10000;
 		Seal[] seals = new Seal[times];
 		Tuple tuple = new Tuple(0, new Point(new double[] { 0, 0 }), 0,
-				new int[] { 1, 2, 3, 4, 5, 6 }, INDEX_TYPE.RTree);
-		Seal seal = new Seal(tuple, TrustedRegister.genSecretShare(tuple));
+				new int[] { 1, 2, 3, 4, 5, 6 });
+		Seal seal = new Seal(tuple, tr.genSecretShare(tuple));
 		timer.reset();
 		for (int i = 0; i < times; i++) {
 			seals[i] = seal;
@@ -196,27 +187,25 @@ public class Seal implements RW {
 		Seal fseal = new Seal(seals);
 		timer.stop();
 		System.out.println(fseal.hashCode());
-		System.out.println("Time consumes @ fold: " + timer.timeElapseinUs()
-				 + " us");
+		System.out.println("Time consumes @ fold: " + timer.timeElapseinMs() / times
+				 + " ms");
 	}
 
 	/**
-	 * one-time pad 28.6 us
+	 * one-time pad 0.0368 ms
 	 * Paillier 118641.34
 	 */
 	public void testVrfTime(ArrayList<Entry> entries) {
-		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
 		Timer timer = new Timer();
 		timer.reset();
-		int times = 1000;
+		int times = 100;
 		for (int i = 0; i < times; i++) {
 			Entry entry = entries.get(i);
 			entry.verify();
 		}
 		timer.stop();
-		System.out.println("Time consumes @ vrf: " + timer.timeElapseinUs()
-				/ times + " us");
+		System.out.println("Time consumes @ vrf: " + timer.timeElapseinMs()
+				/ times + " ms");
 	}
 
 	/**

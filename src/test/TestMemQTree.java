@@ -5,13 +5,11 @@ package test;
 
 import index.MemQTree;
 
-import java.util.List;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import spatialindex.Point;
-import utility.Global;
+import utility.Sim;
 
 /**
  * @author chenqian
@@ -29,11 +27,12 @@ public class TestMemQTree {
 
 	@Test
 	public void testGetPath() {
-		MemQTree qtree = Global.G_QTREE;
-		List<Integer> ids = qtree.getPath(new Point(new double[]{120, 232}));
-//		P.Print(ids);
-		ids = qtree.getPath(new Point(new double[]{1234, 8323}));
-//		P.Print(ids);
+		Sim sim = new Sim();
+		MemQTree qtree = MemQTree.createTree(sim);
+		int[] ids = qtree.getPrefix(new Point(new double[]{120, 232}));
+		for (int id : ids) System.out.print(id + " "); System.out.println();
+		ids = qtree.getPrefix(new Point(new double[]{1234, 8323}));
+		for (int id : ids) System.out.print(id + " "); System.out.println();
 	}
 
 }

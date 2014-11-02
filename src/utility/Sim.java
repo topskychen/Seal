@@ -3,9 +3,7 @@
  */
 package utility;
 
-import index.MemQTree;
-import index.MemRTree;
-import index.Query.QUERY_TYPE;
+import index.Query.QueryType;
 import index.SearchIndex.INDEX_TYPE;
 
 import java.util.ArrayList;
@@ -16,7 +14,6 @@ import party.ServiceProvider;
 import party.TrustedRegister;
 import utility.EncFun.ENC_TYPE;
 import utility.Global.MODE;
-import crypto.AES;
 
 /**
  * @author chenqian
@@ -24,31 +21,25 @@ import crypto.AES;
  */
 public class Sim extends Simulator {
 
-	static String	fileName	= Global.TEST_FILE_DIR + "/TDrive" + Global.G_Dim;
-	INDEX_TYPE		type		= INDEX_TYPE.QTree;
-
+	
+	
 	public Sim() {
 		super();
-		Global.TOTN = 10132;
-		// TODO Auto-generated constructor stub
 	}
 
-	public Sim(String fileName, String type) {
-		Sim.fileName = fileName;
-		if (Global.TOTN == 10132) {
-			//
-		} else {
-			Sim.fileName += Global.G_Dim + "_" + Global.TOTN;
-		}
-		if (type.equalsIgnoreCase("btree")) {
-			this.type = INDEX_TYPE.BTree;
-		} else if (type.equalsIgnoreCase("rtree")) {
-			this.type = INDEX_TYPE.RTree;
-		} else if (type.equalsIgnoreCase("qtree")) {
-			this.type = INDEX_TYPE.QTree;
+	public Sim(String fileName, String indexType, String totN, MODE mode) {
+		this.fileName = fileName;
+		if (indexType.equalsIgnoreCase("btree")) {
+			this.indexType = INDEX_TYPE.BTree;
+		} else if (indexType.equalsIgnoreCase("rtree")) {
+			this.indexType = INDEX_TYPE.RTree;
+		} else if (indexType.equalsIgnoreCase("qtree")) {
+			this.indexType = INDEX_TYPE.QTree;
 		} else {
 			throw new IllegalStateException("No such tree choice.");
 		}
+		this.mode = mode;
+		this.totN = Integer.parseInt(totN);
 	}
 
 	/*
@@ -57,19 +48,14 @@ public class Sim extends Simulator {
 	 * @see utility.Simulator#init()
 	 */
 	@Override
-	public void init(int startTime, int runTimes) {
-		// TODO Auto-generated method stub;
+	public void init() {
 		clearStat();
-		Global.G_QTREE = new MemQTree(Global.G_Dim, 1 << Global.G_Dim, Global.G_BOUND, 0, 0);
-		Global.G_RTREE = MemRTree.createTree(Global.G_Dim);
-		Global.G_RTREE.setRecordStatus(true);
 		dataOwners = new ArrayList<DataOwner>();
-		serviceProvider = new ServiceProvider(statU);
-		client = new Client(statQ);
-		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, Sim.fileName);
-		DataOwner.initData(dataOwners, Sim.fileName, type, startTime, runTimes);
-		System.out.println("init done.");
+		serviceProvider = new ServiceProvider(statU, this);
+		client = new Client(statQ, this);
+		ts = TrustedRegister.getInstance(ENC_TYPE.Paillier, fileName);
+		DataOwner.initData(dataOwners, this);
+		System.out.println("init simulator done.");
 	}
 
 	/*
@@ -78,52 +64,49 @@ public class Sim extends Simulator {
 	 * @see utility.Simulator#run()
 	 */
 	@Override
-	public void run(int runId, double ratio) {
-		// Data owners prepare data
-		DataOwner.prepare(dataOwners, type, runId);
-
-		// Service Provider collects data.
-		// Currently, the index will not be stored to file.
-		serviceProvider.collectDataOnce(dataOwners, type, runId);
-		// Client Make queries
-		// client
-		if (ratio != -1) {
-			if (Global.G_QUERY_TYPE == QUERY_TYPE.range_query) {
-				client.rangeQuery(serviceProvider, fileName + "_" + ratio, runId);
-			} else if (Global.G_QUERY_TYPE == QUERY_TYPE.knn) {
-				client.knn(serviceProvider, fileName + "_" + ratio, runId, Global.G_K);
-			} else if (Global.G_QUERY_TYPE == QUERY_TYPE.skyline) {
-				client.skyline(serviceProvider, runId);
-			}
+	public void run(int runId) {
+		//TODO if (runId > 0) //do update
+		DataOwner.update(dataOwners, runId, this);
+		
+		if (queryType == QueryType.range_query) {
+			client.rangeQuery(serviceProvider, runId);
+		} else if (queryType == QueryType.knn) {
+			client.knn(serviceProvider, runId, k);
+		} else if (queryType == QueryType.skyline) {
+			client.skyline(serviceProvider, runId);
 		} else {
-			if (Global.G_QUERY_TYPE == QUERY_TYPE.range_query) {
-				client.rangeQuery(serviceProvider, fileName, runId);
-			} else if (Global.G_QUERY_TYPE == QUERY_TYPE.knn) {
-				client.knn(serviceProvider, fileName, runId, Global.G_K);
-			} else if (Global.G_QUERY_TYPE == QUERY_TYPE.skyline) {
-				client.skyline(serviceProvider, runId);
-			}
+			System.out.println("No such query is supported!");
 		}
 	}
 
-	public static void batchQuery(Sim sim, int startTime, int runTimes) {
-		for (double ratio : Global.RATIOS) {
-			System.out.println("--------------------" + ratio
-					+ "---------------------");
-			singleQuery(sim, startTime, runTimes, ratio);
+	/**
+	 * Batch query for various query sizes
+	 * @param sim
+	 */
+	public void batchQuery() {
+		for (double size : Global.QUERY_SIZES) {
+			System.out.println("--------------------" + "Query Size " + size + "---------------------");
+			querySize = size;
+			singleQuery();
 		}
 	}
 
-	public static void singleQuery(Sim sim, int startTime, int runTimes,
-			double ratio) {
-		sim.init(startTime, runTimes);
-		for (int i = startTime; i < startTime + runTimes; i++) {
-			if (!Global.BATCH_QUERY)
+	/**
+	 * Multi queries for same query ratio
+	 * @param sim
+	 * @param ratio
+	 */
+	public void singleQuery() {
+		init();
+		run(0);
+		if (mode != MODE.REBUILD) {
+			for (int i = 1; i < Global.RUN_TIMES; i++) {
 				System.out.println("--------------------" + i
 						+ "---------------------");
-			sim.run(i, ratio);
+				run(i);
+			}
 		}
-		sim.printStat();
+		printStat();
 	}
 	
 	/**
@@ -131,47 +114,36 @@ public class Sim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		Sim sim;
-		int startTime = 0, runTimes = 10;
-		if (args.length >= 6) {
-			startTime = Integer.parseInt(args[2]);
-			runTimes = Integer.parseInt(args[3]);
-			Global.QUERY_LIM = Integer.parseInt(args[4]);
-			String mode = args[5];
+		if (args.length > 0) {
+			String mode = args[2];
 			if (mode.equalsIgnoreCase("rebuild")) {
-				Global.G_MODE = MODE.REBUILD;
-				Global.TOTN = Integer.parseInt(args[6]);
-				Global.L = Math.max(6, (int) (Math.log(Global.TOTN) / Math.log(4)) - 1);
+				sim = new Sim(args[0], args[1], args[2], MODE.REBUILD);
 			} else if (mode.equalsIgnoreCase("update")) {
-				Global.G_MODE = MODE.UPDATE;
-				Global.UPDATE_RT = Double.parseDouble(args[6]);
+				sim = new Sim(args[0], args[1], args[2], MODE.UPDATE);
+				sim.updateRate = Double.parseDouble(args[4]);
 			} else if (mode.equalsIgnoreCase("lazy")) {
-				Global.G_MODE = MODE.LAZY;
-				Global.UPDATE_RT = Double.parseDouble(args[6]);
-				Global.BUFFER_SIZE = Integer.parseInt(args[7]);
+				sim = new Sim(args[0], args[1], args[2], MODE.LAZY);
+				sim.updateRate = Double.parseDouble(args[4]);
+				sim.bufferSize = Integer.parseInt(args[5]);
 			} else if (mode.equalsIgnoreCase("loose")) {
-				Global.G_MODE = MODE.LOOSE;
-				Global.UPDATE_RT = Double.parseDouble(args[6]);
-				Global.REGION_L = Double.parseDouble(args[7]);
+				sim = new Sim(args[0], args[1], args[2], MODE.LOOSE);
+				sim.updateRate = Double.parseDouble(args[4]);
+				sim.rteeRegionL = Double.parseDouble(args[5]);
 			} else {
 				System.out.println("This mode is not supprted!");
 				return;
 			}
-			sim = new Sim(args[0], args[1]);
 			System.out.println("parse fin!");
 		} else if (args.length == 0) {
 			sim = new Sim();
-			Global.G_QUERY_TYPE = QUERY_TYPE.range_query;
 		} else {
 			System.out
-					.println("The args should be [fileName treeType startTime runTimes queryLen mode [update_ratio]].");
+					.println("The args should be [fileName indexType totN mode [update_ratio]].");
 			return;
 		}
-
-		if (Global.BATCH_QUERY) {
-			batchQuery(sim, startTime, runTimes);
-		} else {
-			singleQuery(sim, startTime, runTimes, -1);
-		}
+		
+		sim.batchQuery();
+		
 		if (Global.DO_COST) {
 			System.out.println(Global.STAT_DO.toString());
 		}

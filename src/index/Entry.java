@@ -83,6 +83,20 @@ public class Entry extends QuadEntry implements RW {
 	}
 
 	/**
+	 * The seal will be calculate later.
+	 * @param id
+	 * @param p
+	 * @param runId
+	 * @param index
+	 */
+	public Entry(int id, IShape p, int runId, SearchIndex index) {
+		int[] prefix = index.getPrefix(p);
+		this.tuple = new Tuple(id, p, runId, prefix);
+		this.seal = null; // update later
+		this.no = 1;
+	}
+	
+	/**
 	 * Construct an entry for one dim.
 	 * 
 	 * @param tuple
@@ -152,23 +166,22 @@ public class Entry extends QuadEntry implements RW {
 	 * 
 	 */
 	public Entry() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 	}
 
 	@Override
 	public void read(DataInputStream ds) {
-		// TODO Auto-generated method stub
 		tuple = new Tuple();
 		tuple.read(ds);
-		seal = new Seal();
-		seal.read(ds);
+		if (IO.readBoolean(ds)) {
+			seal = new Seal();
+			seal.read(ds);
+		}
 		no = IO.readInt(ds);
 	}
 
@@ -179,36 +192,20 @@ public class Entry extends QuadEntry implements RW {
 
 	@Override
 	public void write(DataOutputStream ds) {
-		// TODO Auto-generated method stub
 		tuple.write(ds);
 		if (seal != null) {
+			IO.writeBoolean(ds, true);
 			seal.write(ds);
+		} else {
+			IO.writeBoolean(ds, false);
 		}
 		IO.writeInt(ds, no);
 	}
 
-	// /**
-	// * Get the lower value of the entry.
-	// * This function called only the one-dimensional data.
-	// * @return
-	// */
-	// public int getLowVal() {
-	// return tuple.getPoint().getCoord(0);
-	// }
-	//
-	// /**
-	// * Get the higher value of the entry.
-	// * This function called only the one-dimensional data.
-	// * @return
-	// */
-	// public int getHiVal() {
-	// return tuple.getPoint().getCoord(0);
-	// }
-	//
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("tuple : " + tuple + "\n");
-		sb.append("seal : " + seal + "\n");
+		sb.append("tuple : " + tuple);
+//		sb.append("seal : " + seal + "\n");
 		sb.append("no : " + no + "\n");
 		return sb.toString();
 	}
@@ -241,6 +238,7 @@ public class Entry extends QuadEntry implements RW {
 	public void setComPre(int[] comPre) {
 		tuple.setComPre(comPre);
 	}
+
 
 	public boolean verify() {
 		BigInteger random = Constants.PRIME_P.multiply(new BigInteger(

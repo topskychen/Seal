@@ -28,7 +28,7 @@ public class CalcSigma {
 		TrustedRegister.sk = AES.getSampleKey();
 		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
 		ArrayList<DataOwner> dataOwners = new ArrayList<DataOwner>();
-		DataOwner.initData(dataOwners, fileName, INDEX_TYPE.QTree, start, len);
+		DataOwner.initData(dataOwners, fileName, INDEX_TYPE.QTree);
 		double sigma2 = 0;
 		int num = 0;
 		for (DataOwner owner : dataOwners) {
