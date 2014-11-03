@@ -246,7 +246,7 @@ public class DataOwner implements Runnable, RW {
 							+ sim.getTotalN() + ".up");
 			BigInteger secret = BigInteger.ZERO;
 			for (DataOwner owner : owners) {
-				secret = owner.getLastSS();
+				secret = secret.add(owner.getLastSS());
 			}
 			sim.getTrustedRegister().putTotalSecret(0, secret);
 		} else {
@@ -433,7 +433,6 @@ public class DataOwner implements Runnable, RW {
 		 * Update the index
 		 */
 		sim.getSP().updateIndex(entries);
-		
 	}
 
 	private Entry getLastEntry() {

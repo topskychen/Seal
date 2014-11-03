@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import party.Client;
 import party.DataOwner;
 import party.ServiceProvider;
-import party.TrustedRegister;
-import utility.EncFun.ENC_TYPE;
 import utility.Global.MODE;
 
 /**
@@ -53,7 +51,6 @@ public class Sim extends Simulator {
 		dataOwners = new ArrayList<DataOwner>();
 		serviceProvider = new ServiceProvider(statU, this);
 		client = new Client(statQ, this);
-		ts = TrustedRegister.getInstance(ENC_TYPE.Paillier, fileName);
 		DataOwner.initData(dataOwners, this);
 		System.out.println("init simulator done.");
 	}

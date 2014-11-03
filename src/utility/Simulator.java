@@ -12,6 +12,7 @@ import party.Client;
 import party.DataOwner;
 import party.ServiceProvider;
 import party.TrustedRegister;
+import utility.EncFun.ENC_TYPE;
 import utility.Global.MODE;
 
 /**
@@ -90,6 +91,7 @@ public abstract class Simulator {
 	 */
 	public Simulator() {
 		super();
+		ts = TrustedRegister.getInstance(ENC_TYPE.Paillier, fileName);
 	}
 
 	/**

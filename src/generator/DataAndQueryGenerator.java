@@ -70,7 +70,7 @@ public class DataAndQueryGenerator {
 					line += "\t" + printPoint(p);
 				}
 				pw.println(line);
-				if (id++ >= totN) break;
+				if (++id>= totN) break;
 			}
 			pw.close();
 		} catch (FileNotFoundException e) {

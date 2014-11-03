@@ -58,7 +58,6 @@ public class VO implements RW{
 		timer.reset();
 		boolean isVerify = true;
 		ansNo = 0;
-		int cnt = 0;
 		for (VOCell voCell : voCells) {
 			if (!voCell.verify(query, ansIds)) {
 				isVerify = false;
@@ -67,10 +66,8 @@ public class VO implements RW{
 				break;
 			} else {
             }
-			cnt += voCell.entry.getNO();
 			ansNo += voCell.getAnsNo();
 		}
-		System.out.println(cnt);
 		if (!verifyComplete()) {
 			isVerify = false;
 		}

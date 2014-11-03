@@ -58,11 +58,11 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 	 * It is used for checking the counting is right or not.
 	 * @return
 	 */
-	boolean checkTree() {
+	public boolean checkTree() {
  		int tmp = 0;
  		if (!isLeaf()) {
-			for (int i = 0; i < getEntries().size(); ++i) {
-				tmp += ((Entry) getEntry(i)).getNO();
+			for (QuadEntry entry : getEntries()) {
+				if (entry != null) tmp += ((Entry) entry).getNO();
 			}
  		} else {
  			for (Entry entry : L.values()) {
@@ -74,8 +74,10 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 			return false;
 		}
 		if (!isLeaf()) {
-			for (int i = 0; i < getDivision(); ++i) {
-				if (!((MemQTree) getChTree(i)).checkTree()) return false;
+			if (getChTrees() != null) {
+				for (int i = 0; i < getDivision(); ++i) {
+					if (!((MemQTree) getChTree(i)).checkTree()) return false;
+				}
 			}
 		}
 		return true;
@@ -140,7 +142,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 		
 		if (simulator.getMode() == MODE.REBUILD) { // push L to entries
 			//TODO check this function
-			pushLtoEntries();
+//			pushLtoEntries();
 		}
 	}
 	
