@@ -111,9 +111,6 @@ public class Seal implements RW {
 		}
 		// Encrypt with Paillier or one-time pad
 		cipher = tr.encrypt(content, Constants.PRIME_P);
-		if (utility.Global.DO_COST) {
-
-		}
 	}
 
 	public BigInteger getSecretShare(BigInteger random) {

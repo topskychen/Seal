@@ -59,7 +59,7 @@ public class VO implements RW{
 		boolean isVerify = true;
 		ansNo = 0;
 		for (VOCell voCell : voCells) {
-			if (!voCell.verify(query, ansIds)) {
+			if (!voCell.verify(query)) {
 				isVerify = false;
 				System.out.print("x\n");
 				System.out.println(voCell);

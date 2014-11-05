@@ -21,6 +21,7 @@ public interface SearchIndex {
 	public abstract ArrayList<IShape> skyline();
 //	public abstract 
 	public abstract void updateIndex(ArrayList<Entry> entries, StatisticsUpdate statU);
+	public abstract byte[] toBytes();
 	public abstract int[] getPrefix(IShape point);
 	public abstract INDEX_TYPE getType();
 

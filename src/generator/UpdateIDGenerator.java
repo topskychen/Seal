@@ -71,8 +71,13 @@ public class UpdateIDGenerator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		UpdateIDGenerator gen = new UpdateIDGenerator(Global.TEST_FILE_DIR + "/GO", 1000);
-		gen.run();
+		if (args.length == 0) {
+			UpdateIDGenerator gen = new UpdateIDGenerator(Global.TEST_FILE_DIR + "/GO", 1000);
+			gen.run();
+		} else {
+			UpdateIDGenerator gen = new UpdateIDGenerator(Global.TEST_FILE_DIR + "/GO", Integer.parseInt(args[0]));
+			gen.run();
+		}
 	}
 
 }

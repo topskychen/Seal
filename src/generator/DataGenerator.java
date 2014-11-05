@@ -17,7 +17,7 @@ import utility.Global;
  * @author chenqian
  *
  */
-public class DataAndQueryGenerator {
+public class DataGenerator {
 	Random random = new Random();
 	List<IShape> locations = null;
 	int dim, totN;
@@ -81,47 +81,12 @@ public class DataAndQueryGenerator {
 		System.out.println("data fin!");
 	}
 
-	void genQueries() {
-		/**
-		 * query
-		 */
-		try {
-			for (double querySize : Global.QUERY_SIZES) {
-				String fileName = Global.TEST_FILE_DIR + "/GO";
-				PrintWriter pw = new PrintWriter(new File(fileName + "_" + dim + "_" + querySize + ".rq"));
-				double ratio = Math.pow(querySize, 1.0 / dim);
-				for (int i = 0; i < 100; ++i) {
-					int[] low = new int[dim];
-					int[] high = new int[dim];
-					for (int j = 0; j < dim; ++j) {
-						int[] range = genRange(0, (int) Global.BOUND, ratio);
-						low[j] = range[0];
-						high[j] = range[1];
-					}
-					String line = "";
-					for (int j = 0; j < dim; ++j) {
-						line += low[j] + " ";
-					}
-					for (int j = 0; j < dim; ++j) {
-						line += high[j] + " ";
-					}
-					line.trim();
-					pw.println(line);
-				}
-				pw.close();
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		System.out.println("query fin!");	
-	}
 	
 	
 	/**
 	 * 
 	 */
-	public DataAndQueryGenerator(int dim, int totN) {
+	public DataGenerator(int dim, int totN) {
 		
 		this.dim = dim;
 		this.totN = totN;
@@ -129,7 +94,6 @@ public class DataAndQueryGenerator {
 		locations = LocationParser.parseLocation("./data/Location.txt");
 		
 		genData();
-		genQueries();
 	}		
 	
 	
@@ -138,7 +102,11 @@ public class DataAndQueryGenerator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		DataAndQueryGenerator gen = new DataAndQueryGenerator(3, 1000);
+		if (args.length == 0) {
+			DataGenerator gen = new DataGenerator(3, 1000);
+		} else {
+			DataGenerator gen = new DataGenerator(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
+		}
 	}
 
 }

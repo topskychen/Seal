@@ -37,28 +37,30 @@ public class Global {
 	public static int				PRINT_LIM		= 10;
 	
 	public static String			TEST_FILE_DIR	= "./data";
-	public static double[]			QUERY_SIZES			= {
-													// 0.0025, 0.005, 0.01,
-													0.02
-													// , 0.04, 0.08, 0.16, 0.32,
-													// 0.64
-													};
+	public static double[]			QUERY_SIZES			= {0.01, 0.02};
+//	public static double[]			QUERY_SIZES			= {
+//													 0.00025, 0.0005, 0.001,
+//													0.002, 0.004, 0.008, 0.016
+//													// , 0.04, 0.08, 0.16, 0.32,
+//													// 0.64
+//													};
 	public static double[]			UPDATE_RATES		= { 0.1, 0.2, 0.3, 0.4, 0.5 };
+//	public static double[]			UPDATE_RATES		= { 0.001, 0.002, 0.003, 0.004, 0.005 };
 	public static int				RUN_TIMES		= 20;
 	
-	public static boolean			DO_COST			= true;
-	public static StatisticsDO		STAT_DO			= new StatisticsDO();
-	public static boolean			INDEX_COST		= true;
-	public static StatisticsIndex	STAT_INDEX		= new StatisticsIndex();
 	public static Timer				TIMER			= null;
 	
 
 	
 	static {
-		if (DO_COST || INDEX_COST)
-			TIMER = new Timer();
+		TIMER = new Timer();
 		if (!System.getProperty("os.name").equals("Mac OS X")) {
 			THREAD_NUM = 16;
+			QUERY_SIZES	= new double[] {
+					 0.00025, 0.0005, 0.001,
+					0.002, 0.004, 0.008, 0.016
+					};
+			UPDATE_RATES= new double[] { 0.001, 0.002, 0.003, 0.004, 0.005 };
 		}
 	}
 

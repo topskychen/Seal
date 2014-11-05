@@ -39,12 +39,14 @@ public abstract class Simulator {
 	int			capacity	= 8;	// 1 << dim
 	int			k			= 256; 	// kNN of k
 	int			dim			= 3;	// dimension
-	MODE		mode 		= MODE.REBUILD; // 
+	MODE		mode 		= MODE.UPDATE; // 
 	int			bufferSize	= 150;
 	double 		updateRate 	= 0.1;
 	double		rteeRegionL	= 0;
 	QueryType 	queryType 	= QueryType.range_query;
 	double 		querySize 	= 0;
+	boolean				recordIndex			= true;
+	StatisticsIndex		STAT_INDEX			= null;
 	
 	public double getUpdateRate() {
 		return updateRate;
@@ -92,6 +94,7 @@ public abstract class Simulator {
 	public Simulator() {
 		super();
 		ts = TrustedRegister.getInstance(ENC_TYPE.Paillier, fileName);
+		STAT_INDEX = new StatisticsIndex(indexType);
 	}
 
 	/**
@@ -200,6 +203,14 @@ public abstract class Simulator {
 	public ServiceProvider getSP() {
 		// TODO Auto-generated method stub
 		return serviceProvider;
+	}
+	
+	public StatisticsIndex getIndexStat() {
+		return STAT_INDEX;
+	}
+	
+	public boolean getRecordIndex() {
+		return recordIndex;
 	}
 
 }

@@ -33,6 +33,7 @@ import java.util.Set;
 import multithread.MultiThread;
 import spatialindex.IShape;
 import spatialindex.Point;
+import timer.Timer;
 import utility.Global;
 import utility.Simulator;
 
@@ -232,7 +233,7 @@ public class DataOwner implements Runnable, RW {
 		}
 		sim.getTrustedRegister().putTotalSecret(0, secret);
 		new MultiThread(owners.toArray(new Runnable[0]), Global.THREAD_NUM,
-				true, 50).run();
+				true, 10.0).run();
 	}
 
 	public static void initData(List<DataOwner> owners, Simulator sim) {
@@ -299,7 +300,7 @@ public class DataOwner implements Runnable, RW {
 	 */
 	public static void loadUpdatesFromFile(List<DataOwner> owners,
 			String fileName) {
-		Map<Integer, DataOwner> map = new HashMap<>();
+		Map<Integer, DataOwner> map = new HashMap<Integer, DataOwner>();
 		int id = 0;
 		for (DataOwner owner : owners) {
 			map.put(id++, owner);
@@ -421,7 +422,7 @@ public class DataOwner implements Runnable, RW {
 			/**
 			 * Prepare seals
 			 */
-			new MultiThread(owners.toArray(new Runnable[0]), Global.THREAD_NUM, true, 50).run();
+			new MultiThread(owners.toArray(new Runnable[0]), Global.THREAD_NUM, true, 10.0).run();
 		} else {
 			for (DataOwner owner : owners) {
 				entries.add(owner.getLastEntry());
@@ -432,7 +433,15 @@ public class DataOwner implements Runnable, RW {
 		/**
 		 * Update the index
 		 */
+		Timer timer = new Timer();
+		if (runId == 0) {
+			timer.reset();
+		}
 		sim.getSP().updateIndex(entries);
+		if (runId == 0) {
+			timer.stop();
+			if (sim.getRecordIndex()) sim.getIndexStat().append(timer.timeElapseinMs(), sim.getSP().getIndexSize());
+		}
 	}
 
 	private Entry getLastEntry() {

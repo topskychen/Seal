@@ -38,6 +38,7 @@ public class Sim extends Simulator {
 		}
 		this.mode = mode;
 		this.totN = Integer.parseInt(totN);
+		STAT_INDEX = new StatisticsIndex(this.indexType);
 	}
 
 	/*
@@ -54,7 +55,7 @@ public class Sim extends Simulator {
 		DataOwner.initData(dataOwners, this);
 		System.out.println("init simulator done.");
 	}
-
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -63,7 +64,7 @@ public class Sim extends Simulator {
 	@Override
 	public void run(int runId) {
 		//TODO if (runId > 0) //do update
-		DataOwner.update(dataOwners, runId, this);
+		if (mode != MODE.REBUILD) DataOwner.update(dataOwners, runId, this);
 		
 		if (queryType == QueryType.range_query) {
 			client.rangeQuery(serviceProvider, runId);
@@ -81,29 +82,34 @@ public class Sim extends Simulator {
 	 * @param sim
 	 */
 	public void batchQuery() {
-		for (double size : Global.QUERY_SIZES) {
-			System.out.println("--------------------" + "Query Size " + size + "---------------------");
-			querySize = size;
-			singleQuery();
+		if (mode == MODE.REBUILD) {
+			updateRate = Global.UPDATE_RATES[0];
+			init();
+			DataOwner.update(dataOwners, 0, this);
+			if (queryType == queryType.range_query) {
+				for (double size : Global.QUERY_SIZES) {
+					System.out.println("--------------------" + "Query Size " + size + "---------------------");
+					querySize = size;
+					client.loadFile(fileName);
+					run(0);
+					printStat();
+				}
+			} else if (queryType == queryType.knn) {
+				System.out.println("--------------------" + k + " NN " + "---------------------");
+				querySize = Global.QUERY_SIZES[0];
+				client.loadFile(fileName);
+				run(0);
+				printStat();
+			}
 		}
-	}
-
-	/**
-	 * Multi queries for same query ratio
-	 * @param sim
-	 * @param ratio
-	 */
-	public void singleQuery() {
-		init();
-		run(0);
 		if (mode != MODE.REBUILD) {
+			run(0);
 			for (int i = 1; i < Global.RUN_TIMES; i++) {
 				System.out.println("--------------------" + i
 						+ "---------------------");
 				run(i);
 			}
 		}
-		printStat();
 	}
 	
 	/**
@@ -112,9 +118,14 @@ public class Sim extends Simulator {
 	public static void main(String[] args) {
 		Sim sim;
 		if (args.length > 0) {
-			String mode = args[2];
+			String mode = args[3];
 			if (mode.equalsIgnoreCase("rebuild")) {
 				sim = new Sim(args[0], args[1], args[2], MODE.REBUILD);
+				String queryType = args[4];
+				if (queryType.equalsIgnoreCase("knn")) {
+					sim.queryType = QueryType.knn;
+					sim.k = Integer.parseInt(args[5]);
+				}
 			} else if (mode.equalsIgnoreCase("update")) {
 				sim = new Sim(args[0], args[1], args[2], MODE.UPDATE);
 				sim.updateRate = Double.parseDouble(args[4]);
@@ -141,11 +152,6 @@ public class Sim extends Simulator {
 		
 		sim.batchQuery();
 		
-		if (Global.DO_COST) {
-			System.out.println(Global.STAT_DO.toString());
-		}
-		if (Global.INDEX_COST) {
-			System.out.println(Global.STAT_INDEX.toString());
-		}
+		System.out.println(sim.STAT_INDEX.toString());
 	}
 }

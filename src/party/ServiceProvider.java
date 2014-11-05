@@ -53,6 +53,9 @@ public class ServiceProvider {
 		
 	}
 	
+	public int getIndexSize() {
+		return index.toBytes().length;
+	}
 	
 	public void specifyIndex(INDEX_TYPE type) {
 		if (type == INDEX_TYPE.BTree) {

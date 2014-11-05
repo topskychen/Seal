@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import spatialindex.IShape;
+import spatialindex.Point;
 import spatialindex.Region;
 import utility.Simulator;
 import utility.StatisticsQuery;
@@ -29,16 +30,17 @@ public class Client {
 	List<IShape>	queries	= new LinkedList<IShape>();
 	StatisticsQuery	statQ	= null;
 	Simulator		sim		= null;
+	int 			queryLimit = 100;
 	/**
 	 * 
 	 */
 	public Client(StatisticsQuery statQ, Simulator sim) {
 		this.statQ = statQ;
 		this.sim = sim;
-		loadFile(sim.getFileName());
 	}
 	
-	void loadFile(String fileName) {
+	public void loadFile(String fileName) {
+		queries.clear();
 		Scanner in = null;
 		try {
 			if (sim.getQueryType() == QueryType.range_query) {
@@ -59,7 +61,18 @@ public class Client {
 				}
 				in.close();
 			} else if (sim.getQueryType() == QueryType.knn) {
-				//TODO
+				in = new Scanner(new File(sim.getFileName() + "_" + sim.getDim() + "_" + sim.getQuerySize() + ".rq"));
+				String[] tks = null;
+				while (in.hasNext()) {
+					tks = in.nextLine().split(" ");
+					double[] lb = new double[tks.length / 2];
+					for (int i = 0; i < lb.length; ++i) {
+						lb[i] = Integer.parseInt(tks[i]);
+					}
+					Point query = new Point(lb);
+					queries.add(query);
+				}
+				in.close();
 			} else if (sim.getQueryType() == QueryType.skyline) {
 				//TODO
 			} else {
@@ -71,7 +84,9 @@ public class Client {
 	}
 	
 	public void rangeQuery(ServiceProvider sp, int runId) {
+		int queryCnt = 0;
 		for (IShape query : queries) {
+			if (queryCnt++ > queryLimit) break;
 			VO vo = sp.rangeQuery(query, runId);
 			if (!vo.verify(query)) {
 				System.err.print("x");

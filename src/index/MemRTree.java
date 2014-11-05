@@ -11,8 +11,10 @@ import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import rtree.Node;
 import rtree.RTree;
@@ -254,6 +256,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 
 		private ArrayList<Integer>	toVisit	= new ArrayList<Integer>();
 		private ArrayList<VOCell>	voCells	= new ArrayList<VOCell>();
+		private ArrayList<VOCell>	resVOCells	= null;
 		private IShape				query	= null;
 
 		public RangeQueryStrategy(IShape query) {
@@ -261,7 +264,28 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 		}
 
 		public ArrayList<VOCell> getVOCells() {
-			return voCells;
+			if (resVOCells == null) {
+				Map<Integer, List<VOCell>> map = new HashMap<Integer, List<VOCell>>();
+				for (VOCell cell : voCells) {
+					int lev = cell.getLev();
+					if (!map.containsKey(lev)) map.put(lev, new ArrayList<VOCell>());
+					map.get(lev).add(cell);
+				}
+				resVOCells = new ArrayList<VOCell>();
+				for (int lev = 0; lev < Global.L; ++lev) {
+					if (map.containsKey(lev)) {
+						List<VOCell> cells = map.get(lev);
+						if (cells.size() != 0) {
+							VOCell res = cells.get(0);
+							for (int i = 1; i < cells.size(); ++i) {
+								res.fold(cells.get(i));
+							}
+							resVOCells.add(res);
+						}
+					}
+				}
+			}
+			return resVOCells;
 		}
 
 		@Override
@@ -275,19 +299,19 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 				if (query.contains(shape)) {
 					if (node.isLeaf()) {
 						Entry entry = leafEntries.get(cId);
-						voCells.add(new VOCell(entry.getTuple(), entry));
+						voCells.add(new VOCell(entry.getId(), entry.getTuple(), entry));
 					} else {
 						Entry entry = innerEntries.get(cId);
 						RetrieveStrategy rs = new RetrieveStrategy();
 						queryStrategy(cId, rs);
-						voCells.add(new VOCell(rs.getTuples(), entry));
+						voCells.add(new VOCell(rs.getAnsIds(), rs.getTuples(), entry));
 					}
 				} else if (!query.intersects(shape)) {
 					if (node.isLeaf()) {
-						voCells.add(new VOCell(new ArrayList<Tuple>(),
+						voCells.add(new VOCell(-1, null,
 								leafEntries.get(cId)));
 					} else {
-						voCells.add(new VOCell(new ArrayList<Tuple>(),
+						voCells.add(new VOCell(null, null,
 								innerEntries.get(cId)));
 					}
 				} else {
@@ -309,6 +333,14 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 		private ArrayList<Integer>	toVisit	= new ArrayList<Integer>();
 		ArrayList<Tuple>			tuples	= null;
 
+		public Set<Integer> getAnsIds() {
+			Set<Integer> ans = new HashSet<Integer>();
+			for (Tuple tuple : tuples) {
+				ans.add(tuple.getId());
+			}
+			return ans;
+		}
+		
 		public ArrayList<Tuple> getTuples() {
 			return tuples;
 		}
@@ -491,5 +523,10 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 		LeafEntry(IShape _shape, int _id) { id = _id; shape = _shape; }
 		public int getIdentifier() { return id; }
 		public IShape getShape() { return shape; }
+	}
+
+	@Override
+	public byte[] toBytes() {
+		return IO.toBytes(this);
 	}
 }

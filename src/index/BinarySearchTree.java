@@ -7,6 +7,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import memoryindex.BinaryTree;
 import memoryindex.IQueryStrategyBT;
@@ -15,6 +17,7 @@ import utility.StatisticsUpdate;
 import utility.Tuple;
 
 /**
+ * @deprecated
  * @author chenqian
  *
  */
@@ -93,10 +96,10 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 			for (BinaryTree tree : inRange) {
 				RetrieveStrategy qs = new RetrieveStrategy();
 				queryStrategy(tree, qs);
-				voCells.add(new VOCell(qs.getTuples(), (Entry)tree.getValue()));
+				voCells.add(new VOCell(qs.getAnsIds(), qs.getTuples(), (Entry)tree.getValue()));
 			}
 			for (BinaryTree tree: outRange) {
-				voCells.add(new VOCell(new ArrayList<Tuple>(), (Entry) tree.getValue()));
+				voCells.add(new VOCell(-1, null, (Entry) tree.getValue()));
 			}
 			return voCells;
 		}
@@ -147,6 +150,14 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 			return tuples;
 		}
 		
+		public Set<Integer> getAnsIds() {
+			Set<Integer> ans = new HashSet<Integer>();
+			for (Tuple tuple : tuples) {
+				ans.add(tuple.getId());
+			}
+			return ans;
+		}
+
 		/**
 		 * 
 		 */
@@ -245,6 +256,12 @@ public class BinarySearchTree extends BinaryTree implements SearchIndex {
 
 	@Override
 	public int[] getPrefix(IShape point) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public byte[] toBytes() {
 		// TODO Auto-generated method stub
 		return null;
 	}

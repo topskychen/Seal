@@ -3,12 +3,16 @@
  */
 package utility;
 
+import index.SearchIndex.INDEX_TYPE;
+
 /**
  * @author chenqian
  * 
  */
 public class StatisticsIndex {
 
+	
+	INDEX_TYPE indexType = null;
 	double	buildTime	= 0;
 	double	indexSize	= 0;
 	int		num			= 0;
@@ -36,7 +40,8 @@ public class StatisticsIndex {
 	/**
 	 * 
 	 */
-	public StatisticsIndex() {
+	public StatisticsIndex(INDEX_TYPE indexType) {
+		this.indexType = indexType;
 	}
 
 	/**
@@ -47,7 +52,7 @@ public class StatisticsIndex {
 	}
 
 	public String toString() {
-		StringBuffer sb = new StringBuffer("---------Index Costs------\n");
+		StringBuffer sb = new StringBuffer("---------" + indexType + " Index Costs------\n");
 		sb.append("buildTime : " + getAveBuildTime() + " ms\n");
 		sb.append("indexSize : " + getAveIndexSize() / 1024 / 1024 + " MB\n");
 		sb.append("--------------------\n");
