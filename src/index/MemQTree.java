@@ -138,6 +138,7 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 				pushU(simulator.getBufferSize());
 			Global.TIMER.stop();
 			statU.append(Global.TIMER.timeElapseinMs(), 0);
+			statU.appendNum(entries.size(), entries.size());
 		} else {
 			pushU(0);
 		}

@@ -3,19 +3,12 @@
  */
 package utility;
 
-import index.Entry;
-import index.SearchIndex.INDEX_TYPE;
+import java.util.List;
 
-import java.util.ArrayList;
-
-import party.Client;
 import party.DataOwner;
-import party.TrustedRegister;
+import spatialindex.IShape;
 import spatialindex.Point;
 import spatialindex.Region;
-import timer.Timer;
-import utility.EncFun.ENC_TYPE;
-import crypto.AES;
 
 /**
  * @author chenqian
@@ -23,88 +16,67 @@ import crypto.AES;
  */
 public class LooseR {
 
-	String					fileName	= Sim.fileName;
 	int						start		= 0;
 	int						len			= 250;
 	int 					qlen 		= 50;
-	ArrayList<DataOwner>	dataOwners;
-	ArrayList<Region>		queries;
+	List<DataOwner>	dataOwners;
+	List<IShape>		queries;
 
 	/**
 	 * 
 	 */
 	public LooseR() {
-		TrustedRegister.sk = AES.getSampleKey();
-		TrustedRegister.specifyEncFun(ENC_TYPE.OTPad, fileName);
-		dataOwners = new ArrayList<DataOwner>();
-		DataOwner.initData(dataOwners, fileName, INDEX_TYPE.QTree, start, len);
-		queries = Client.initQuery(fileName + "_0.02");
+		Sim sim = new Sim();
+		sim.init();
+		dataOwners = sim.dataOwners;
+		sim.client.loadFile("./data/GO");
+		queries = sim.client.getQueries();
 	}
 
 	public void run(double L) {
-		int outOfBounds = 0;
-		int interQueries = 0;
-		int tot = 0;
+		double outOfBounds = 0;
+		double interQueries = 0;
 		for (DataOwner owner : dataOwners) {
-			Region region = new Region(new double[] { 0, 0 }, new double[] { 0,
-					0 });
-			for (int i = start; i < start + len; i++) {
+			Point o = owner.getPoint(0);
+			Region region = new Region(new double[] { o.m_pCoords[0]-L/2, o.m_pCoords[1]-L/2, o.m_pCoords[2]-L/2}, new double[] { o.m_pCoords[0] + L/2,
+					o.m_pCoords[1] + L/2 , o.m_pCoords[2] + L/2});
+			double a = 0;
+			for (int i = 1; i < 20; i++) {
 				Point point = (Point) owner.getPoint(i);
 				if (point != null) {
 					if (!region.contains(point)) {
-						outOfBounds++;
-						region = new Region(new double[] { point.getCoord(0) - L,
-								point.getCoord(1) - L }, new double[] {
-								point.getCoord(0) + L, point.getCoord(1) + L });
-					}
-				}
-				tot++;
-				for (int q = 0; q < qlen; q++) {
-					Region query = queries.get(q);
-					if (query.intersects(region)) {
-						interQueries++;
+						a++;
+						o = owner.getPoint(i);
+						region = new Region(new double[] { o.m_pCoords[0]-L/2, o.m_pCoords[1]-L/2, o.m_pCoords[2]-L/2}, new double[] { o.m_pCoords[0] + L/2,
+								o.m_pCoords[1] + L/2 , o.m_pCoords[2] + L/2});
 					}
 				}
 			}
+			outOfBounds += a/19;
+			a = 0;
+			for (int q = 0; q < 50; q++) {
+				Region query = (Region) queries.get(q);
+				if (query.intersects(region)) {
+					interQueries++;
+				}
+			}
 		}
-		System.out.println("------------" + L + "--------------");
-		Timer timer = new Timer();
-		ArrayList<Entry> entries = new ArrayList<Entry>();
-		timer.reset();
-		for (int i = 0; i < outOfBounds; i++) {
-			entries.add(Seal.getSample(i));
-		}
-		timer.stop();
-		double doCPU = timer.timeElapseinMs() / len * 5;
-		System.out.println(doCPU + " ms");
-		timer.reset();
-		for (int i = 0; i < interQueries; i++) {
-			entries.get(0).verify();
-		}
-		timer.stop();
-		double vrfCPU = timer.timeElapseinMs() / len;
-		System.out.println(vrfCPU + " ms");
-		System.out.println(doCPU + vrfCPU + " ms");
-		System.out.println(1.0 * outOfBounds / tot);
-		System.out.println("----------------------------");
+//		System.out.println("------------" + L + "--------------");
+//		System.out.println(1.0 * outOfBounds/dataOwners.size());
+//		System.out.println(1.0 * interQueries/dataOwners.size());
+		System.out.println(1.0 * outOfBounds/dataOwners.size() + 0.2 * interQueries/dataOwners.size());
+//		System.out.println("----------------------------");
 	}
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		double L = 100, tmp = L;
-		LooseR looseR = new LooseR();
-		looseR.run(L);
-		for (int i = 0; i < 4; i++) {
-			tmp *= Math.sqrt(2);
+		double L = 5000, tmp = L;
+		LooseR looseR = new LooseR();		
+		for (int i = 4; i >= -4; i--) {
+			tmp = L/Math.pow(Math.sqrt(2), i);
 			looseR.run(tmp);
 		}
-		tmp = L;
-		for (int i = 0; i < 4; i++) {
-			tmp /= Math.sqrt(2);
-			looseR.run(tmp);
-		}
-		looseR.run(L);
 	}
 }

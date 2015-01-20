@@ -44,7 +44,7 @@ public abstract class Simulator {
 	double 		updateRate 	= 0.1;
 	double		rteeRegionL	= 0;
 	QueryType 	queryType 	= QueryType.range_query;
-	double 		querySize 	= 0;
+	double 		querySize 	= 0.01;
 	boolean				recordIndex			= true;
 	StatisticsIndex		STAT_INDEX			= null;
 	
@@ -211,6 +211,10 @@ public abstract class Simulator {
 	
 	public boolean getRecordIndex() {
 		return recordIndex;
+	}
+
+	public void setRecordIndex(boolean b) {
+		recordIndex = false;
 	}
 
 }

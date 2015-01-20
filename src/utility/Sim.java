@@ -103,11 +103,18 @@ public class Sim extends Simulator {
 			}
 		}
 		if (mode != MODE.REBUILD) {
-			run(0);
-			for (int i = 1; i < Global.RUN_TIMES; i++) {
-				System.out.println("--------------------" + i
+			for (double rate : Global.UPDATE_RATES) {
+				System.out.println("--------------------" + "Update Rate " + rate
 						+ "---------------------");
-				run(i);
+				updateRate = rate;
+				init();
+				client.loadFile(fileName);
+				run(0);
+				for (int i = 1; i < 3; i++) {
+					clearStat();
+					run(i);
+					printStat();
+				}
 			}
 		}
 	}
@@ -128,7 +135,6 @@ public class Sim extends Simulator {
 				}
 			} else if (mode.equalsIgnoreCase("update")) {
 				sim = new Sim(args[0], args[1], args[2], MODE.UPDATE);
-				sim.updateRate = Double.parseDouble(args[4]);
 			} else if (mode.equalsIgnoreCase("lazy")) {
 				sim = new Sim(args[0], args[1], args[2], MODE.LAZY);
 				sim.updateRate = Double.parseDouble(args[4]);

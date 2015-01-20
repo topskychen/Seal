@@ -39,6 +39,10 @@ public class Client {
 		this.sim = sim;
 	}
 	
+	public List<IShape> getQueries() {
+		return queries;
+	}
+	
 	public void loadFile(String fileName) {
 		queries.clear();
 		Scanner in = null;

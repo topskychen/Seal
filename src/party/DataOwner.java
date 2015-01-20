@@ -186,6 +186,7 @@ public class DataOwner implements Runnable, RW {
 				DataOwner owner = new DataOwner();
 				owner.read(ds);
 				owners.add(owner);
+				owner.updateTS.clear();
 			}
 			ds.close();
 		} catch (FileNotFoundException e) {
@@ -440,7 +441,10 @@ public class DataOwner implements Runnable, RW {
 		sim.getSP().updateIndex(entries);
 		if (runId == 0) {
 			timer.stop();
-			if (sim.getRecordIndex()) sim.getIndexStat().append(timer.timeElapseinMs(), sim.getSP().getIndexSize());
+			if (sim.getRecordIndex()) {
+				sim.getIndexStat().append(timer.timeElapseinMs(), sim.getSP().getIndexSize());
+				sim.setRecordIndex(false);
+			}
 		}
 	}
 
