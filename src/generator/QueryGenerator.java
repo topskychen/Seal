@@ -13,7 +13,9 @@ public class QueryGenerator {
 	
 	Random random = new Random();
 	List<IShape> locations = null;
-	int dim, totN;
+	int dim;
+	
+	double[] QUERY_SIZES = {0.032, 0.064, 0.128, 0.256, 0.512, 0.99};
 	
 	int[] genRange(int b0, int b1, double ratio) {
 		int bound = b1 - b0;
@@ -26,7 +28,7 @@ public class QueryGenerator {
 		 * query
 		 */
 		try {
-			for (double querySize : Global.QUERY_SIZES) {
+			for (double querySize : QUERY_SIZES) {
 				String fileName = Global.TEST_FILE_DIR + "/GO";
 				PrintWriter pw = new PrintWriter(new File(fileName + "_" + dim + "_" + querySize + ".rq"));
 				double ratio = Math.pow(querySize, 1.0 / dim);
@@ -58,8 +60,13 @@ public class QueryGenerator {
 	}
 	
 	
-	public QueryGenerator() {
-		// TODO Auto-generated constructor stub
+	public QueryGenerator(int dim) {
+		this.dim = dim;
+	}
+	
+	public static void main(String[] args) {
+		QueryGenerator gen = new QueryGenerator(3);
+		gen.genQueries();
 	}
 
 }

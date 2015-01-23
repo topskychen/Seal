@@ -25,20 +25,56 @@ public class Sim extends Simulator {
 		super();
 	}
 
-	public Sim(String fileName, String indexType, String totN, MODE mode) {
-		this.fileName = fileName;
-		if (indexType.equalsIgnoreCase("btree")) {
-			this.indexType = INDEX_TYPE.BTree;
-		} else if (indexType.equalsIgnoreCase("rtree")) {
-			this.indexType = INDEX_TYPE.RTree;
-		} else if (indexType.equalsIgnoreCase("qtree")) {
-			this.indexType = INDEX_TYPE.QTree;
-		} else {
-			throw new IllegalStateException("No such tree choice.");
+	public void go(String[] args) {
+		if (args.length > 0) {
+			String mode = args[3];
+			this.fileName = args[0];
+			if (args[1].equalsIgnoreCase("btree")) {
+				this.indexType = INDEX_TYPE.BTree;
+			} else if (args[1].equalsIgnoreCase("rtree")) {
+				this.indexType = INDEX_TYPE.RTree;
+			} else if (args[1].equalsIgnoreCase("qtree")) {
+				this.indexType = INDEX_TYPE.QTree;
+			} else {
+				throw new IllegalStateException("No such tree choice.");
+			}
+			this.totN = Integer.parseInt(args[2]);
+			STAT_INDEX = new StatisticsIndex(this.indexType);
+			if (mode.equalsIgnoreCase("rebuild")) {
+				this.mode = MODE.REBUILD;
+				String queryType = args[4];
+				if (queryType.equalsIgnoreCase("rq") || queryType.equalsIgnoreCase("range") || queryType.equalsIgnoreCase("rangequery")) {
+					this.queryType = QueryType.range_query;
+				} else if (queryType.equalsIgnoreCase("knn")) {
+					this.queryType = QueryType.knn;
+					this.k = Integer.parseInt(args[5]);
+				} else if (queryType.equalsIgnoreCase("skyline")) {
+					this.queryType = QueryType.skyline;
+				} else {
+					System.out.println("no query type : " + queryType + " is supported");
+				}
+			} else if (mode.equalsIgnoreCase("update")) {
+				this.mode = MODE.UPDATE;
+			} else if (mode.equalsIgnoreCase("lazy")) {
+				this.mode = MODE.LAZY;
+				this.updateRate = Double.parseDouble(args[4]);
+				this.bufferSize = Integer.parseInt(args[5]);
+			} else if (mode.equalsIgnoreCase("loose")) {
+				this.mode = MODE.LOOSE;
+				this.updateRate = Double.parseDouble(args[4]);
+				this.rteeRegionL = Double.parseDouble(args[5]);
+			} else {
+				System.out.println("This mode is not supprted!");
+				return;
+			}
+			System.out.println("parse fin!");
 		}
-		this.mode = mode;
-		this.totN = Integer.parseInt(totN);
-		STAT_INDEX = new StatisticsIndex(this.indexType);
+//			System.out
+//					.println("The args should be [fileName indexType totN mode [update_ratio]].");
+		
+		batchQuery();
+		
+		System.out.println(this.STAT_INDEX.toString());
 	}
 
 	/*
@@ -100,6 +136,11 @@ public class Sim extends Simulator {
 				client.loadFile(fileName);
 				run(0);
 				printStat();
+			} else {
+				System.out.println("-------------------- skyline ---------------------");
+				client.loadFile(fileName);
+				run(0);
+				printStat();
 			}
 		}
 		if (mode != MODE.REBUILD) {
@@ -120,44 +161,11 @@ public class Sim extends Simulator {
 	}
 	
 	/**
+	 * the args should be [fileName indexType totN mode [queryType,update_ratio]].
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Sim sim;
-		if (args.length > 0) {
-			String mode = args[3];
-			if (mode.equalsIgnoreCase("rebuild")) {
-				sim = new Sim(args[0], args[1], args[2], MODE.REBUILD);
-				String queryType = args[4];
-				if (queryType.equalsIgnoreCase("knn")) {
-					sim.queryType = QueryType.knn;
-					sim.k = Integer.parseInt(args[5]);
-				}
-			} else if (mode.equalsIgnoreCase("update")) {
-				sim = new Sim(args[0], args[1], args[2], MODE.UPDATE);
-			} else if (mode.equalsIgnoreCase("lazy")) {
-				sim = new Sim(args[0], args[1], args[2], MODE.LAZY);
-				sim.updateRate = Double.parseDouble(args[4]);
-				sim.bufferSize = Integer.parseInt(args[5]);
-			} else if (mode.equalsIgnoreCase("loose")) {
-				sim = new Sim(args[0], args[1], args[2], MODE.LOOSE);
-				sim.updateRate = Double.parseDouble(args[4]);
-				sim.rteeRegionL = Double.parseDouble(args[5]);
-			} else {
-				System.out.println("This mode is not supprted!");
-				return;
-			}
-			System.out.println("parse fin!");
-		} else if (args.length == 0) {
-			sim = new Sim();
-		} else {
-			System.out
-					.println("The args should be [fileName indexType totN mode [update_ratio]].");
-			return;
-		}
-		
-		sim.batchQuery();
-		
-		System.out.println(sim.STAT_INDEX.toString());
+		Sim sim = new Sim();
+		sim.go(new String[] {"./data/GO", "qtree", "1000", "rebuild", "rq"});
 	}
 }

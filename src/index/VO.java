@@ -74,8 +74,17 @@ public class VO implements RW{
 		timer.stop();
 //		System.out.println(ansNo);
 		verifyTime = timer.timeElapseinMs();
-		voSize = IO.toBytes(this).length;
+//		voSize = IO.toBytes(this).length; this vo size includes everything
+		voSize = getEntryNum() * 256;
 		return isVerify;
+	}
+	
+	/**
+	 * call after verify
+	 * @return
+	 */
+	public int getResultNum() {
+		return ansNo;
 	}
 	
 	public boolean verifyComplete() {
@@ -151,5 +160,15 @@ public class VO implements RW{
 	
 	public int getVOSize() {
 		return voSize;
+	}
+	
+	public int getEntryNum() {
+		int num = 0;
+		if (voCells != null) {
+			for (VOCell cell : voCells) {
+				num += cell.getEntryNum();
+			}
+		}
+		return num;
 	}
 }

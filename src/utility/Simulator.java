@@ -39,7 +39,7 @@ public abstract class Simulator {
 	int			capacity	= 8;	// 1 << dim
 	int			k			= 256; 	// kNN of k
 	int			dim			= 3;	// dimension
-	MODE		mode 		= MODE.UPDATE; // 
+	MODE		mode 		= MODE.REBUILD; // 
 	int			bufferSize	= 150;
 	double 		updateRate 	= 0.1;
 	double		rteeRegionL	= 0;

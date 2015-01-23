@@ -37,7 +37,7 @@ import utility.Tuple;
 
 /**
  * @author chenqian
- * 
+ * wrtie function is commented right now.
  */
 public class MemRTree extends RTree implements SearchIndex, RW {
 
@@ -55,7 +55,7 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 
 	public static MemRTree createTree(Simulator simulator) {
 		IStorageManager sm = new MemoryStorageManager();
-		IBuffer buffer = new RandomEvictionsBuffer(sm, 1000, false); // no
+		IBuffer buffer = new RandomEvictionsBuffer(sm, 10, false); // no
 																		// buffer
 																		// due
 																		// to no
@@ -411,16 +411,16 @@ public class MemRTree extends RTree implements SearchIndex, RW {
 	@Override
 	public void write(DataOutputStream ds) {
 		// TODO Auto-generated method stub
-		IO.writeInt(ds, innerEntries.size());
-		for (java.util.Map.Entry<Integer, Entry> entry : innerEntries.entrySet()) {
-			IO.writeInt(ds, entry.getKey());
-			entry.getValue().write(ds);
-		}
-		IO.writeInt(ds, leafEntries.size());
-		for (java.util.Map.Entry<Integer, Entry> entry : leafEntries.entrySet()) {
-			IO.writeInt(ds, entry.getKey());
-			entry.getValue().write(ds);
-		}
+//		IO.writeInt(ds, innerEntries.size());
+//		for (java.util.Map.Entry<Integer, Entry> entry : innerEntries.entrySet()) {
+//			IO.writeInt(ds, entry.getKey());
+//			entry.getValue().write(ds);
+//		}
+//		IO.writeInt(ds, leafEntries.size());
+//		for (java.util.Map.Entry<Integer, Entry> entry : leafEntries.entrySet()) {
+//			IO.writeInt(ds, entry.getKey());
+//			entry.getValue().write(ds);
+//		}
 	}
 
 	@Override

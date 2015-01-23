@@ -35,6 +35,7 @@ import utility.Tuple;
  * For lazy update. L is short for lastest updated. U is short for un-updated
  * ones.
  * 
+ * wrtie function is commented right now.
  * @author chenqian
  * 
  */
@@ -721,38 +722,38 @@ public class MemQTree extends QuadTree implements SearchIndex, RW {
 
 	@Override
 	public void write(DataOutputStream ds) {
-		if (getEntries() == null) {
-			IO.writeBoolean(ds, false);
-		} else {
-			IO.writeBoolean(ds, true);
-			IO.writeInt(ds, getEntries().size());
-			for (QuadEntry entry : getEntries()) {
-				if (entry == null) {
-					IO.writeBoolean(ds, false);
-				} else {
-					IO.writeBoolean(ds, true);
-					((Entry) entry).write(ds);
-				}
-			}
-		}
-		if (isLeaf()) {
-			IO.writeInt(ds, L.size());
-			for (java.util.Map.Entry<Integer, Entry> entry : L.entrySet()) {
-				IO.writeInt(ds, entry.getKey());
-				entry.getValue().write(ds);
-			}
-		}
-		if (!isLeaf()) {
-			IO.writeBoolean(ds, false);
-			MemQTree[] chTrees = (MemQTree[]) getChTrees();
-			if (chTrees != null && getCnt() > 0) {
-				for (int i = 0; i < chTrees.length; i++) {
-					chTrees[i].write(ds);
-				}
-			}
-		} else {
-			IO.writeBoolean(ds, true);
-		}
+//		if (getEntries() == null) {
+//			IO.writeBoolean(ds, false);
+//		} else {
+//			IO.writeBoolean(ds, true);
+//			IO.writeInt(ds, getEntries().size());
+//			for (QuadEntry entry : getEntries()) {
+//				if (entry == null) {
+//					IO.writeBoolean(ds, false);
+//				} else {
+//					IO.writeBoolean(ds, true);
+//					((Entry) entry).write(ds);
+//				}
+//			}
+//		}
+//		if (isLeaf()) {
+//			IO.writeInt(ds, L.size());
+//			for (java.util.Map.Entry<Integer, Entry> entry : L.entrySet()) {
+//				IO.writeInt(ds, entry.getKey());
+//				entry.getValue().write(ds);
+//			}
+//		}
+//		if (!isLeaf()) {
+//			IO.writeBoolean(ds, false);
+//			MemQTree[] chTrees = (MemQTree[]) getChTrees();
+//			if (chTrees != null && getCnt() > 0) {
+//				for (int i = 0; i < chTrees.length; i++) {
+//					chTrees[i].write(ds);
+//				}
+//			}
+//		} else {
+//			IO.writeBoolean(ds, true);
+//		}
 	}
 
 	@Override

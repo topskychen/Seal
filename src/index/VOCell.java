@@ -31,6 +31,7 @@ public class VOCell implements RW{
 	ArrayList<Tuple>	tuples 		= null;
 	ArrayList<Integer>	counts 		= null;
 	int					lev			= -1;
+	int 				entryNum	= 0;
 	Entry 				entry		= null;
 	BigInteger 			ps 			= null;
 	TrustedRegister 	tr 			= TrustedRegister.getInstance();
@@ -85,6 +86,7 @@ public class VOCell implements RW{
 	 */
 	public VOCell(Set<Integer> ansIds, ArrayList<Tuple> tuples, Entry entry) {
 		// TODO Auto-generated constructor stub
+		this.entryNum = 1;
 		this.entry 	= entry;
 		counts = new ArrayList<Integer>();
 		if (tuples != null) {
@@ -104,6 +106,7 @@ public class VOCell implements RW{
 	}
 	
 	public VOCell(int id, Tuple tuple, Entry entry) {
+		this.entryNum = 1;
 		this.entry = entry;
 		this.tuples = new ArrayList<Tuple>();
 		counts = new ArrayList<Integer>();
@@ -127,10 +130,15 @@ public class VOCell implements RW{
 		ansIds.addAll(vo.ansIds);
 		tuples.addAll(vo.tuples);
 		counts.addAll(vo.counts);
+		entryNum += vo.getEntryNum();
 		entry = new Entry(entry, vo.entry, -1);
 	}
 	
 	
+	public int getEntryNum() {
+		return entryNum;
+	}
+
 	public VOCell() {
 	}
 

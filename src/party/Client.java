@@ -99,7 +99,7 @@ public class Client {
 			}
 			if (vo != null) {
 				statQ.append(vo.getPrepareTime(), vo.getVerifyTime(),
-						vo.getVOSize());
+						vo.getVOSize(), vo.getResultNum(), vo.getEntryNum());
 			}
 		}
 		System.out.println();
@@ -123,7 +123,7 @@ public class Client {
 			}
 			if (vo != null) {
 				statQ.append(vo.getPrepareTime(), vo.getVerifyTime(),
-						vo.getVOSize());
+						vo.getVOSize(), vo.getResultNum(), vo.getEntryNum());
 			}
 		}
 	}
@@ -157,7 +157,7 @@ public class Client {
 		ArrayList<IShape> points = sp.skyline();
 		ArrayList<Region> queries = prepareQueriesFromSkyline(points);
 		double prepareTime = 0, verifyTime = 0;
-		long voSize = 0;
+		long voSize = 0, resultNum = 0, entryNum = 0;;
 		for (Region query : queries) {
 			VO vo = sp.rangeQuery(query, runId);
 			if (!vo.verify(query)) {
@@ -168,8 +168,10 @@ public class Client {
 			prepareTime += vo.getPrepareTime();
 			verifyTime += vo.getVerifyTime();
 			voSize += vo.getVOSize();
+			resultNum += vo.getResultNum();
+			entryNum += vo.getEntryNum();
 		}
-		statQ.append(prepareTime, verifyTime, voSize);
+		statQ.append(prepareTime, verifyTime, voSize, resultNum, entryNum);
 	}
 
 	/**
