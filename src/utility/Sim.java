@@ -166,6 +166,10 @@ public class Sim extends Simulator {
 	 */
 	public static void main(String[] args) {
 		Sim sim = new Sim();
-		sim.go(new String[] {"./data/GO", "qtree", "1000", "rebuild", "rq"});
+		if (args.length == 0) {
+			sim.go(new String[] {"./data/GO", "rtree", "1000", "lazy", "0.1", "150"});
+		} else {
+			sim.go(args);
+		}
 	}
 }

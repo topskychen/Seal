@@ -171,6 +171,7 @@ public class Client {
 			resultNum += vo.getResultNum();
 			entryNum += vo.getEntryNum();
 		}
+		System.out.println("skyline issues " + queries.size() + " range queries.");
 		statQ.append(prepareTime, verifyTime, voSize, resultNum, entryNum);
 	}
 
